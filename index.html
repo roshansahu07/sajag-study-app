@@ -287,7 +287,7 @@
         const generateTextBackup = () => {
           const backupData = { user, studyLogs };
           const base64Str = btoa(unescape(encodeURIComponent(JSON.stringify(backupData))));
-          navigator.clipboard.writeText(base64Str); showAlert("📋 बैकअप कोड कॉपी हो गया है!");
+          navigator.clipboard.writeText(base64Str); showAlert("📋バックアップコードコピー हो गया है!");
         };
 
         const handleRestoreData = (e) => {
@@ -307,7 +307,7 @@
           setTimeout(() => {
             const simulatedQuestions = [
               { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पने के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
-              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्पैस्ड रिपीटीशन और एक्टिव टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
+              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और एक्टिव टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
             ];
             setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
           }, 1200);
@@ -345,17 +345,6 @@
             return log;
           }));
           setUser(prev => ({ ...prev, points: prev.points + 15 })); showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP');
-        };
-
-        const getHeatmapColor = (dayOffset) => {
-          const checkDate = new Date();
-          checkDate.setDate(checkDate.getDate() - dayOffset);
-          const dateStr = checkDate.toISOString().split('T')[0];
-          const totalHours = studyLogs.filter(log => log.date === dateStr).reduce((sum, current) => sum + current.timeSpent, 0);
-          if (totalHours === 0) return 'bg-slate-800 dark:bg-slate-800 light:bg-slate-200';
-          if (totalHours < 2) return 'bg-emerald-900';
-          if (totalHours < 4) return 'bg-emerald-700';
-          return 'bg-emerald-500';
         };
 
         return (
@@ -416,7 +405,7 @@
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-slate-950 to-indigo-950 dark:from-slate-955 dark:to-indigo-955 light:from-indigo-50/60 light:to-slate-100 p-4 rounded-xl border border-indigo-900/30 light:border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div className="bg-gradient-to-br from-slate-950 to-indigo-950 dark:from-slate-950 dark:to-indigo-950 light:from-indigo-50/60 light:to-slate-100 p-4 rounded-xl border border-indigo-900/30 light:border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <div className="space-y-1">
                         <h2 className="text-xs text-indigo-300 light:text-indigo-600 font-bold uppercase tracking-wider">दैनिक अध्ययन समय बजट प्रोग्रेस</h2>
                         <h3 className="text-base sm:text-xl font-black dark:text-white light:text-slate-900">{todayTotalAllocated} / {user.availableHours} घंटे बुक हैं</h3>
@@ -633,14 +622,17 @@
             </nav>
 
             <AdSenseUnit slotId="FOOTER_SLOT_ID" />
-            <footer className="w-full text-center py-2 text-[9px] text-slate-500 hidden md:block">सजग छात्र</footer>
+            <footer className="w-full text-center py-2 text-[9px] text-slate-500 hidden md:block">सजय छात्र</footer>
           </div>
         );
       }
 
-      // React 18 को CDN और Babel एनवायरनमेंट में सुरक्षित रेंडर करने का फाइनल सिंटैक्स फिक्स
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
+      // सुरक्षित रेंडर फ़ंक्शन जो ब्राउज़र पार्सर को कभी क्रैश नहीं होने देगा
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(<App />);
+      }
     </script>
 </body>
 </html>
