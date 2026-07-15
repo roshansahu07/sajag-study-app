@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>सजग छात्र Ultimate v2.5</title>
+    <title>सजय छात्र Ultimate v2.5</title>
     
     <!-- Tailwind CSS v4 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -112,7 +112,7 @@
         });
       };
 
-      // 🔔 मुफ़्त अलार्म बीप साउंड जनरेटर फंक्शन (HTML5 Web Audio API)
+      // 🔔 मुफ़्त अलार्म बीप साउंड जनरेटर फंक्शन
       const playTimerAlarm = () => {
         try {
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -123,24 +123,24 @@
           gainNode.connect(audioCtx.destination);
           
           oscillator.type = 'sine';
-          oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note (क्लियर अलर्ट साउंड)
+          oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
           gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
           
           oscillator.start();
-          oscillator.stop(audioCtx.currentTime + 0.8); // 0.8 सेकंड तक बजेगा
+          oscillator.stop(audioCtx.currentTime + 0.8);
         } catch (e) {
           console.error("Audio error", e);
         }
       };
 
       function App() {
-        // --- थीम मैनेजर स्टेट (डार्क / लाइट) ---
+        // --- थीम मैनेजर स्टेट ---
         const [isDarkMode, setIsDarkMode] = useState(() => {
           const savedTheme = localStorage.getItem('sajag_theme');
           return savedTheme ? savedTheme === 'dark' : true;
         });
 
-        // लोकल स्टोरेज से यूजर डेटा लोड करना
+        // लोकल स्टोरेज से यूजर डेटा
         const [user, setUser] = useState(() => {
           const localUser = localStorage.getItem('sajag_user');
           return localUser ? JSON.parse(localUser) : {
@@ -177,7 +177,7 @@
         const [profileForm, setProfileForm] = useState({ name: user.name, availableHours: user.availableHours, category: user.category });
         const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
         const [pdfFile, setPdfFile] = useState(null);
-        const [backupInputCode, setBackupInputCode] = useState(''); // रिस्टोर के लिए इनपुट स्ट्रिंग
+        const [backupInputCode, setBackupInputCode] = useState('');
 
         const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
         const [activeTab, setActiveTab] = useState('dashboard');
@@ -194,7 +194,7 @@
           setTimeout(() => setAlertMsg(null), 4000);
         };
 
-        // थीम अपडेटर इफ़ेक्ट
+        // थीम इफ़ेक्ट
         useEffect(() => {
           const root = window.document.documentElement;
           if (isDarkMode) {
@@ -208,12 +208,11 @@
           }
         }, [isDarkMode]);
 
-        // ऑटो-सेव प्रणालियाँ
         useEffect(() => { localStorage.setItem('sajag_user', JSON.stringify(user)); }, [user]);
         useEffect(() => { localStorage.setItem('sajag_logs', JSON.stringify(studyLogs)); }, [studyLogs]);
         useEffect(() => { setProfileForm({ name: user.name, availableHours: user.availableHours, category: user.category }); }, [user]);
 
-        // स्मार्ट सुझाव विश्लेषक
+        // स्मार्ट सुझाव
         useEffect(() => {
           const todayStr = new Date().toISOString().split('T')[0];
           const generatedAlerts = [];
@@ -223,32 +222,57 @@
               generatedAlerts.push({
                 id: `alert-${log.id}`,
                 title: `स्मार्ट रिवीजन अलर्ट: ${log.subject} 💡`,
-                text: `आपने पहले "${log.topic}" पढ़ा था। आज रिवीजन का समय है। स्मरण शक्ति बनाए रखने के लिए अभ्यास टेस्ट लें!`,
+                text: `आज रिवीजन का समय है। स्मरण शक्ति बनाए रखने के लिए अभ्यास टेस्ट लें!`,
                 type: 'urgent',
                 actionTopic: log
               });
             }
           });
-          generatedAlerts.push({ id: 'focus-tip-1', title: 'एकाग्रता सुधार गाइड ⚡', text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर में 25 मिनट का सेशन शुरू करें!', type: 'tip' });
+          generatedAlerts.push({ id: 'focus-tip-1', title: 'एकाग्रता सुधार गाइड ⚡', text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर का उपयोग करें!', type: 'tip' });
           setNotifications(generatedAlerts);
         }, [studyLogs]);
 
+        // 🛠️ सुधरा हुआ मोबाइल कॉम्पैटिबल PDF व्यूअर फंक्शन (Blob URL)
         const handleViewPdf = async (logId) => {
-          const pdfRecord = await getPDFFromDB(logId);
-          if (pdfRecord && pdfRecord.data) {
-            const newWindow = window.open();
-            newWindow.document.write(`<iframe src="${pdfRecord.data}" style="width:100%; height:100%; border:none;"></iframe>`);
-          } else {
-            showAlert("⚠️ इस टॉपिक के लिए कोई PDF फाइल नहीं मिली!");
+          try {
+            const pdfRecord = await getPDFFromDB(logId);
+            if (!pdfRecord || !pdfRecord.data) {
+              showAlert("⚠️ इस टॉपिक के लिए कोई PDF फाइल नहीं मिली!");
+              return;
+            }
+
+            // Base64 से बाइनरी एरे बनाना
+            const base64Parts = pdfRecord.data.split(',');
+            const mimeType = base64Parts[0].match(/:(.*?);/)[1];
+            const rawBinary = atob(base64Parts[1]);
+            const arrayLength = rawBinary.length;
+            const uint8Array = new Uint8Array(arrayLength);
+
+            for (let i = 0; i < arrayLength; i++) {
+              uint8Array[i] = rawBinary.charCodeAt(i);
+            }
+
+            // सुरक्षित लोकल Blob यूआरएल बनाना
+            const blob = new Blob([uint8Array], { type: mimeType });
+            const blobUrl = URL.createObjectURL(blob);
+
+            // मोबाइल ब्राउज़र विंडो ओपनर
+            window.open(blobUrl, '_blank');
+            
+            // मेमोरी सुरक्षा क्लीनअप
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+
+          } catch (error) {
+            console.error("PDF Open Error: ", error);
+            showAlert("⚠️ मोबाइल पर PDF खोलने में समस्या हुई।");
           }
         };
 
-        // IndexedDB से PDF फाइल पूरी तरह डिलीट करने का सुधार
         const handleDeletePdf = async (logId) => {
           const success = await deletePDFFromDB(logId);
           if (success) {
             setStudyLogs(prev => prev.map(log => log.id === logId ? { ...log, hasPdf: false } : log));
-            showAlert("🗑️ PDF फाइल लोकल स्टोरेज से सफलतापूर्वक डिलीट कर दी गई है!");
+            showAlert("🗑️ PDF फाइल लोकल स्टोरेज से सफलतापूर्वक डिलीट कर दी गई!");
           } else {
             showAlert("⚠️ फ़ाइल डिलीट करने में समस्या हुई।");
           }
@@ -329,15 +353,13 @@
           setActiveTab('dashboard');
         };
 
-        // 💾 डेटा बैकअप जनरेटर मैकेनिज्म (मुफ़्त)
         const generateTextBackup = () => {
           const backupData = { user, studyLogs };
           const base64Str = btoa(unescape(encodeURIComponent(JSON.stringify(backupData))));
           navigator.clipboard.writeText(base64Str);
-          showAlert("📋 बैकअप कोड कॉपी हो गया है! इसे कहीं सुरक्षित नोट कर लें।");
+          showAlert("📋 बैकअप कोड कॉपी हो गया है!");
         };
 
-        // 💾 डेटा रिस्टोर मैकेनिज्म (मुफ़्त)
         const handleRestoreData = (e) => {
           e.preventDefault();
           try {
@@ -357,7 +379,6 @@
           }
         };
 
-        // एआई अभ्यास टेस्ट इंजन (सिम्युलेटेड)
         const handleGenerateQuiz = async (log) => {
           setSelectedTopicForTest(log);
           setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
@@ -367,13 +388,13 @@
                 question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पना के संदर्भ में सबसे महत्वपूर्ण पहलू को दर्शाता है?`,
                 options: ["सैद्धांतिक अनुप्रयोग और नियम", "दैनिक जीवन के व्यावहारिक अनुभव", "गणितीय समीकरणों का विश्लेषण", "उपरोक्त सभी आयाम"],
                 correctIndex: 3,
-                explanation: "यह अवधारणा सैद्धांतिक, व्यावहारिक और गणितीय तीनों पहलुओं को संतुलित तरीके से समझाने में सक्षम है।"
+                explanation: "यह अवधारणा तीनों पहलुओं को संतुलित तरीके से समझाने में सक्षम है।"
               },
               {
-                question: `इस विषय में याद रखने की क्षमता (Memory Retention) बढ़ाने का सबसे बेहतर वैज्ञानिक तरीका क्या है?`,
+                question: `इस विषय में याद रखने की क्षमता बढ़ाने का सबसे बेहतर वैज्ञानिक तरीका क्या है?`,
                 options: ["सिर्फ एक बार ध्यान से पढ़ना", "नियमित स्पैस्ड रिपीटीशन और सक्रिय टेस्ट देना", "लगातार 5 घंटे तक नोट्स बनाना", "परीक्षा के ठीक एक दिन पहले रटना"],
                 correctIndex: 1,
-                explanation: "वैज्ञानिक शोधों के अनुसार, सक्रिय रिकॉल (Active Recall) और स्पैस्ड रिपीटीशन ही लंबे समय तक याद रखने का सर्वोत्तम साधन हैं।"
+                explanation: "सक्रिय रिकॉल (Active Recall) और स्पैस्ड रिपीटीशन ही लंबे समय तक याद रखने का सर्वोत्तम साधन हैं।"
               }
             ];
             setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
@@ -415,7 +436,7 @@
             return log;
           }));
           setUser(prev => ({ ...prev, points: prev.points + 15 }));
-          showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP絆।');
+          showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP');
         };
 
         const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
@@ -429,7 +450,7 @@
               else if (timer.seconds === 0 && timer.minutes > 0) setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
               else {
                 clearInterval(interval);
-                playTimerAlarm(); // 🔔 अलार्म बीप एक्टिवेट करें
+                playTimerAlarm();
                 const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
                 setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
                 showAlert(`🔔 फोकस सत्र समाप्त!`);
@@ -450,7 +471,6 @@
                 <p className="text-[9px] text-slate-400 mt-0.5">वैज्ञानिक 4-स्टेज मेमोरी ट्रैकर व टूल्स</p>
               </div>
               
-              {/* 🌓 थीम टॉगल बटन (UI सुधार) */}
               <button 
                 onClick={() => setIsDarkMode(!isDarkMode)} 
                 className="p-2 rounded-xl bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-slate-800 dark:border-slate-800 light:border-slate-300 text-indigo-400 transition"
@@ -520,7 +540,6 @@
                                 {log.hasPdf && (
                                   <div className="flex gap-1">
                                     <button onClick={() => handleViewPdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-emerald-500/40 text-emerald-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="file-text" className="w-3 h-3" /></button>
-                                    {/* 🗑️ PDF डिलीट बटन सुधार */}
                                     <button onClick={() => handleDeletePdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-rose-500/40 text-rose-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="trash-2" className="w-3 h-3" /></button>
                                   </div>
                                 )}
@@ -689,7 +708,6 @@
                       <button type="submit" className="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white shadow-md">💾 प्रोफाइल डेटा सुरक्षित करें</button>
                     </form>
 
-                    {/* 💾 बैकअप और रिस्टोर यूटिलिटी ब्लॉक (सुधार) */}
                     <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 light:border-slate-300 space-y-3 text-xs">
                       <h4 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">डेटा बैकअप सुरक्षा केंद्र</h4>
                       <p className="text-[10px] text-slate-400">ब्राउज़र बदलने या मोबाइल चेंज होने पर अपना डेटा सुरक्षित रखने का मुफ़्त मैकेनिज्म।</p>
