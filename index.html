@@ -32,13 +32,8 @@
       const useState = React.useState;
       const useEffect = React.useEffect;
 
-      // 🧠 ऑप्टिमाइज़्ड आइकॉन कंपोनेंट (अनंत लूप से सुरक्षा के साथ)
       function Icon({ name, className = "w-4 h-4" }) {
-        useEffect(() => {
-          if (window.lucide) {
-            window.lucide.createIcons();
-          }
-        }, [name]);
+        useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
         return <i data-lucide={name} className={className}></i>;
       }
 
@@ -319,7 +314,7 @@
           setTimeout(() => {
             const simulatedQuestions = [
               { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पने के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
-              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और सक्रिय टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
+              { question: `इस विषय में मेमोरी"। रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और सक्रिय टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
             ];
             setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
           }, 1200);
@@ -375,8 +370,21 @@
           }));
         };
 
+        const getHeatmapColor = (dayOffset) => {
+          const checkDate = new Date();
+          checkDate.setDate(checkDate.getDate() - dayOffset);
+          const dateStr = checkDate.toISOString().split('T')[0];
+          const totalHours = studyLogs.filter(log => log.date === dateStr).reduce((sum, current) => sum + current.timeSpent, 0);
+          if (totalHours === 0) return 'bg-slate-800';
+          if (totalHours < 2) return 'bg-emerald-900';
+          if (totalHours < 4) return 'bg-emerald-700';
+          return 'bg-emerald-500';
+        };
+
         const activeTopics = studyLogs.filter(log => log.stages.some(s => !s.completed));
         const masteredTopics = studyLogs.filter(log => log.stages.every(s => s.completed));
+        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
+        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
 
         return (
           <div className="w-full flex-1 flex flex-col justify-between pb-14 md:pb-0">
@@ -429,10 +437,8 @@
                       <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider block">📆 साप्ताहिक निरंतरता ग्रिड (Consistency Heatmap)</span>
                       <div className="flex gap-2 pt-1">
                         {[6, 5, 4, 3, 2, 1, 0].map(day => (
-                          <div key={day} className={`w-7 h-7 rounded-md bg-slate-800`}>
-                            <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-white/40">
-                              {new Date(Date.now() - day * 24 * 60 * 60 * 1000).getDate()}
-                            </div>
+                          <div key={day} className={`w-7 h-7 rounded-md transition-colors ${getHeatmapColor(day)} flex items-center justify-center text-[8px] font-bold text-white/40`}>
+                            {new Date(Date.now() - day * 24 * 60 * 60 * 1000).getDate()}
                           </div>
                         ))}
                       </div>
@@ -452,7 +458,7 @@
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         <Icon name="calendar" className="text-emerald-400" /><span>📅 सक्रिय मेमोरी ट्रैकर (Progressing)</span>
                       </h3>
                       
@@ -479,7 +485,7 @@
                                 {log.customQuiz && (
                                   <div className="mt-3 perspective-1000 w-full h-12">
                                     <div onClick={() => setFlippedCards(p => ({...p, [log.id]: !p[log.id]}))} className={`w-full h-full relative transition-transform duration-500 transform-style-3d cursor-pointer ${flippedCards[log.id] ? 'rotate-y-180' : ''}`}>
-                                      <div className="absolute inset-0 bg-slate-900 border border-indigo-500/20 rounded-lg p-2 flex items-center justify-between backface-hidden">
+                                      <div className="absolute inset-0 bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-indigo-500/20 rounded-lg p-2 flex items-center justify-between backface-hidden">
                                         <span className="text-[9px] truncate">❓ प्रश्न: {log.customQuiz.question}</span>
                                         <span className="text-[7px] text-indigo-400 font-bold shrink-0">पलटें 🔄</span>
                                       </div>
@@ -505,6 +511,7 @@
                       )}
                     </div>
 
+                    {/* 🏆 सेक्शन 2: महारत हासिल टॉपिक्स */}
                     <div className="space-y-3 pt-4 border-t border-slate-800/40">
                       <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                         <Icon name="award" className="text-amber-400" /><span>🏆 महारत हासिल टॉपिक्स (Mastered Archive)</span>
@@ -557,8 +564,8 @@
 
                       <div className="bg-slate-950/40 p-3 rounded-xl border border-indigo-500/20 space-y-2">
                         <label className="block font-bold text-indigo-400 text-[10px] uppercase tracking-wide">💡 क्विक सेल्फ़-क्विज़ कार्ड जोड़ें (वैकल्पिक)</label>
-                        <input type="text" placeholder="प्रश्न यहाँ टाइप करें..." value={newLog.quizQ} onChange={(e) => setNewLog({ ...newLog, quizQ: e.target.value })} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-[11px]" />
-                        <input type="text" placeholder="उत्तर यहाँ टाइप करें..." value={newLog.quizA} onChange={(e) => setNewLog({ ...newLog, quizA: e.target.value })} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-[11px]" />
+                        <input type="text" placeholder="प्रश्न यहाँ टाइप करें..." value={newLog.quizQ} onChange={(e) => setNewLog({ ...newLog, quizQ: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
+                        <input type="text" placeholder="उत्तर यहाँ टाइप करें..." value={newLog.quizA} onChange={(e) => setNewLog({ ...newLog, quizA: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
                       </div>
 
                       <div>
@@ -684,7 +691,7 @@
         );
       }
 
-      // 🛠️ फ़िक्स: रिएक्ट 18 का सबसे स्थिर पार्सिंग रेंडर मैकेनिज्म जो ब्राउज़र को कभी ब्लैंक नहीं होने देगा
+      // 🛠️ फ़िक्स: शुद्ध जावास्क्रिप्ट रेंडर मैकेनिज्म जो ब्राउज़र और Babel कंपाइलर दोनों में 100% कंपैटिबल है
       const rootElement = document.getElementById('root');
       if (rootElement) {
         const root = ReactDOM.createRoot(rootElement);
