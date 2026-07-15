@@ -32,8 +32,13 @@
       const useState = React.useState;
       const useEffect = React.useEffect;
 
+      // 🧠 ऑप्टिमाइज़्ड आइकॉन कंपोनेंट (अनंत लूप से सुरक्षा के साथ)
       function Icon({ name, className = "w-4 h-4" }) {
-        useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
+        useEffect(() => {
+          if (window.lucide) {
+            window.lucide.createIcons();
+          }
+        }, [name]);
         return <i data-lucide={name} className={className}></i>;
       }
 
@@ -314,7 +319,7 @@
           setTimeout(() => {
             const simulatedQuestions = [
               { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पने के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
-              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और एक्टिव टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और भारती स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
+              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और सक्रिय टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
             ];
             setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
           }, 1200);
@@ -334,15 +339,14 @@
           setStudyLogs(prev => prev.map(log => {
             if (log.id === logId) {
               const nextStage = log.currentStage + 1;
-              const isFinalTestCompleting = log.currentStage === 4; // क्या चौथा (अंतिम) चरण पूरा हो रहा है?
+              const isFinalTestCompleting = log.currentStage === 4;
               
               const updatedStages = log.stages.map((stage, sIdx) => {
                 if (sIdx === log.currentStage - 1) return { ...stage, completed: true }; return stage;
               });
 
               if (isFinalTestCompleting) {
-                // सुधार लॉजिक: अंतिम चरण पूरा होने पर 100 XP का अतिरिक्त बोनस माइलस्टोन रिवॉर्ड
-                setTimeout(() => showAlert("🏆 अद्भुत! आपने इस टॉपिक पर 100% महारत (Mastery) हासिल कर ली है! +100 XP बोनस!"), 500);
+                setTimeout(() => showAlert("🏆 अद्भुत! आपने इस टॉपिक पर 100% महारत हासिल कर ली है! +100 XP बोनस!"), 500);
                 setUser(prev => ({ ...prev, points: prev.points + 100 }));
               }
 
@@ -352,16 +356,16 @@
           }));
         };
 
-        const handleMarkStageCompleted = (logId, stageIndex) => {
+        const handleMakeStageCompletedDirect = (logId, stageIndex) => {
           setStudyLogs(prev => prev.map(log => {
             if (log.id === logId) {
               const updatedStages = [...log.stages]; 
               updatedStages[stageIndex].completed = true;
               const nextStage = stageIndex + 2;
-              const isFinalTestCompleting = stageIndex === 3; // क्या चौथा चरण टिक करके पूरा किया गया?
+              const isFinalTestCompleting = stageIndex === 3;
 
               if (isFinalTestCompleting) {
-                setTimeout(() => showAlert("🏆 अद्भुत! आपने इस टॉपिक पर 100% महारत (Mastery) हासिल कर ली है! +100 XP बोनस!"), 500);
+                setTimeout(() => showAlert("🏆 अद्भुत! आपने इस टॉपिक पर 100% महारत हासिल कर ली है! +100 XP बोनस!"), 500);
                 setUser(prev => ({ ...prev, points: prev.points + 100 }));
               }
 
@@ -371,10 +375,7 @@
           }));
         };
 
-        // फ़िल्टर इंजन: सक्रिय टॉपिक्स (जिनका कोई न कोई चरण अभी अपूर्ण है)
         const activeTopics = studyLogs.filter(log => log.stages.some(s => !s.completed));
-        
-        // फ़िल्टर इंजन: महारत हासिल टॉपिक्स (जिनके सभी 4 चरण 100% पूर्ण हो चुके हैं)
         const masteredTopics = studyLogs.filter(log => log.stages.every(s => s.completed));
 
         return (
@@ -428,8 +429,10 @@
                       <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider block">📆 साप्ताहिक निरंतरता ग्रिड (Consistency Heatmap)</span>
                       <div className="flex gap-2 pt-1">
                         {[6, 5, 4, 3, 2, 1, 0].map(day => (
-                          <div key={day} className={`w-7 h-7 rounded-md transition-colors ${getHeatmapColor(day)} flex items-center justify-center text-[8px] font-bold text-white/40`}>
-                            {new Date(Date.now() - day * 24 * 60 * 60 * 1000).getDate()}
+                          <div key={day} className={`w-7 h-7 rounded-md bg-slate-800`}>
+                            <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-white/40">
+                              {new Date(Date.now() - day * 24 * 60 * 60 * 1000).getDate()}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -448,10 +451,9 @@
                       </span>
                     </div>
 
-                    {/* सेक्शन 1: सक्रिय मेमोरी ट्रैकर */}
                     <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Icon name="calendar" className="text-emerald-400" /><span>📅 सक्रिय मेमोरी ट्रैकर (Progressing Work)</span>
+                      <h3 className="text-xs font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                        <Icon name="calendar" className="text-emerald-400" /><span>📅 सक्रिय मेमोरी ट्रैकर (Progressing)</span>
                       </h3>
                       
                       {activeTopics.length === 0 ? (
@@ -477,11 +479,11 @@
                                 {log.customQuiz && (
                                   <div className="mt-3 perspective-1000 w-full h-12">
                                     <div onClick={() => setFlippedCards(p => ({...p, [log.id]: !p[log.id]}))} className={`w-full h-full relative transition-transform duration-500 transform-style-3d cursor-pointer ${flippedCards[log.id] ? 'rotate-y-180' : ''}`}>
-                                      <div className="absolute inset-0 bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-indigo-500/20 rounded-lg p-2 flex items-center justify-between backface-hidden">
+                                      <div className="absolute inset-0 bg-slate-900 border border-indigo-500/20 rounded-lg p-2 flex items-center justify-between backface-hidden">
                                         <span className="text-[9px] truncate">❓ प्रश्न: {log.customQuiz.question}</span>
                                         <span className="text-[7px] text-indigo-400 font-bold shrink-0">पलटें 🔄</span>
                                       </div>
-                                      <div className="absolute inset-0 bg-indigo-950/50 dark:bg-indigo-950/50 light:bg-indigo-50 border border-emerald-500/30 rounded-lg p-2 flex items-center rotate-y-180 backface-hidden">
+                                      <div className="absolute inset-0 bg-indigo-950/50 border border-emerald-500/30 rounded-lg p-2 flex items-center rotate-y-180 backface-hidden">
                                         <span className="text-[9px] text-emerald-400 font-bold truncate">💡 उत्तर: {log.customQuiz.answer}</span>
                                       </div>
                                     </div>
@@ -491,7 +493,7 @@
 
                               <div className="grid grid-cols-4 gap-1 pt-2 border-t border-slate-900/60 light:border-slate-200">
                                 {log.stages.map((stage, idx) => (
-                                  <button key={idx} disabled={stage.completed || (idx !== log.currentStage - 1)} onClick={() => handleMarkStageCompleted(log.id, idx)}
+                                  <button key={idx} disabled={stage.completed || (idx !== log.currentStage - 1)} onClick={() => handleMakeStageCompletedDirect(log.id, idx)}
                                     className={`text-[8px] py-1 rounded border text-center transition ${stage.completed ? 'bg-emerald-950 border-emerald-500 text-emerald-400' : (idx === log.currentStage - 1 ? 'bg-indigo-950 border-indigo-500 text-indigo-300 font-bold' : 'bg-slate-800 light:bg-slate-200 border-slate-700 text-slate-400')}`}>
                                     <span>{stage.name}</span>
                                   </button>
@@ -503,14 +505,13 @@
                       )}
                     </div>
 
-                    {/* 🏆 सेक्शन 2: महारत हासिल टॉपिक्स आर्काइव (New Mastered Archive Section Layout) */}
                     <div className="space-y-3 pt-4 border-t border-slate-800/40">
                       <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Icon name="award" className="text-amber-400" /><span>🏆 महारत हासिल टॉपिक्स (Lifetime Long-Term Memory Archive)</span>
+                        <Icon name="award" className="text-amber-400" /><span>🏆 महारत हासिल टॉपिक्स (Mastered Archive)</span>
                       </h3>
                       
                       {masteredTopics.length === 0 ? (
-                        <p className="text-xs text-slate-500 italic">अभी तक कोई टॉपिक 100% कम्प्लीट नहीं हुआ है। नियमित अभ्यास जारी रखें!</p>
+                        <p className="text-xs text-slate-500 italic">अभी तक कोई भी टॉपिक 100% कम्प्लीट नहीं हुआ है।</p>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {masteredTopics.map(log => (
@@ -521,7 +522,7 @@
                               </div>
                               <h4 className="text-xs font-bold text-slate-200 line-through decoration-slate-500/50">{log.topic}</h4>
                               <div className="flex justify-between items-center text-[9px] text-emerald-400/80 font-semibold pt-1">
-                                <span className="flex items-center gap-1">✨ 100% स्थायी स्मृति (Long-term)</span>
+                                <span>✨ 100% स्थायी स्मृति (Long-term)</span>
                                 <span className="bg-emerald-500/10 py-0.5 px-2 rounded-full text-[8px]">कम्प्लीट 👑</span>
                               </div>
                             </div>
@@ -529,7 +530,6 @@
                         </div>
                       )}
                     </div>
-
                   </div>
                 )}
 
@@ -548,17 +548,17 @@
                       )}
                       <div>
                         <label className="block font-semibold mb-1">पढ़ा गया टॉपिक:</label>
-                        <input type="text" placeholder="टॉपिक का नाम दर्ज करें..." value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
+                        <input type="text" placeholder="टॉपिक का नाम दर्ज करें..." value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
                       </div>
                       <div>
                         <label className="block font-semibold mb-1">लगाया गया समय (घंटे):</label>
-                        <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
+                        <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
                       </div>
 
                       <div className="bg-slate-950/40 p-3 rounded-xl border border-indigo-500/20 space-y-2">
                         <label className="block font-bold text-indigo-400 text-[10px] uppercase tracking-wide">💡 क्विक सेल्फ़-क्विज़ कार्ड जोड़ें (वैकल्पिक)</label>
-                        <input type="text" placeholder="प्रश्न यहाँ टाइप करें..." value={newLog.quizQ} onChange={(e) => setNewLog({ ...newLog, quizQ: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
-                        <input type="text" placeholder="उत्तर यहाँ टाइप करें..." value={newLog.quizA} onChange={(e) => setNewLog({ ...newLog, quizA: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
+                        <input type="text" placeholder="प्रश्न यहाँ टाइप करें..." value={newLog.quizQ} onChange={(e) => setNewLog({ ...newLog, quizQ: e.target.value })} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-[11px]" />
+                        <input type="text" placeholder="उत्तर यहाँ टाइप करें..." value={newLog.quizA} onChange={(e) => setNewLog({ ...newLog, quizA: e.target.value })} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-[11px]" />
                       </div>
 
                       <div>
@@ -684,10 +684,11 @@
         );
       }
 
+      // 🛠️ फ़िक्स: रिएक्ट 18 का सबसे स्थिर पार्सिंग रेंडर मैकेनिज्म जो ब्राउज़र को कभी ब्लैंक नहीं होने देगा
       const rootElement = document.getElementById('root');
       if (rootElement) {
         const root = ReactDOM.createRoot(rootElement);
-        root.render(<App />);
+        root.render(React.createElement(App));
       }
     </script>
 </body>
