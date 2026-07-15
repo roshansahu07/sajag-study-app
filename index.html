@@ -16,24 +16,14 @@
 <body class="bg-slate-950 text-slate-100">
     <div id="root"></div>
 
-    <!-- React, ReactDOM, Lucide Icons (CDN), and Babel Packages -->
+    <!-- React, ReactDOM, and Babel CDN Packages -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- React App Script Logic -->
+    <!-- React Application Logic -->
     <script type="text/babel">
       const { useState, useEffect } = React;
-      
-      // Lucide Icons को CDN ऑब्जेक्ट से एक्सट्रैक्ट करना
-      const { 
-        BookOpen, Clock, Bell, User, PlusCircle, CheckCircle, 
-        AlertCircle, Play, Pause, RotateCcw, TrendingUp, Sparkles,
-        Calendar, BookMarked, Award, Brain, Info, ChevronRight, TrendingDown
-      } = Lucide;
-
-      const apiKey = ""; 
 
       function App() {
         // --- स्टेट मैनेजमेंट ---
@@ -88,11 +78,6 @@
 
         const [activeTab, setActiveTab] = useState('dashboard');
         const [alertMsg, setAlertMsg] = useState(null);
-        const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
-        const [aiQuiz, setAiQuiz] = useState(null);
-        const [loadingQuiz, setLoadingQuiz] = useState(false);
-        const [userAnswers, setUserAnswers] = useState({});
-        const [quizSubmitted, setQuizSubmitted] = useState(false);
         const [notifications, setNotifications] = useState([]);
 
         const showAlert = (msg) => {
@@ -108,21 +93,18 @@
             const activeStage = log.stages.find(s => !s.completed);
             if (activeStage && activeStage.due === todayStr) {
               generatedAlerts.push({
-                id: `alert-${log.id}`,
-                title: `स्मार्ट रिवीजन अलर्ट: ${log.subject} 💡`,
-                text: `आपने पूर्व में "${log.topic}" पढ़ा था। आज वैज्ञानिक अंतराल के अनुसार "${activeStage.name}" का समय है।`,
-                type: 'urgent',
-                actionTopic: log
+                title: `📚 स्मार्ट रिवीजन अलर्ट: ${log.subject}`,
+                text: `आपने पहले "${log.topic}" पढ़ा था। आज वैज्ञानिक अंतराल के अनुसार रिवीजन का समय है।`
               });
             }
           });
 
-          generatedAlerts.push({
-            id: 'focus-tip-1',
-            title: 'एकाग्रता सुधार गाइड ⚡',
-            text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर का उपयोग करें!',
-            type: 'tip'
-          });
+          if (generatedAlerts.length === 0) {
+            generatedAlerts.push({
+              title: "⚡ एकाग्रता सुधार गाइड",
+              text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर टैब में जाकर 25 मिनट का एक सेशन अभी चालू करें!'
+            });
+          }
 
           setNotifications(generatedAlerts);
         }, [studyLogs]);
@@ -160,7 +142,7 @@
 
           setStudyLogs([newEntry, ...studyLogs]);
           setUser(prev => ({ ...prev, points: prev.points + 50 }));
-          showAlert('🚀 शानदार! पढ़ाई का ब्यौरा दर्ज हो गया।');
+          showAlert('🚀 शानदार! पढ़ाई का ब्यौरा दर्ज हो गया। +50 XP!');
           setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
           setActiveTab('dashboard');
         };
@@ -190,31 +172,25 @@
         const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
 
         return (
-          <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between items-center p-2 sm:p-4">
+          <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between items-center p-2 sm:p-4 w-full">
             <header className="w-full max-w-md text-center py-2">
               <h1 className="text-xl sm:text-2xl font-black text-indigo-400 flex items-center justify-center gap-2">
-                <Brain className="w-6 h-6 text-indigo-500 animate-pulse" /> सजग छात्र <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-[9px] text-white px-2 py-0.5 rounded-full font-bold">ULTIMATE v2.5</span>
+                🧠 सजग छात्र <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-[9px] text-white px-2 py-0.5 rounded-full font-bold">ULTIMATE v2.5</span>
               </h1>
               <p className="text-[10px] text-slate-400 mt-1">वैज्ञानिक 4-स्टेज रिवीजन ट्रैकर व फोकस टाइमर</p>
             </header>
 
             <div className="w-full max-w-md bg-slate-900 rounded-[32px] border-4 border-slate-800 shadow-2xl relative flex flex-col overflow-hidden h-[84vh] max-h-[790px]">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-4 w-32 bg-slate-800 rounded-b-xl z-20 flex justify-center items-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-950 mr-2"></div>
-                <div className="w-10 h-1 rounded-full bg-slate-950"></div>
-              </div>
-
               {alertMsg && (
-                <div className="absolute top-8 left-4 right-4 bg-indigo-600 text-white p-3.5 rounded-xl shadow-xl z-50 text-xs flex items-center gap-2 border border-indigo-400 animate-fadeIn">
-                  <Info className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-medium">{alertMsg}</span>
+                <div className="absolute top-4 left-4 right-4 bg-indigo-600 text-white p-3 rounded-xl shadow-xl z-50 text-xs border border-indigo-400 animate-fadeIn">
+                  <span>{alertMsg}</span>
                 </div>
               )}
 
-              <div className="bg-slate-950 text-[10px] px-6 pt-5 pb-2 text-slate-400 flex justify-between items-center z-10 border-b border-slate-800/40">
-                <div>09:30 AM</div>
+              <div className="bg-slate-950 text-[10px] px-6 pt-4 pb-2 text-slate-400 flex justify-between items-center border-b border-slate-800/40">
+                <div>📱 app.pmevidya.com</div>
                 <div className="flex items-center gap-1.5 font-semibold text-slate-300">
-                  <span className="bg-indigo-900/40 border border-indigo-700/50 text-[9px] px-1.5 py-0.5 rounded text-indigo-300">🔥 {user.streak} दिन स्ट्रीक</span>
+                  <span className="bg-indigo-900/40 border border-indigo-700/50 text-[9px] px-1.5 py-0.5 rounded text-indigo-300">🔥 {user.streak} दिन</span>
                   <span>⭐ {user.points} XP</span>
                 </div>
               </div>
@@ -226,7 +202,7 @@
                       <div className="flex justify-between items-start">
                         <div>
                           <h2 className="text-xs text-indigo-300 font-bold uppercase tracking-wide">दैनिक अध्ययन समय बजट</h2>
-                          <h3 className="text-lg font-black text-white mt-1">{todayTotalAllocated} / {user.availableHours} घंटे बुक हैं</h3>
+                          <h3 className="text-lg font-black text-white mt-1">{todayTotalAllocated} / {user.availableHours} घंटे book हैं</h3>
                         </div>
                         <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] py-1 px-2 rounded-lg font-bold">
                           {remainingTime > 0 ? `${remainingTime}h उपलब्ध` : 'पूर्ण!'}
@@ -238,7 +214,7 @@
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Calendar className="w-4 h-4 text-emerald-400" /> सक्रिय मेमोरी ट्रैकर</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">📅 सक्रिय मेमोरी ट्रैकर</h3>
                       {studyLogs.map(log => (
                         <div key={log.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
                           <span className="text-[9px] bg-indigo-950 border border-indigo-800 text-indigo-300 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
@@ -270,13 +246,13 @@
                       </select>
                     </div>
                     {newLog.subject === 'अन्य (Custom)' && (
-                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
                     )}
                     <div>
                       <label className="block text-slate-300 font-semibold mb-1">टॉपिक:</label>
-                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
                     </div>
-                    <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl shadow-lg text-white text-xs">सुरक्षित करें</button>
+                    <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl shadow-lg text-white text-xs">🚀 सुरक्षित करें</button>
                   </form>
                 )}
 
@@ -288,31 +264,27 @@
                     </div>
                     <div className="flex gap-3">
                       <button type="button" onClick={() => setTimer(prev => ({ ...prev, isActive: !prev.isActive }))} className={`px-6 py-2 rounded-full font-bold text-white text-xs ${timer.isActive ? 'bg-amber-600' : 'bg-emerald-600'}`}>
-                        {timer.isActive ? 'रोकें' : 'शुरू करें'}
+                        {timer.isActive ? '⏸ रोकें' : '▶ शुरू करें'}
                       </button>
-                      <button type="button" onClick={() => setTimer({ minutes: timer.mode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: timer.mode })} className="bg-slate-800 border border-slate-700 text-slate-300 px-5 py-2 rounded-full text-xs">रीसेट</button>
+                      <button type="button" onClick={() => setTimer({ minutes: timer.mode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: timer.mode })} className="bg-slate-800 border border-slate-700 text-slate-300 px-5 py-2 rounded-full text-xs">🔄 रीसेट</button>
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'notifications' && (
                   <div className="space-y-3 text-xs">
-                    {notifications.length === 0 ? (
-                      <p className="text-slate-500 italic text-center py-6">अभी कोई सुझाव उपलब्ध नहीं है।</p>
-                    ) : (
-                      notifications.map((notif, idx) => (
-                        <div key={idx} className="p-3 bg-indigo-950/25 border border-indigo-900/40 rounded-xl text-indigo-300">
-                          <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
-                          <p className="text-[11px] text-slate-300">{notif.text}</p>
-                        </div>
-                      ))
-                    )}
+                    {notifications.map((notif, idx) => (
+                      <div key={idx} className="p-3 bg-indigo-950/25 border border-indigo-900/40 rounded-xl text-indigo-300">
+                        <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
+                        <p className="text-[11px] text-slate-300">{notif.text}</p>
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 {activeTab === 'profile' && (
                   <div className="space-y-4 text-center">
-                    <div className="w-16 h-16 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto mt-4"><User className="w-8 h-8 text-indigo-400" /></div>
+                    <div className="w-16 h-16 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto mt-4 text-xl">👤</div>
                     <h3 className="text-sm font-bold text-white">{user.name}</h3>
                     <p className="text-[10px] text-slate-400">{user.category}</p>
                   </div>
@@ -320,11 +292,11 @@
               </main>
 
               <nav className="absolute bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-20">
-                <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-400' : 'text-slate-500'}`}><BookOpen className="w-4.5 h-4.5" /><span className="text-[8px] mt-0.5">मेमोरी ट्रैक</span></button>
-                <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400' : 'text-slate-500'}`}><PlusCircle className="w-4.5 h-4.5" /><span className="text-[8px] mt-0.5">पढ़ाई दर्ज करें</span></button>
-                <button type="button" onClick={() => setActiveTab('timer')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'timer' ? 'text-indigo-400' : 'text-slate-500'}`}><Clock className="w-4.5 h-4.5" /><span className="text-[8px] mt-0.5">फोकस</span></button>
-                <button type="button" onClick={() => setActiveTab('notifications')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'notifications' ? 'text-indigo-400' : 'text-slate-500'}`}><Bell className="w-4.5 h-4.5" /><span className="text-[8px] mt-0.5">स्मार्ट सुझाव</span></button>
-                <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400' : 'text-slate-500'}`}><User className="w-4.5 h-4.5" /><span className="text-[8px] mt-0.5">प्रोफाइल</span></button>
+                <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">📖</span><span className="text-[8px] mt-0.5">ट्रैकर</span></button>
+                <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">➕</span><span className="text-[8px] mt-0.5">दर्ज करें</span></button>
+                <button type="button" onClick={() => setActiveTab('timer')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'timer' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">⏱</span><span className="text-[8px] mt-0.5">फोकस</span></button>
+                <button type="button" onClick={() => setActiveTab('notifications')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'notifications' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">🔔</span><span className="text-[8px] mt-0.5">सुझाव</span></button>
+                <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">👤</span><span className="text-[8px] mt-0.5">प्रोफाइल</span></button>
               </nav>
             </div>
             <footer className="w-full max-w-md text-center py-2 text-[9px] text-slate-500">सजग छात्र v2.5 Ultimate</footer>
