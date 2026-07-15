@@ -16,14 +16,16 @@
 <body class="bg-slate-950 text-slate-100">
     <div id="root"></div>
 
-    <!-- React, ReactDOM, and Babel CDN Packages -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- React, ReactDOM, and Babel CDN Packages (Stable Version for CDN Setup) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <!-- React Application Logic -->
     <script type="text/babel">
-      const { useState, useEffect } = React;
+      // सुरक्षित तरीके से React हुक्स को निकालना
+      const useState = React.useState;
+      const useEffect = React.useEffect;
 
       function App() {
         // --- स्टेट मैनेजमेंट ---
@@ -304,7 +306,10 @@
         );
       }
 
-      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+      // CDN सेटअप के लिए सही React 18 रेंडरिंग मेथड
+      const rootElement = document.getElementById('root');
+      const root = ReactDOM.createRoot(rootElement);
+      root.render(React.createElement(App));
     </script>
 </body>
 </html>
