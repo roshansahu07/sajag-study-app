@@ -13,6 +13,13 @@
       @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
       .animate-spin-slow { animation: spin 8s linear infinite; }
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      
+      /* फ़्लैशकार्ड फ्लिप एनीमेशन */
+      .perspective-1000 { perspective: 1000px; }
+      .transform-style-3d { transform-style: preserve-3d; }
+      .backface-hidden { backface-visibility: hidden; }
+      .rotate-y-180 { transform: rotateY(180deg); }
+      
       ::-webkit-scrollbar { width: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #1e1b4b; border-radius: 999px; }
@@ -32,34 +39,19 @@
       const useState = React.useState;
       const useEffect = React.useEffect;
 
-      // CDN पर Lucide Icons को सुरक्षित रूप से रेंडर करने का कंपोनेंट
       function Icon({ name, className = "w-4 h-4" }) {
-        useEffect(() => {
-          if (window.lucide) {
-            window.lucide.createIcons();
-          }
-        });
+        useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
         return <i data-lucide={name} className={className}></i>;
       }
 
-      // 💰 AdSense डिस्प्ले कंपोनेंट
       function AdSenseUnit({ slotId }) {
         useEffect(() => {
-          try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-          } catch (e) {
-            console.error("AdSense Blocked or Empty", e);
-          }
+          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } 
+          catch (e) { console.error("AdSense Blocked or Empty", e); }
         }, [slotId]);
-
         return (
           <div className="my-2 mx-auto bg-slate-900/40 dark:bg-slate-950/40 p-1 rounded-xl border border-slate-800/40 flex items-center justify-center overflow-hidden min-h-[60px] w-full text-[9px] text-slate-600">
-             <ins className="adsbygoogle"
-                  style={{ display: 'block' }}
-                  data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                  data-ad-slot={slotId}
-                  data-ad-format="horizontal"
-                  data-full-width-responsive="true"></ins>
+             <ins className="adsbygoogle" style={{ display: 'block' }} data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot={slotId} data-ad-format="horizontal" data-full-width-responsive="true"></ins>
           </div>
         );
       }
@@ -70,9 +62,7 @@
           const request = indexedDB.open("SajagStudentDB", 1);
           request.onupgradeneeded = (e) => {
             const db = e.target.result;
-            if (!db.objectStoreNames.contains("pdfs")) {
-              db.createObjectStore("pdfs", { keyPath: "id" });
-            }
+            if (!db.objectStoreNames.contains("pdfs")) db.createObjectStore("pdfs", { keyPath: "id" });
           };
           request.onsuccess = (e) => resolve(e.target.result);
           request.onerror = (e) => reject("DB Open Error");
@@ -85,8 +75,7 @@
           const transaction = db.transaction("pdfs", "readwrite");
           const store = transaction.objectStore("pdfs");
           const request = store.put({ id, data: base64Data, name: fileName });
-          request.onsuccess = () => resolve(true);
-          request.onerror = () => reject(false);
+          request.onsuccess = () => resolve(true); request.onerror = () => reject(false);
         });
       };
 
@@ -96,8 +85,7 @@
           const transaction = db.transaction("pdfs", "readonly");
           const store = transaction.objectStore("pdfs");
           const request = store.get(id);
-          request.onsuccess = (e) => resolve(e.target.result);
-          request.onerror = () => reject(null);
+          request.onsuccess = (e) => resolve(e.target.result); request.onerror = () => reject(null);
         });
       };
 
@@ -107,48 +95,32 @@
           const transaction = db.transaction("pdfs", "readwrite");
           const store = transaction.objectStore("pdfs");
           const request = store.delete(id);
-          request.onsuccess = () => resolve(true);
-          request.onerror = () => reject(false);
+          request.onsuccess = () => resolve(true); request.onerror = () => reject(false);
         });
       };
 
-      // 🔔 मुफ़्त अलार्म बीप साउंड जनरेटर फंक्शन
       const playTimerAlarm = () => {
         try {
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           const oscillator = audioCtx.createOscillator();
           const gainNode = audioCtx.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-          
-          oscillator.type = 'sine';
-          oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+          oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+          oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
           gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-          
-          oscillator.start();
-          oscillator.stop(audioCtx.currentTime + 0.8);
-        } catch (e) {
-          console.error("Audio error", e);
-        }
+          oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.8);
+        } catch (e) { console.error("Audio error", e); }
       };
 
       function App() {
-        // --- थीम मैनेजर स्टेट ---
         const [isDarkMode, setIsDarkMode] = useState(() => {
           const savedTheme = localStorage.getItem('sajag_theme');
           return savedTheme ? savedTheme === 'dark' : true;
         });
 
-        // लोकल स्टोरेज से यूजर डेटा लोड करना
         const [user, setUser] = useState(() => {
           const localUser = localStorage.getItem('sajag_user');
           return localUser ? JSON.parse(localUser) : {
-            name: 'रोशन लाल साहू',
-            category: 'प्रतियोगी परीक्षा (Competitive Exams)',
-            availableHours: 6,
-            streak: 5, 
-            points: 350
+            name: 'रोशन लाल साहू', category: 'प्रतियोगी परीक्षा (Competitive Exams)', availableHours: 6, streak: 5, points: 350, pomodoroRounds: 0
           };
         });
 
@@ -156,14 +128,10 @@
           const localLogs = localStorage.getItem('sajag_logs');
           return localLogs ? JSON.parse(localLogs) : [
             {
-              id: 1,
-              subject: 'भौतिक विज्ञान (Physics)',
-              topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
+              id: 1, subject: 'भौतिक विज्ञान (Physics)', topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
               date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
-              difficulty: 'कठिन (Hard)',
-              timeSpent: 2,
-              hasPdf: false,
-              currentStage: 1, 
+              difficulty: 'कठिन (Hard)', timeSpent: 2, hasPdf: false, currentStage: 1,
+              flashcards: [{ question: "गति का प्रथम नियम क्या कहलाता है?", answer: "जड़त्व का नियम (Law of Inertia)" }],
               stages: [
                 { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
                 { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
@@ -175,9 +143,10 @@
         });
 
         const [profileForm, setProfileForm] = useState({ name: user.name, availableHours: user.availableHours, category: user.category });
-        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
+        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2, cardQ: '', cardA: '' });
         const [pdfFile, setPdfFile] = useState(null);
         const [backupInputCode, setBackupInputCode] = useState('');
+        const [flippedCards, setFlippedCards] = useState({}); // फ़्लैशकार्ड फ्लिप स्टेट
 
         const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
         const [activeTab, setActiveTab] = useState('dashboard');
@@ -190,124 +159,80 @@
         const [notifications, setNotifications] = useState([]);
 
         const showAlert = (msg) => {
-          setAlertMsg(msg);
-          setTimeout(() => setAlertMsg(null), 4000);
+          setAlertMsg(msg); setTimeout(() => setAlertMsg(null), 4000);
         };
 
-        // थीम इफ़ेक्ट
         useEffect(() => {
           const root = window.document.documentElement;
-          if (isDarkMode) {
-            root.classList.add('dark');
-            root.style.backgroundColor = "#020617";
-            localStorage.setItem('sajag_theme', 'dark');
-          } else {
-            root.classList.remove('dark');
-            root.style.backgroundColor = "#f8fafc";
-            localStorage.setItem('sajag_theme', 'light');
-          }
+          if (isDarkMode) { root.classList.add('dark'); root.style.backgroundColor = "#020617"; localStorage.setItem('sajag_theme', 'dark'); } 
+          else { root.classList.remove('dark'); root.style.backgroundColor = "#f8fafc"; localStorage.setItem('sajag_theme', 'light'); }
         }, [isDarkMode]);
 
         useEffect(() => { localStorage.setItem('sajag_user', JSON.stringify(user)); }, [user]);
         useEffect(() => { localStorage.setItem('sajag_logs', JSON.stringify(studyLogs)); }, [studyLogs]);
         useEffect(() => { setProfileForm({ name: user.name, availableHours: user.availableHours, category: user.category }); }, [user]);
 
-        // स्मार्ट सुझाव विश्लेषक
         useEffect(() => {
           const todayStr = new Date().toISOString().split('T')[0];
           const generatedAlerts = [];
           studyLogs.forEach(log => {
             const activeStage = log.stages.find(s => !s.completed);
             if (activeStage && activeStage.due === todayStr) {
-              generatedAlerts.push({
-                id: `alert-${log.id}`,
-                title: `स्मार्ट रिवीजन अलर्ट: ${log.subject} 💡`,
-                text: `आज रिवीजन का समय है। स्मरण शक्ति बनाए रखने के लिए अभ्यास टेस्ट लें!`,
-                type: 'urgent',
-                actionTopic: log
-              });
+              generatedAlerts.push({ id: `alert-${log.id}`, title: `स्मार्ट रिवीजन अलर्ट: ${log.subject} 💡`, text: `आज रिवीजन का समय है। अभ्यास टेस्ट लें!`, type: 'urgent', actionTopic: log });
             }
           });
-          generatedAlerts.push({ id: 'focus-tip-1', title: 'एकाग्रता सुधार गाइड ⚡', text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर का उपयोग करें!', type: 'tip' });
+          generatedAlerts.push({ id: 'focus-tip-1', title: 'एकाग्रता सुधार गाइड ⚡', text: 'लगातार 45 minute से अधिक न पढ़ें। फोकस टाइमर का उपयोग करें!', type: 'tip' });
           setNotifications(generatedAlerts);
         }, [studyLogs]);
 
-        // मोबाइल कॉम्पैटिबल PDF व्यूअर फंक्शन (Blob URL)
         const handleViewPdf = async (logId) => {
           try {
             const pdfRecord = await getPDFFromDB(logId);
-            if (!pdfRecord || !pdfRecord.data) {
-              showAlert("⚠️ इस टॉपिक के लिए कोई PDF फाइल नहीं मिली!");
-              return;
-            }
-
+            if (!pdfRecord || !pdfRecord.data) { showAlert("⚠️ कोई PDF फाइल नहीं मिली!"); return; }
             const base64Parts = pdfRecord.data.split(',');
             const mimeType = base64Parts[0].match(/:(.*?);/)[1];
             const rawBinary = atob(base64Parts[1]);
             const arrayLength = rawBinary.length;
             const uint8Array = new Uint8Array(arrayLength);
-
-            for (let i = 0; i < arrayLength; i++) {
-              uint8Array[i] = rawBinary.charCodeAt(i);
-            }
-
+            for (let i = 0; i < arrayLength; i++) uint8Array[i] = rawBinary.charCodeAt(i);
             const blob = new Blob([uint8Array], { type: mimeType });
             const blobUrl = URL.createObjectURL(blob);
-
             window.open(blobUrl, '_blank');
             setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-
-          } catch (error) {
-            console.error("PDF Open Error: ", error);
-            showAlert("⚠️ मोबाइल पर PDF खोलने में समस्या हुई।");
-          }
+          } catch (error) { showAlert("⚠️ PDF खोलने में समस्या हुई।"); }
         };
 
         const handleDeletePdf = async (logId) => {
           const success = await deletePDFFromDB(logId);
           if (success) {
             setStudyLogs(prev => prev.map(log => log.id === logId ? { ...log, hasPdf: false } : log));
-            showAlert("🗑️ PDF फाइल लोकल स्टोरेज से सफलतापूर्वक डिलीट कर दी गई!");
-          } else {
-            showAlert("⚠️ फ़ाइल डिलीट करने में समस्या हुई।");
+            showAlert("🗑️ PDF फाइल डिलीट कर दी गई!");
           }
         };
 
         const handleFileChange = (e) => {
           const file = e.target.files[0];
           if (file && file.type === "application/pdf") {
-            if (file.size > 5 * 1024 * 1024) {
-              showAlert("⚠️ फाइल का साइज 5MB से कम होना चाहिए!");
-              e.target.value = "";
-              return;
-            }
+            if (file.size > 5 * 1024 * 1024) { showAlert("⚠️ साइज 5MB से कम होना चाहिए!"); e.target.value = ""; return; }
             setPdfFile(file);
-          } else {
-            showAlert("⚠️ केवल PDF फाइल ही अपलोड करना मुमकिन है!");
-            e.target.value = "";
-          }
+          } else { showAlert("⚠️ केवल PDF फाइल चुनें!"); e.target.value = ""; }
         };
 
         const handleAddLog = async (e) => {
           e.preventDefault();
           const finalSubject = newLog.subject === 'अन्य (Custom)' ? newLog.customSubject : newLog.subject;
-
-          if (!finalSubject || !newLog.topic) {
-            showAlert('⚠️ कृपया विषय और मुख्य टॉपिक का नाम दर्ज करें!');
-            return;
-          }
+          if (!finalSubject || !newLog.topic) { showAlert('⚠️ कृपया विषय और टॉपिक दर्ज करें!'); return; }
 
           const logId = Date.now();
           let hasPdf = false;
-
           if (pdfFile) {
             hasPdf = true;
-            const reader = new FileReader();
-            reader.readAsDataURL(pdfFile);
-            reader.onload = async () => {
-              await savePDFToDB(logId, reader.result, pdfFile.name);
-            };
+            const reader = new FileReader(); reader.readAsDataURL(pdfFile);
+            reader.onload = async () => { await savePDFToDB(logId, reader.result, pdfFile.name); };
           }
+
+          const fCards = [];
+          if (newLog.cardQ && newLog.cardA) { fCards.push({ question: newLog.cardQ, answer: newLog.cardA }); }
 
           const todayStr = new Date().toISOString().split('T')[0];
           let d1 = new Date(); d1.setDate(d1.getDate() + 1);
@@ -316,14 +241,8 @@
           let d4 = new Date(); d4.setDate(d4.getDate() + 15);
 
           const newEntry = {
-            id: logId,
-            subject: finalSubject,
-            topic: newLog.topic,
-            date: todayStr,
-            difficulty: newLog.difficulty,
-            timeSpent: parseFloat(newLog.timeSpent) || 1,
-            hasPdf: hasPdf,
-            currentStage: 1,
+            id: logId, subject: finalSubject, topic: newLog.topic, date: todayStr, difficulty: newLog.difficulty,
+            timeSpent: parseFloat(newLog.timeSpent) || 1, hasPdf: hasPdf, currentStage: 1, flashcards: fCards,
             stages: [
               { name: 'R1 (24h)', due: d1.toISOString().split('T')[0], completed: false },
               { name: 'R2 (3d)', due: d2.toISOString().split('T')[0], completed: false },
@@ -334,25 +253,22 @@
 
           setStudyLogs([newEntry, ...studyLogs]);
           setUser(prev => ({ ...prev, points: prev.points + 50 }));
-          showAlert('🚀 शानदार! पढ़ाई का ब्यौरा और PDF सेव हो गए। +50 XP!');
-          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
-          setPdfFile(null);
-          setActiveTab('dashboard');
+          showAlert('🚀 पढ़ाई का ब्यौरा सुरक्षित हो गया! +50 XP!');
+          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2, cardQ: '', cardA: '' });
+          setPdfFile(null); setActiveTab('dashboard');
         };
 
         const handleUpdateProfile = (e) => {
           e.preventDefault();
           if (!profileForm.name.trim()) return;
           setUser(prev => ({ ...prev, name: profileForm.name, availableHours: parseInt(profileForm.availableHours) || 6, category: profileForm.category }));
-          showAlert('👤 प्रोफाइल डेटा सफलतापूर्वक सुरक्षित हो गया!');
-          setActiveTab('dashboard');
+          showAlert('👤 प्रोफाइल डेटा सुरक्षित हो गया!'); setActiveTab('dashboard');
         };
 
         const generateTextBackup = () => {
           const backupData = { user, studyLogs };
           const base64Str = btoa(unescape(encodeURIComponent(JSON.stringify(backupData))));
-          navigator.clipboard.writeText(base64Str);
-          showAlert("📋 बैकअप कोड कॉपी हो गया है!");
+          navigator.clipboard.writeText(base64Str); showAlert("📋 बैकअप कोड कॉपी हो गया है!");
         };
 
         const handleRestoreData = (e) => {
@@ -361,36 +277,23 @@
             if (!backupInputCode.trim()) return;
             const decodedData = JSON.parse(decodeURIComponent(escape(atob(backupInputCode.trim()))));
             if (decodedData.user && decodedData.studyLogs) {
-              setUser(decodedData.user);
-              setStudyLogs(decodedData.studyLogs);
-              showAlert("✅ डेटा सफलतापूर्वक रिस्टोर हो गया है!");
-              setBackupInputCode('');
-              setActiveTab('dashboard');
-            } else {
-              showAlert("⚠️ अमान्य बैकअप कोड!");
+              setUser(decodedData.user); setStudyLogs(decodedData.studyLogs);
+              showAlert("✅ डेटा सफलतापूर्वक रिस्टोर हो गया!"); setBackupInputCode(''); setActiveTab('dashboard');
             }
-          } catch (err) {
-            showAlert("⚠️ कोड सही नहीं है, कृपया दोबारा जांचें।");
-          }
+          } catch (err) { showAlert("⚠️ कोड सही नहीं है।"); }
+        };
+
+        const toggleCardFlip = (logId, index) => {
+          const key = `${logId}-${index}`;
+          setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
         };
 
         const handleGenerateQuiz = async (log) => {
-          setSelectedTopicForTest(log);
-          setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
+          setSelectedTopicForTest(log); setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
           setTimeout(() => {
             const simulatedQuestions = [
-              {
-                question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पना के संदर्भ में सबसे महत्वपूर्ण पहलू को दर्शाता है?`,
-                options: ["सैद्धांतिक अनुप्रयोग और नियम", "दैनिक जीवन के व्यावहारिक अनुभव", "गणितीय समीकरणों का विश्लेषण", "उपरोक्त सभी आयाम"],
-                correctIndex: 3,
-                explanation: "यह अवधारणा तीनों पहलुओं को संतुलित तरीके से समझाने में सक्षम है।"
-              },
-              {
-                question: `इस विषय में याद रखने की क्षमता बढ़ाने का सबसे बेहतर वैज्ञानिक तरीका क्या है?`,
-                options: ["सिर्फ एक बार ध्यान से पढ़ना", "नियमित स्पैस्ड रिपीटीशन और सक्रिय टेस्ट देना", "लगातार 5 घंटे तक नोट्स बनाना", "परीक्षा के ठीक एक दिन पहले रटना"],
-                correctIndex: 1,
-                explanation: "सक्रिय रिकॉल (Active Recall) और स्पैस्ड रिपीटीशन ही लंबे समय तक याद रखने का सर्वोत्तम साधन हैं।"
-              }
+              { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पना के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
+              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्पैस्ड रिपीटीशन और एक्टिव टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
             ];
             setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
           }, 1200);
@@ -411,8 +314,7 @@
             if (log.id === logId) {
               const nextStage = log.currentStage + 1;
               const updatedStages = log.stages.map((stage, sIdx) => {
-                if (sIdx === log.currentStage - 1) return { ...stage, completed: true };
-                return stage;
+                if (sIdx === log.currentStage - 1) return { ...stage, completed: true }; return stage;
               });
               return { ...log, currentStage: nextStage > 4 ? 4 : nextStage, stages: updatedStages };
             }
@@ -423,15 +325,12 @@
         const handleMarkStageCompleted = (logId, stageIndex) => {
           setStudyLogs(prev => prev.map(log => {
             if (log.id === logId) {
-              const updatedStages = [...log.stages];
-              updatedStages[stageIndex].completed = true;
-              const nextStage = stageIndex + 2;
-              return { ...log, currentStage: nextStage > 4 ? 4 : nextStage, stages: updatedStages };
+              const updatedStages = [...log.stages]; updatedStages[stageIndex].completed = true;
+              return { ...log, currentStage: (stageIndex + 2) > 4 ? 4 : (stageIndex + 2), stages: updatedStages };
             }
             return log;
           }));
-          setUser(prev => ({ ...prev, points: prev.points + 15 }));
-          showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP');
+          setUser(prev => ({ ...prev, points: prev.points + 15 })); showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP');
         };
 
         const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
@@ -444,50 +343,44 @@
               if (timer.seconds > 0) setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
               else if (timer.seconds === 0 && timer.minutes > 0) setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
               else {
-                clearInterval(interval);
-                playTimerAlarm();
-                const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
-                setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
-                showAlert(`🔔 फोकस सत्र समाप्त!`);
+                clearInterval(interval); playTimerAlarm();
+                if (timer.mode === 'Focus') {
+                  setUser(prev => ({ ...prev, pomodoroRounds: (prev.pomodoroRounds || 0) + 1, points: prev.points + 30 }));
+                  showAlert(`🔔 फोकस सत्र समाप्त! आपको मिले +30 बोनस XP!`);
+                  setTimer({ minutes: 5, seconds: 0, isActive: false, mode: 'Break' });
+                } else {
+                  showAlert(`🔔 ब्रेक सत्र समाप्त! वापस पढ़ाई शुरू करें।`);
+                  setTimer({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
+                }
               }
             }, 1000);
           } else clearInterval(interval);
           return () => clearInterval(interval);
-        }, [timer.isActive, timer.seconds, timer.minutes]);
+        }, [timer.isActive, timer.seconds, timer.minutes, timer.mode]);
 
         return (
           <div className="min-h-screen bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100 light:bg-slate-50 light:text-slate-900 flex flex-col justify-between items-center p-2 sm:p-4 w-full transition-colors duration-300">
-            
-            {/* 🛠️ बिल्कुल साफ़ सुधरा हुआ हेडर (स्पेलिंग 'सजग छात्र' फिक्स और बिना किसी बैज के) */}
             <header className="w-full max-w-md flex justify-between items-center py-3 px-3 border-b border-slate-800/40 light:border-slate-200 bg-slate-950/20 transition-colors">
               <div className="text-left flex flex-col justify-center">
                 <h1 className="text-xl sm:text-2xl font-black text-indigo-400 dark:text-indigo-400 light:text-indigo-600 flex items-center gap-2 tracking-tight">
                   <Icon name="brain" className="w-6 h-6 text-indigo-500 animate-pulse" />
-                  <span>सजग छात्र</span>
+                  <span>सजगा छात्र</span>
                 </h1>
-                <p className="text-[10px] text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium mt-0.5 tracking-wide">
-                  वैज्ञानिक 4-स्टेज मेमोरी ट्रैकर व टूल्स
-                </p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium mt-0.5 tracking-wide">वैज्ञानिक 4-स्टेज मेमोरी ट्रैकर व टूल्स</p>
               </div>
-              
-              <button 
-                onClick={() => setIsDarkMode(!isDarkMode)} 
-                className="p-2.5 rounded-xl bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-slate-800 dark:border-slate-800 light:border-slate-300 text-indigo-400 hover:scale-105 active:scale-95 transition-all shadow-md"
-              >
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 rounded-xl bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-slate-800 text-indigo-400 shadow-md">
                 <Icon name={isDarkMode ? "sun" : "moon"} className="w-4 h-4" />
               </button>
             </header>
 
             <div className="w-full max-w-md bg-slate-900 dark:bg-slate-900 light:bg-white rounded-[32px] border-4 border-slate-800 dark:border-slate-800 light:border-slate-200 shadow-2xl relative flex flex-col overflow-hidden h-[84vh] max-h-[790px] transition-colors duration-300">
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-4 w-32 bg-slate-800 rounded-b-xl z-20 flex justify-center items-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-950 mr-2"></div>
-                <div className="w-10 h-1 rounded-full bg-slate-950"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-950 mr-2"></div><div className="w-10 h-1 rounded-full bg-slate-950"></div>
               </div>
 
               {alertMsg && (
                 <div className="absolute top-8 left-4 right-4 bg-indigo-600 text-white p-3.5 rounded-xl shadow-xl z-50 text-xs flex items-center gap-2 border border-indigo-400 animate-fadeIn">
-                  <Icon name="info" className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-medium">{alertMsg}</span>
+                  <Icon name="info" className="w-4 h-4 flex-shrink-0" /><span className="font-medium">{alertMsg}</span>
                 </div>
               )}
 
@@ -500,7 +393,6 @@
               </div>
 
               <main className="flex-1 overflow-y-auto p-4 pb-16 dark:text-slate-100 light:text-slate-800">
-                
                 <AdSenseUnit slotId="HEADER_SLOT_ID" />
 
                 {activeTab === 'dashboard' && (
@@ -522,44 +414,56 @@
 
                     <div className="space-y-3">
                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                        <Icon name="calendar" className="text-emerald-400" />
-                        <span>📅 सक्रिय मेमोरी ट्रैकर</span>
+                        <Icon name="calendar" className="text-emerald-400" /><span>📅 सक्रिय मेमोरी ट्रैकर</span>
                       </h3>
-                      {studyLogs.length === 0 ? (
-                        <p className="text-xs text-slate-500 text-center py-6 italic">कोई रिकॉर्ड नहीं मिला। 'दर्ज करें' टैब में जाएँ।</p>
-                      ) : (
-                        studyLogs.map(log => (
-                          <div key={log.id} className="bg-slate-950 dark:bg-slate-950 light:bg-slate-50 p-3.5 rounded-xl border border-slate-800/80 light:border-slate-200 space-y-2">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <span className="text-[9px] bg-indigo-950 dark:bg-indigo-950 light:bg-indigo-100 border border-indigo-800 dark:border-indigo-800 light:border-indigo-300 text-indigo-300 dark:text-indigo-300 light:text-indigo-700 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
-                                <h4 className="text-xs font-bold dark:text-white light:text-slate-900 mt-1">{log.topic}</h4>
-                              </div>
-                              <div className="flex gap-1">
-                                {log.hasPdf && (
-                                  <div className="flex gap-1">
-                                    <button onClick={() => handleViewPdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-emerald-500/40 text-emerald-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="file-text" className="w-3 h-3" /></button>
-                                    <button onClick={() => handleDeletePdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-rose-500/40 text-rose-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="trash-2" className="w-3 h-3" /></button>
-                                  </div>
-                                )}
-                                <button onClick={() => handleGenerateQuiz(log)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-indigo-500/40 text-indigo-400 p-1 rounded-lg text-[9px] font-bold flex items-center gap-0.5"><Icon name="brain" className="w-3 h-3" /><span>AI</span></button>
-                              </div>
+                      {studyLogs.map(log => (
+                        <div key={log.id} className="bg-slate-950 dark:bg-slate-950 light:bg-slate-50 p-3.5 rounded-xl border border-slate-800/80 light:border-slate-200 space-y-2">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-[9px] bg-indigo-950 dark:bg-indigo-950 light:bg-indigo-100 border border-indigo-800 text-indigo-300 dark:text-indigo-300 light:text-indigo-700 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
+                              <h4 className="text-xs font-bold dark:text-white light:text-slate-900 mt-1">{log.topic}</h4>
                             </div>
-                            <div className="grid grid-cols-4 gap-1.5 mt-2">
-                              {log.stages.map((stage, idx) => (
-                                <button
-                                  key={idx}
-                                  disabled={stage.completed || (idx !== log.currentStage - 1)}
-                                  onClick={() => handleMarkStageCompleted(log.id, idx)}
-                                  className={`text-[9px] p-1.5 rounded border text-center transition ${stage.completed ? 'bg-emerald-950 dark:bg-emerald-950 light:bg-emerald-100 border-emerald-500 text-emerald-400 dark:text-emerald-400 light:text-emerald-700' : (idx === log.currentStage - 1 ? 'bg-indigo-950 border-indigo-500 text-indigo-300 font-bold' : 'bg-slate-800 light:bg-slate-200 border-slate-700 light:border-slate-300 text-slate-400')}`}
-                                >
-                                  <span>{stage.name}</span>
-                                </button>
-                              ))}
+                            <div className="flex gap-1">
+                              {log.hasPdf && (
+                                <div className="flex gap-1">
+                                  <button onClick={() => handleViewPdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-emerald-500/40 text-emerald-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="file-text" className="w-3 h-3" /></button>
+                                  <button onClick={() => handleDeletePdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-rose-500/40 text-rose-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="trash-2" className="w-3 h-3" /></button>
+                                </div>
+                              )}
+                              <button onClick={() => handleGenerateQuiz(log)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-indigo-500/40 text-indigo-400 p-1 rounded-lg text-[9px] font-bold flex items-center gap-0.5"><Icon name="brain" className="w-3 h-3" /><span>AI</span></button>
                             </div>
                           </div>
-                        ))
-                      )}
+                          
+                          {/* 🧠 एक्टिव रिकॉल फ़्लैशकार्ड्स रेंडर सुधार */}
+                          {log.flashcards && log.flashcards.map((card, cIdx) => {
+                            const isFlipped = flippedCards[`${log.id}-${cIdx}`];
+                            return (
+                              <div key={cIdx} className="pt-1.5">
+                                <div onClick={() => toggleCardFlip(log.id, cIdx)} className="w-full h-14 perspective-1000 cursor-pointer">
+                                  <div className={`w-full h-full relative transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                    <div className="absolute inset-0 bg-slate-900 dark:bg-slate-900 light:bg-slate-100 border border-indigo-500/30 rounded-lg p-2 flex items-center justify-between backface-hidden">
+                                      <span className="text-[10px] text-slate-300 light:text-slate-700">❓ प्रश्न: {card.question}</span>
+                                      <span className="text-[8px] text-indigo-400 font-bold">पलटें 🔄</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-indigo-950/40 dark:bg-indigo-950/40 light:bg-indigo-50 border border-emerald-500/40 rounded-lg p-2 flex items-center rotate-y-180 backface-hidden">
+                                      <span className="text-[10px] text-emerald-400 dark:text-emerald-400 light:text-emerald-700 font-semibold">💡 उत्तर: {card.answer}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+
+                          <div className="grid grid-cols-4 gap-1.5 mt-2">
+                            {log.stages.map((stage, idx) => (
+                              <button key={idx} disabled={stage.completed || (idx !== log.currentStage - 1)} onClick={() => handleMarkStageCompleted(log.id, idx)}
+                                className={`text-[9px] p-1.5 rounded border text-center transition ${stage.completed ? 'bg-emerald-950 border-emerald-500 text-emerald-400' : (idx === log.currentStage - 1 ? 'bg-indigo-950 border-indigo-500 text-indigo-300 font-bold' : 'bg-slate-800 light:bg-slate-200 border-slate-700 text-slate-400')}`}>
+                                <span>{stage.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -567,30 +471,33 @@
                 {activeTab === 'log' && (
                   <form onSubmit={handleAddLog} className="space-y-4 text-xs dark:text-slate-200 light:text-slate-800">
                     <div>
-                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">विषय (Subject):</label>
+                      <label className="block font-semibold mb-1">विषय (Subject):</label>
                       <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5">
-                        <option value="">-- चुनें --</option>
-                        <option value="भौतिक विज्ञान (Physics)">भौतिक विज्ञान (Physics)</option>
-                        <option value="रसायन विज्ञान (Chemistry)">रसायन विज्ञान (Chemistry)</option>
-                        <option value="गणित (Maths)">गणित (Maths)</option>
-                        <option value="इतिहास (History)">इतिहास (History)</option>
-                        <option value="अन्य (Custom)">अन्य</option>
+                        <option value="">-- चुनें --</option><option value="भौतिक विज्ञान (Physics)">भौतिक विज्ञान (Physics)</option><option value="रसायन विज्ञान (Chemistry)">रसायन विज्ञान (Chemistry)</option><option value="गणित (Maths)">गणित (Maths)</option><option value="इतिहास (History)">इतिहास (History)</option><option value="अन्य (Custom)">अन्य</option>
                       </select>
                     </div>
                     {newLog.subject === 'अन्य (Custom)' && (
-                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5" />
+                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
                     )}
                     <div>
-                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">टॉपिक:</label>
-                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5" />
+                      <label className="block font-semibold mb-1">टॉपिक:</label>
+                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
                     </div>
                     <div>
-                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">पढ़ाई का समय (घंटे):</label>
-                      <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5" />
+                      <label className="block font-semibold mb-1">पढ़ाई का समय (घंटे):</label>
+                      <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
                     </div>
+                    
+                    {/* 🧠 फ़्लैशकार्ड्स क्रिएशन फ़ील्ड्स */}
+                    <div className="bg-slate-950/40 p-3 rounded-xl border border-indigo-500/20 space-y-2">
+                      <label className="block font-bold text-indigo-400 text-[10px] uppercase">एक्टिव रिकॉल फ़्लैशकार्ड जोड़ें (वैकल्पिक)</label>
+                      <input type="text" placeholder="प्रश्न दर्ज करें..." value={newLog.cardQ} onChange={(e) => setNewLog({ ...newLog, cardQ: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
+                      <input type="text" placeholder="उत्तर दर्ज करें..." value={newLog.cardA} onChange={(e) => setNewLog({ ...newLog, cardA: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
+                    </div>
+
                     <div>
-                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">स्टडी नोट्स (PDF, Max 5MB):</label>
-                      <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:bg-indigo-950 file:text-indigo-300" />
+                      <label className="block font-semibold mb-1">स्टडी नोट्स (PDF, Max 5MB):</label>
+                      <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2 file:py-1 file:px-3 file:rounded file:bg-indigo-950 file:text-indigo-300" />
                     </div>
                     <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl text-white text-xs shadow-lg">🚀 सुरक्षित करें</button>
                   </form>
@@ -602,7 +509,6 @@
                       <span className="text-[9px] bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded font-black uppercase">{selectedTopicForTest?.subject}</span>
                       <h3 className="text-sm font-bold text-white mt-1.5">{selectedTopicForTest?.topic}</h3>
                     </div>
-
                     {loadingQuiz ? (
                       <div className="flex flex-col items-center justify-center py-12 space-y-3">
                         <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
@@ -621,25 +527,13 @@
                                   if (oIdx === q.correctIndex) optClass = "border-emerald-500 bg-emerald-950/30 text-emerald-400 font-bold";
                                   else if (userAnswers[qIdx] === oIdx) optClass = "border-rose-500 bg-rose-950/30 text-rose-400";
                                 }
-                                return (
-                                  <button key={oIdx} type="button" disabled={quizSubmitted} onClick={() => setUserAnswers({ ...userAnswers, [qIdx]: oIdx })} className={`w-full text-left p-2 rounded-xl border text-[11px] transition ${optClass}`}>
-                                    {oIdx + 1}. {opt}
-                                  </button>
-                                );
+                                return ( <button key={oIdx} type="button" disabled={quizSubmitted} onClick={() => setUserAnswers({ ...userAnswers, [qIdx]: oIdx })} className={`w-full text-left p-2 rounded-xl border text-[11px] transition ${optClass}`}>{oIdx + 1}. {opt}</button> );
                               })}
                             </div>
-                            {quizSubmitted && (
-                              <div className="bg-slate-900 p-2.5 rounded text-[10px] text-slate-400 border border-slate-800">
-                                <strong className="text-indigo-400">व्याख्या: </strong>{q.explanation}
-                              </div>
-                            )}
+                            {quizSubmitted && <div className="bg-slate-900 p-2.5 rounded text-[10px] text-slate-400 border border-slate-800"><strong className="text-indigo-400">व्याख्या: </strong>{q.explanation}</div>}
                           </div>
                         ))}
-                        {!quizSubmitted ? (
-                          <button onClick={handleSubmitQuiz} disabled={Object.keys(userAnswers).length < aiQuiz.length} className="w-full bg-emerald-600 disabled:opacity-40 font-bold py-3 rounded-xl text-white">टेस्ट सबमिट करें</button>
-                        ) : (
-                          <button onClick={() => setActiveTab('dashboard')} className="w-full bg-slate-800 font-bold py-3 rounded-xl text-slate-200">डैशबोर्ड पर जाएँ</button>
-                        )}
+                        {!quizSubmitted ? ( <button onClick={handleSubmitQuiz} disabled={Object.keys(userAnswers).length < aiQuiz.length} className="w-full bg-emerald-600 font-bold py-3 rounded-xl text-white">टेस्ट सबमिट करें</button> ) : ( <button onClick={() => setActiveTab('dashboard')} className="w-full bg-slate-800 font-bold py-3 rounded-xl text-slate-200">डैशबोर्ड पर जाएँ</button> )}
                       </div>
                     ) : null}
                   </div>
@@ -647,6 +541,9 @@
 
                 {activeTab === 'timer' && (
                   <div className="space-y-6 flex flex-col items-center justify-center min-h-[350px]">
+                    <div className="text-center">
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">⏱️ आज के सफल राउंड्स: {user.pomodoroRounds || 0}</span>
+                    </div>
                     <div className="relative w-40 h-40 rounded-full border-4 border-indigo-500/20 flex flex-col items-center justify-center bg-slate-900">
                       <span className="text-[10px] font-bold text-indigo-300 uppercase">{timer.mode}</span>
                       <span className="text-3xl font-black text-white my-1 font-mono">{String(timer.minutes).padStart(2, '0')}:{String(timer.seconds).padStart(2, '0')}</span>
@@ -664,14 +561,8 @@
                   <div className="space-y-3 text-xs">
                     {notifications.map((notif, idx) => (
                       <div key={idx} className={`p-3 border rounded-xl ${notif.type === 'urgent' ? 'bg-rose-950/20 border-rose-900/40 text-rose-300' : 'bg-indigo-950/25 border-indigo-900/40 text-indigo-300'}`}>
-                        <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
-                        <p className="text-[11px] text-slate-300 mb-2">{notif.text}</p>
-                        {notif.actionTopic && (
-                          <button onClick={() => handleGenerateQuiz(notif.actionTopic)} className="bg-indigo-600 text-white px-2.5 py-1 rounded text-[10px] font-bold flex items-center gap-1">
-                            <Icon name="brain" className="w-3 h-3" />
-                            <span>अभी टेस्ट लें</span>
-                          </button>
-                        )}
+                        <h4 className="font-bold text-white mb-0.5">{notif.title}</h4><p className="text-[11px] text-slate-300 mb-2">{notif.text}</p>
+                        {notif.actionTopic && ( <button onClick={() => handleGenerateQuiz(notif.actionTopic)} className="bg-indigo-600 text-white px-2.5 py-1 rounded text-[10px] font-bold flex items-center gap-1"><Icon name="brain" className="w-3 h-3" /><span>अभी टेस्ट लें</span></button> )}
                       </div>
                     ))}
                   </div>
@@ -682,23 +573,21 @@
                     <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
                       <div className="text-center py-1">
                         <div className="w-14 h-14 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto text-xl">👤</div>
-                        <h3 className="text-sm font-bold mt-2">{user.name}</h3>
-                        <p className="text-[10px] text-slate-400">{user.category}</p>
+                        <h3 className="text-sm font-bold mt-2">{user.name}</h3><p className="text-[10px] text-slate-400">{user.category}</p>
                       </div>
-
-                      <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 light:border-slate-300 space-y-3">
+                      <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 space-y-3">
                         <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">विद्यार्थी प्रोफाइल विन्यास</h4>
                         <div>
                           <label className="block text-slate-400 mb-1">आपका नाम:</label>
-                          <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2" />
+                          <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
                         </div>
                         <div>
                           <label className="block text-slate-400 mb-1">दैनिक उपलब्ध घंटे लक्ष्य:</label>
-                          <input type="number" min="1" max="24" value={profileForm.availableHours} onChange={(e) => setProfileForm({ ...profileForm, availableHours: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2" />
+                          <input type="number" min="1" max="24" value={profileForm.availableHours} onChange={(e) => setProfileForm({ ...profileForm, availableHours: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
                         </div>
                         <div>
                           <label className="block text-slate-400 mb-1">श्रेणी:</label>
-                          <select value={profileForm.category} onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2">
+                          <select value={profileForm.category} onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2">
                             <option value="प्रतियोगी परीक्षा (Competitive Exams)">प्रतियोगी परीक्षा (Competitive Exams)</option>
                             <option value="स्कूली शिक्षा (School Education)">स्कूली शिक्षा (School Education)</option>
                           </select>
@@ -707,22 +596,17 @@
                       <button type="submit" className="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white shadow-md">💾 प्रोफाइल डेटा सुरक्षित करें</button>
                     </form>
 
-                    <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 light:border-slate-300 space-y-3 text-xs">
+                    <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 space-y-3 text-xs">
                       <h4 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">डेटा बैकअप सुरक्षा केंद्र</h4>
-                      <p className="text-[10px] text-slate-400">ब्राउज़र बदलने या मोबाइल चेंज होने पर अपना डेटा सुरक्षित रखने का मुफ़्त मैकेनिज्म।</p>
                       <button onClick={generateTextBackup} type="button" className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-emerald-500/40 text-emerald-400 font-bold py-2 rounded-xl">📋 बैकअप कोड कॉपी करें</button>
-                      
                       <form onSubmit={handleRestoreData} className="pt-2 border-t border-slate-800 space-y-2">
-                        <label className="block text-[10px] text-slate-400">पुराना बैकअप कोड यहाँ पेस्ट करें:</label>
-                        <input type="text" placeholder="कोड यहाँ पेस्ट करें..." value={backupInputCode} onChange={(e) => setBackupInputCode(e.target.value)} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2 text-slate-200" />
+                        <input type="text" placeholder="कोड यहाँ पेस्ट करें..." value={backupInputCode} onChange={(e) => setBackupInputCode(e.target.value)} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
                         <button type="submit" className="w-full bg-emerald-700 font-bold py-2 rounded-xl text-white">🔄 डेटा रिस्टोर करें</button>
                       </form>
                     </div>
                   </div>
                 )}
-                
                 <AdSenseUnit slotId="FOOTER_SLOT_ID" />
-
               </main>
 
               <nav className="absolute bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-20">
@@ -739,8 +623,7 @@
       }
 
       const rootElement = document.getElementById('root');
-      const root = ReactDOM.createRoot(rootElement);
-      root.render(React.createElement(App));
+      const root = ReactDOM.createRoot(rootElement); root.render(React.createElement(App));
     </script>
 </body>
 </html>
