@@ -284,22 +284,31 @@
           showAlert('👤 प्रोफाइल डेटा सुरक्षित हो गया!'); setActiveTab('dashboard');
         };
 
+        // 🛠️ सुधार: Unicode/हिंदी के लिए सुरक्षित Base64 एनकोडिंग मैकेनिज्म
         const generateTextBackup = () => {
           const backupData = { user, studyLogs };
-          const base64Str = btoa(unescape(encodeURIComponent(JSON.stringify(backupData))));
-          navigator.clipboard.writeText(base64Str); showAlert("📋バックアップコードコピー हो गया है!");
+          const jsonString = JSON.stringify(backupData);
+          const base64Str = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+            return String.fromCharCode(parseInt(p1, 16));
+          }));
+          navigator.clipboard.writeText(base64Str); 
+          showAlert("📋 बैकअप कोड कॉपी हो गया है!");
         };
 
+        // 🛠️ सुधार: Unicode/हिंदी के लिए सुरक्षित Base64 डिकोडिंग मैकेनिज्म
         const handleRestoreData = (e) => {
           e.preventDefault();
           try {
             if (!backupInputCode.trim()) return;
-            const decodedData = JSON.parse(decodeURIComponent(escape(atob(backupInputCode.trim()))));
+            const decodedJson = decodeURIComponent(atob(backupInputCode.trim()).split('').map((c) => {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            const decodedData = JSON.parse(decodedJson);
             if (decodedData.user && decodedData.studyLogs) {
               setUser(decodedData.user); setStudyLogs(decodedData.studyLogs);
               showAlert("✅ डेटा सफलतापूर्वक रिस्टोर हो गया!"); setBackupInputCode(''); setActiveTab('dashboard');
             }
-          } catch (err) { showAlert("⚠️ कोड सही नहीं है।"); }
+          } catch (err) { showAlert("⚠️ कोड सही नहीं है या विकृत है।"); }
         };
 
         const handleGenerateQuiz = async (log) => {
@@ -346,6 +355,42 @@
           }));
           setUser(prev => ({ ...prev, points: prev.points + 15 })); showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP');
         };
+
+        const getHeatmapColor = (dayOffset) => {
+          const checkDate = new Date();
+          checkDate.setDate(checkDate.getDate() - dayOffset);
+          const dateStr = checkDate.toISOString().split('T')[0];
+          const totalHours = studyLogs.filter(log => log.date === dateStr).reduce((sum, current) => sum + current.timeSpent, 0);
+          if (totalHours === 0) return 'bg-slate-800 dark:bg-slate-800 light:bg-slate-200';
+          if (totalHours < 2) return 'bg-emerald-900';
+          if (totalHours < 4) return 'bg-emerald-700';
+          return 'bg-emerald-500';
+        };
+
+        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
+        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
+
+        useEffect(() => {
+          let interval = null;
+          if (timer.isActive) {
+            interval = setInterval(() => {
+              if (timer.seconds > 0) setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
+              else if (timer.seconds === 0 && timer.minutes > 0) setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
+              else {
+                clearInterval(interval); playTimerAlarm();
+                if (timer.mode === 'Focus') {
+                  setUser(prev => ({ ...prev, pomodoroRounds: (prev.pomodoroRounds || 0) + 1, points: prev.points + 30 }));
+                  showAlert(`🔔 फोकस सत्र समाप्त! आपको मिले +30 बोनस XP!`);
+                  setTimer({ minutes: 5, seconds: 0, isActive: false, mode: 'Break' });
+                } else {
+                  showAlert(`🔔 ब्रेक सत्र समाप्त! वापस पढ़ाई शुरू करें।`);
+                  setTimer({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
+                }
+              }
+            }, 1000);
+          } else clearInterval(interval);
+          return () => clearInterval(interval);
+        }, [timer.isActive, timer.seconds, timer.minutes, timer.mode]);
 
         return (
           <div className="w-full flex-1 flex flex-col justify-between pb-14 md:pb-0">
@@ -622,12 +667,11 @@
             </nav>
 
             <AdSenseUnit slotId="FOOTER_SLOT_ID" />
-            <footer className="w-full text-center py-2 text-[9px] text-slate-500 hidden md:block">सजय छात्र</footer>
+            <footer className="w-full text-center py-2 text-[9px] text-slate-500 hidden md:block">सजक छात्र</footer>
           </div>
         );
       }
 
-      // सुरक्षित रेंडर फ़ंक्शन जो ब्राउज़र पार्सर को कभी क्रैश नहीं होने देगा
       const rootElement = document.getElementById('root');
       if (rootElement) {
         const root = ReactDOM.createRoot(rootElement);
