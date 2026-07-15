@@ -140,6 +140,8 @@
         const [pdfFile, setPdfFile] = useState(null);
         const [backupInputCode, setBackupInputCode] = useState('');
         const [flippedCards, setFlippedCards] = useState({});
+        const [searchQuery, setSearchQuery] = useState(''); // 🔍 सर्च स्टेट
+        const [reminderTime, setReminderTime] = useState(''); // ⏰ रिमाइंडर अलार्म स्टेट
 
         const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
         const [treeState, setTreeState] = useState('🌱');
@@ -156,11 +158,34 @@
           setAlertMsg(msg); setTimeout(() => setAlertMsg(null), 4000);
         };
 
+        // ⏰ सुधार: स्मार्ट थीम शेड्यूलर (सुबह 6 से शाम 6 लाइट, अन्यथा डार्क)
+        useEffect(() => {
+          const currentHour = new Date().getHours();
+          const shouldBeDark = currentHour < 6 || currentHour >= 18;
+          setIsDarkMode(shouldBeDark);
+        }, []);
+
         useEffect(() => {
           const root = window.document.documentElement;
           if (isDarkMode) { root.classList.add('dark'); root.style.backgroundColor = "#020617"; localStorage.setItem('sajag_theme', 'dark'); } 
           else { root.classList.remove('dark'); root.style.backgroundColor = "#f8fafc"; localStorage.setItem('sajag_theme', 'light'); }
         }, [isDarkMode]);
+
+        // ⏰ सुधार: बैकग्राउंड रिमाइंडर अलार्म चेकर क्लॉक इंजन
+        useEffect(() => {
+          const interval = setInterval(() => {
+            if (reminderTime) {
+              const now = new Date();
+              const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+              if (timeStr === reminderTime) {
+                playTimerAlarm();
+                showAlert("🔔 अलार्म! आपके पढ़ाई का समय हो गया है, कृपया फोकस करें।");
+                setReminderTime(''); // ट्रिगर के बाद रीसेट
+              }
+            }
+          }, 30000); // हर 30 सेकंड में चेक करेगा
+          return () => clearInterval(interval);
+        }, [reminderTime]);
 
         useEffect(() => { localStorage.setItem('sajag_user', JSON.stringify(user)); }, [user]);
         useEffect(() => { localStorage.setItem('sajag_logs', JSON.stringify(studyLogs)); }, [studyLogs]);
@@ -284,6 +309,24 @@
           showAlert('👤 प्रोफाइल डेटा सुरक्षित हो गया!'); setActiveTab('dashboard');
         };
 
+        // 📊 सुधार: वीकली स्टडी रिपोर्ट को CSV फाइल के रूप में एक्सपोर्ट/डाउनलोड करने का इंजन
+        const exportToCSVReport = () => {
+          if (studyLogs.length === 0) { showAlert("⚠️ निर्यात करने के लिए कोई डेटा नहीं है!"); return; }
+          let csvContent = "data:text/csv;charset=utf-8,विषय,टॉपिक,तारीख,समय बिताया (घंटे),स्थिति\n";
+          studyLogs.forEach(log => {
+            const status = log.stages.every(s => s.completed) ? "मास्टर (Complete)" : "सक्रिय (In-Progress)";
+            csvContent += `"${log.subject}","${log.topic}","${log.date}",${log.timeSpent},"${status}"\n`;
+          });
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", `Sajag_Chhatra_Report_${new Date().toISOString().split('T')[0]}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          showAlert("📊 आपकी साप्ताहिक रिपोर्ट सफलतापूर्वक डाउनलोड हो गई है!");
+        };
+
         const generateTextBackup = () => {
           const backupData = { user, studyLogs };
           const jsonString = JSON.stringify(backupData);
@@ -314,7 +357,7 @@
           setTimeout(() => {
             const simulatedQuestions = [
               { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पने के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
-              { question: `इस विषय में मेमोरी"। रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और सक्रिय टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
+              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और सक्रिय टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
             ];
             setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
           }, 1200);
@@ -381,8 +424,15 @@
           return 'bg-emerald-500';
         };
 
-        const activeTopics = studyLogs.filter(log => log.stages.some(s => !s.completed));
-        const masteredTopics = studyLogs.filter(log => log.stages.every(s => s.completed));
+        // 🔍 सुधार: सर्च क्वेरी के हिसाब से फ़िल्टर्ड डेटा एरे इंजनों की रेंडरिंग संरचना
+        const filteredLogs = studyLogs.filter(log => 
+          log.topic.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          log.subject.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        const activeTopics = filteredLogs.filter(log => log.stages.some(s => !s.completed));
+        const masteredTopics = filteredLogs.filter(log => log.stages.every(s => s.completed));
+        
         const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
         const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
 
@@ -395,7 +445,7 @@
                 </div>
                 <div>
                   <h1 className="text-lg sm:text-2xl font-black text-indigo-400 dark:text-indigo-400 light:text-indigo-600 tracking-tight">सजक छात्र</h1>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">वैज्ञानिक 4-स्टेज मेमोरी ट्रैकर व टूल्स</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">वैज्ञानिक 4-स्टेश मेमोरी ट्रैकर व टूल्स</p>
                 </div>
               </div>
 
@@ -433,6 +483,17 @@
 
                 {activeTab === 'dashboard' && (
                   <div className="space-y-6">
+                    {/* 🔍 सर्च बार विजेट (New Filtering Control Layout) */}
+                    <div className="relative w-full">
+                      <input 
+                        type="text" 
+                        placeholder="🔍 यहाँ विषय या टॉपिक का नाम टाइप करके खोजें..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-slate-950 dark:bg-slate-950 light:bg-slate-100 border border-slate-800 light:border-slate-300 rounded-xl py-2 px-3 text-xs focus:border-indigo-500 outline-none shadow-inner"
+                      />
+                    </div>
+
                     <div className="bg-slate-950/40 dark:bg-slate-950/40 light:bg-slate-100 p-4 rounded-xl border border-slate-800 light:border-slate-200 space-y-2">
                       <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider block">📆 साप्ताहिक निरंतरता ग्रिड (Consistency Heatmap)</span>
                       <div className="flex gap-2 pt-1">
@@ -463,7 +524,7 @@
                       </h3>
                       
                       {activeTopics.length === 0 ? (
-                        <p className="text-xs text-slate-500 text-center py-6 italic border border-dashed border-slate-800 rounded-xl">कोई सक्रिय रिवीजन पेंडिंग नहीं है!</p>
+                        <p className="text-xs text-slate-500 text-center py-6 italic border border-dashed border-slate-800 rounded-xl">कोई सक्रिय डेटा मेल नहीं खाया या पेंडिंग नहीं है!</p>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {activeTopics.map(log => (
@@ -511,14 +572,13 @@
                       )}
                     </div>
 
-                    {/* 🏆 सेक्शन 2: महारत हासिल टॉपिक्स */}
                     <div className="space-y-3 pt-4 border-t border-slate-800/40">
                       <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                         <Icon name="award" className="text-amber-400" /><span>🏆 महारत हासिल टॉपिक्स (Mastered Archive)</span>
                       </h3>
                       
                       {masteredTopics.length === 0 ? (
-                        <p className="text-xs text-slate-500 italic">अभी तक कोई भी टॉपिक 100% कम्प्लीट नहीं हुआ है।</p>
+                        <p className="text-xs text-slate-500 italic">खोजे गए शब्दों के हिसाब से कोई मास्टर आर्काइव डेटा नहीं मिला।</p>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {masteredTopics.map(log => (
@@ -627,7 +687,22 @@
                 )}
 
                 {activeTab === 'notifications' && (
-                  <div className="max-w-xl mx-auto space-y-3 text-xs">
+                  <div className="max-w-xl mx-auto space-y-4 text-xs">
+                    {/* ⏰ रिमाइंडर अलार्म विन्यास (New Alarm Scheduler View) */}
+                    <div className="bg-slate-950/40 border border-slate-800 p-4 rounded-xl space-y-2">
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1"><Icon name="clock" /> ककस्टमाइज़्ड डेली स्टडी रिमाइंडर अलार्म</span>
+                      <div className="flex gap-2 pt-1">
+                        <input 
+                          type="time" 
+                          value={reminderTime} 
+                          onChange={(e) => setReminderTime(e.target.value)}
+                          className="bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-200 outline-none"
+                        />
+                        <button type="button" onClick={() => { if(reminderTime) showAlert(`⏰ रिमाइंडर सफलतापूर्वक ${reminderTime} बजे के लिए सेट हो गया!`); }} className="bg-indigo-600 px-4 rounded-xl text-white font-bold text-[11px]">रिमाइंडर लॉक करें</button>
+                      </div>
+                      {reminderTime && <p className="text-[9px] text-emerald-400 font-medium">सक्रिय अलार्म समय: आज {reminderTime} बजे</p>}
+                    </div>
+
                     <h3 className="text-sm font-bold border-b border-slate-800 pb-2">🧠 एआई विश्लेषक सुझाव केंद्र</h3>
                     {notifications.map((notif, idx) => (
                       <div key={idx} className={`p-4 border rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-3 ${notif.type === 'urgent' ? 'bg-rose-950/20 border-rose-900/40 text-rose-300' : 'bg-indigo-950/25 border-indigo-900/40 text-indigo-300'}`}>
@@ -643,6 +718,15 @@
 
                 {activeTab === 'profile' && (
                   <div className="max-w-xl mx-auto grid grid-cols-1 gap-6">
+                    {/* 📊 वीकली प्रोग्रेस डाउनलोडर ट्रिगर बटन */}
+                    <div className="bg-slate-950/40 border border-slate-800 p-4 rounded-xl space-y-2 text-xs">
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">📊 अध्ययन रिपोर्ट डेटा सेंटर</span>
+                      <p className="text-[10px] text-slate-400">अपने पूरे अध्ययन चक्र का सारांश एक्सेल / सीएसवी शीट के रूप में ऑफ़लाइन सुरक्षित करें।</p>
+                      <button type="button" onClick={exportToCSVReport} className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-2 rounded-xl text-center shadow-md">
+                        📥 स्टडी रिपोर्ट (.CSV) डाउनलोड करें
+                      </button>
+                    </div>
+
                     <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs dark:text-slate-200 light:text-slate-800">
                       <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 space-y-3">
                         <div className="flex justify-between items-center">
@@ -691,7 +775,6 @@
         );
       }
 
-      // 🛠️ फ़िक्स: शुद्ध जावास्क्रिप्ट रेंडर मैकेनिज्म जो ब्राउज़र और Babel कंपाइलर दोनों में 100% कंपैटिबल है
       const rootElement = document.getElementById('root');
       if (rootElement) {
         const root = ReactDOM.createRoot(rootElement);
