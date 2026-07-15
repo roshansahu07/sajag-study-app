@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>सजग छात्र Ultimate v2.5</title>
+    <title>सजग छात्र</title>
     
     <!-- Tailwind CSS v4 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -140,7 +140,7 @@
           return savedTheme ? savedTheme === 'dark' : true;
         });
 
-        // लोकल स्टोरेज से यूजर डेटा
+        // लोकल स्टोरेज से यूजर डेटा लोड करना
         const [user, setUser] = useState(() => {
           const localUser = localStorage.getItem('sajag_user');
           return localUser ? JSON.parse(localUser) : {
@@ -457,15 +457,13 @@
 
         return (
           <div className="min-h-screen bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100 light:bg-slate-50 light:text-slate-900 flex flex-col justify-between items-center p-2 sm:p-4 w-full transition-colors duration-300">
-            {/* 🛠️ सुधरा हुआ प्रीमियम ब्रांडेड हेडर ब्लॉक */}
+            
+            {/* 🛠️ बिल्कुल साफ़ सुधरा हुआ हेडर (स्पेलिंग 'सजग छात्र' फिक्स और बिना किसी बैज के) */}
             <header className="w-full max-w-md flex justify-between items-center py-3 px-3 border-b border-slate-800/40 light:border-slate-200 bg-slate-950/20 transition-colors">
               <div className="text-left flex flex-col justify-center">
                 <h1 className="text-xl sm:text-2xl font-black text-indigo-400 dark:text-indigo-400 light:text-indigo-600 flex items-center gap-2 tracking-tight">
                   <Icon name="brain" className="w-6 h-6 text-indigo-500 animate-pulse" />
-                  <span>सजगा छात्र</span>
-                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-[9px] text-white px-2 py-0.5 rounded-full font-bold shadow-sm tracking-normal">
-                    ULTIMATE v2.5
-                  </span>
+                  <span>सजग छात्र</span>
                 </h1>
                 <p className="text-[10px] text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium mt-0.5 tracking-wide">
                   वैज्ञानिक 4-स्टेज मेमोरी ट्रैकर व टूल्स
@@ -735,7 +733,7 @@
                 <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="user" /><span className="text-[8px] mt-0.5">प्रोफाइल</span></button>
               </nav>
             </div>
-            <footer className="w-full max-w-md text-center py-2 text-[9px] text-slate-500">सजग छात्र v2.5 Ultimate</footer>
+            <footer className="w-full max-w-md text-center py-2 text-[9px] text-slate-500">सजग छात्र</footer>
           </div>
         );
       }
