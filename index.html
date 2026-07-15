@@ -13,6 +13,13 @@
       @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
       .animate-spin-slow { animation: spin 8s linear infinite; }
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      
+      /* फ़्लैशकार्ड फ्लिप एनीमेशन */
+      .perspective-1000 { perspective: 1000px; }
+      .transform-style-3d { transform-style: preserve-3d; }
+      .backface-hidden { backface-visibility: hidden; }
+      .rotate-y-180 { transform: rotateY(180deg); }
+
       ::-webkit-scrollbar { width: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #1e1b4b; border-radius: 999px; }
@@ -124,6 +131,7 @@
               id: 1, subject: 'भौतिक विज्ञान (Physics)', topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
               date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
               difficulty: 'कठिन (Hard)', timeSpent: 2, hasPdf: false, currentStage: 1,
+              customQuiz: { question: "गति का प्रथम नियम क्या कहलाता है?", answer: "जड़त्व का नियम (Law of Inertia)" },
               stages: [
                 { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
                 { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
@@ -135,11 +143,13 @@
         });
 
         const [profileForm, setProfileForm] = useState({ name: user.name, availableHours: user.availableHours, category: user.category });
-        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
+        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2, quizQ: '', quizA: '' });
         const [pdfFile, setPdfFile] = useState(null);
         const [backupInputCode, setBackupInputCode] = useState('');
+        const [flippedCards, setFlippedCards] = useState({});
 
         const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
+        const [treeState, setTreeState] = useState('🌱'); // Forest tree state
         const [activeTab, setActiveTab] = useState('dashboard');
         const [alertMsg, setAlertMsg] = useState(null);
         const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
@@ -175,6 +185,22 @@
           generatedAlerts.push({ id: 'focus-tip-1', title: 'एकाग्रता सुधार गाइड ⚡', text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर का उपयोग करें!', type: 'tip' });
           setNotifications(generatedAlerts);
         }, [studyLogs]);
+
+        // विज़ुअल स्टडी ट्री ग्रोथ इंजन
+        useEffect(() => {
+          if (!timer.isActive) {
+            if (timer.minutes === 25 && timer.seconds === 0) setTreeState('🌱');
+            else if (timer.mode === 'Focus') setTreeState('🍂'); // Stopped middle
+            return;
+          }
+          if (timer.mode === 'Focus') {
+            if (timer.minutes < 5) setTreeState('🌳');
+            else if (timer.minutes < 15) setTreeState('🌿');
+            else setTreeState('🌱');
+          } else {
+            setTreeState('🎉');
+          }
+        }, [timer.minutes, timer.isActive, timer.mode]);
 
         const handleViewPdf = async (logId) => {
           try {
@@ -230,6 +256,11 @@
             reader.onload = async () => { await savePDFToDB(logId, reader.result, pdfFile.name); };
           }
 
+          let cQuiz = null;
+          if (newLog.quizQ.trim() && newLog.quizA.trim()) {
+            cQuiz = { question: newLog.quizQ, answer: newLog.quizA };
+          }
+
           const todayStr = new Date().toISOString().split('T')[0];
           let d1 = new Date(); d1.setDate(d1.getDate() + 1);
           let d2 = new Date(); d2.setDate(d2.getDate() + 3);
@@ -238,7 +269,7 @@
 
           const newEntry = {
             id: logId, subject: finalSubject, topic: newLog.topic, date: todayStr, difficulty: newLog.difficulty,
-            timeSpent: parseFloat(newLog.timeSpent) || 1, hasPdf: hasPdf, currentStage: 1,
+            timeSpent: parseFloat(newLog.timeSpent) || 1, hasPdf: hasPdf, currentStage: 1, customQuiz: cQuiz,
             stages: [
               { name: 'R1 (24h)', due: d1.toISOString().split('T')[0], completed: false },
               { name: 'R2 (3d)', due: d2.toISOString().split('T')[0], completed: false },
@@ -250,7 +281,7 @@
           setStudyLogs([newEntry, ...studyLogs]);
           setUser(prev => ({ ...prev, points: prev.points + 50 }));
           showAlert('🚀 पढ़ाई का ब्यौरा सुरक्षित हो गया! +50 XP!');
-          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
+          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2, quizQ: '', quizA: '' });
           setPdfFile(null); setActiveTab('dashboard');
         };
 
@@ -324,8 +355,17 @@
           setUser(prev => ({ ...prev, points: prev.points + 15 })); showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP');
         };
 
-        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
-        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
+        // वीकली स्टडी हीटमैप डेटा जनरेटर (Consistency Tracker)
+        const getHeatmapColor = (dayOffset) => {
+          const checkDate = new Date();
+          checkDate.setDate(checkDate.getDate() - dayOffset);
+          const dateStr = checkDate.toISOString().split('T')[0];
+          const totalHours = studyLogs.filter(log => log.date === dateStr).reduce((sum, current) => sum + current.timeSpent, 0);
+          if (totalHours === 0) return 'bg-slate-800 dark:bg-slate-800 light:bg-slate-200';
+          if (totalHours < 2) return 'bg-emerald-900';
+          if (totalHours < 4) return 'bg-emerald-700';
+          return 'bg-emerald-500';
+        };
 
         useEffect(() => {
           let interval = null;
@@ -351,7 +391,7 @@
 
         return (
           <div className="w-full flex-1 flex flex-col justify-between pb-14 md:pb-0">
-            {/* nav bar */}
+            {/* Nav Bar */}
             <nav className="w-full bg-slate-900 border-b border-slate-800 dark:bg-slate-900 light:bg-white light:border-slate-200 px-4 sm:px-8 py-3 flex justify-between items-center transition-colors">
               <div className="flex items-center gap-3">
                 <div className="bg-indigo-600/10 p-2 rounded-xl border border-indigo-500/20">
@@ -371,7 +411,6 @@
                   <span className="text-slate-600">|</span>
                   <span className="font-bold text-amber-400">⭐ {user.points} XP</span>
                 </div>
-
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-indigo-400 light:bg-slate-100 light:border-slate-200 shadow-sm transition active:scale-95">
                   <Icon name={isDarkMode ? "sun" : "moon"} className="w-4 h-4" />
                 </button>
@@ -383,7 +422,7 @@
             {/* Grid Container */}
             <main className="flex-1 w-full max-w-6xl mx-auto p-3 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
               
-              {/* 🖥️ डेस्कटॉप साइडबार (यह मोबाइल `md:block hidden` पर ही दिखेगा) */}
+              {/* 🖥️ डेस्कटॉप साइडबार बार */}
               <div className="hidden md:block md:col-span-1 bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl p-4 space-y-2 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block px-2 mb-2">मुख्य मेनू</span>
                 <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><Icon name="book-open" /><span>मेमोरी ट्रैक</span></button>
@@ -402,7 +441,6 @@
                   </div>
                 )}
 
-                {/* मोबाइल स्क्रीन पर दिखने वाला छोटा मिनी-स्कोर विजेट */}
                 <div className="md:hidden flex justify-between items-center bg-slate-950/40 light:bg-slate-100 p-2.5 rounded-xl mb-4 border border-slate-800/60 light:border-slate-200 text-[10px] text-slate-400">
                   <span className="font-bold text-indigo-400">🔥 {user.streak} दिन स्ट्रीक</span>
                   <span className="font-bold text-amber-400">⭐ {user.points} XP</span>
@@ -410,6 +448,18 @@
 
                 {activeTab === 'dashboard' && (
                   <div className="space-y-6">
+                    {/* 📊 वीकली कंसिस्टेंसी हीटमैप (New Analytics Feature) */}
+                    <div className="bg-slate-950/40 dark:bg-slate-950/40 light:bg-slate-100 p-4 rounded-xl border border-slate-800 light:border-slate-200 space-y-2">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider block">📆 साप्ताहिक निरंतरता ग्रिड (Consistency Heatmap)</span>
+                      <div className="flex gap-2 pt-1">
+                        {[6, 5, 4, 3, 2, 1, 0].map(day => (
+                          <div key={day} className={`w-7 h-7 rounded-md transition-colors ${getHeatmapColor(day)} flex items-center justify-center text-[8px] font-bold text-white/40`} title="स्टडी गतिविधि ग्रिड">
+                            {new Date(Date.now() - day * 24 * 60 * 60 * 1000).getDate()}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="bg-gradient-to-br from-slate-950 to-indigo-950 dark:from-slate-950 dark:to-indigo-950 light:from-indigo-50/60 light:to-slate-100 p-4 rounded-xl border border-indigo-900/30 light:border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <div className="space-y-1">
                         <h2 className="text-xs text-indigo-300 light:text-indigo-600 font-bold uppercase tracking-wider">दैनिक अध्ययन समय बजट प्रोग्रेस</h2>
@@ -449,6 +499,21 @@
                                 </div>
                                 <h4 className="text-xs font-bold dark:text-white light:text-slate-900 mt-2">{log.topic}</h4>
                                 <p className="text-[9px] text-slate-500 mt-0.5">शुरू किया गया: {log.date}</p>
+
+                                {/* 🧠 क्विक क्विज़ फ़्लैशकार्ड इंटरफ़ेस (Anki Card System Style) */}
+                                {log.customQuiz && (
+                                  <div className="mt-3 perspective-1000 w-full h-12">
+                                    <div onClick={() => setFlippedCards(p => ({...p, [log.id]: !p[log.id]}))} className={`w-full h-full relative transition-transform duration-500 transform-style-3d cursor-pointer ${flippedCards[log.id] ? 'rotate-y-180' : ''}`}>
+                                      <div className="absolute inset-0 bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-indigo-500/20 rounded-lg p-2 flex items-center justify-between backface-hidden">
+                                        <span className="text-[9px] truncate">❓ प्रश्न: {log.customQuiz.question}</span>
+                                        <span className="text-[7px] text-indigo-400 font-bold shrink-0">पलटें 🔄</span>
+                                      </div>
+                                      <div className="absolute inset-0 bg-indigo-950/50 dark:bg-indigo-950/50 light:bg-indigo-50 border border-emerald-500/30 rounded-lg p-2 flex items-center rotate-y-180 backface-hidden">
+                                        <span className="text-[9px] text-emerald-400 font-bold truncate">💡 उत्तर: {log.customQuiz.answer}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
 
                               <div className="grid grid-cols-4 gap-1 pt-2 border-t border-slate-900/60 light:border-slate-200">
@@ -478,19 +543,27 @@
                         </select>
                       </div>
                       {newLog.subject === 'अन्य (Custom)' && (
-                        <input type="text" placeholder="कस्टम विषय का नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+                        <input type="text" placeholder="कस्टम विषय का नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
                       )}
                       <div>
                         <label className="block font-semibold mb-1">पढ़ा गया टॉपिक:</label>
-                        <input type="text" placeholder="टॉपिक का नाम दर्ज करें..." value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+                        <input type="text" placeholder="टॉपिक का नाम दर्ज करें..." value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
                       </div>
                       <div>
                         <label className="block font-semibold mb-1">लगाया गया समय (घंटे):</label>
-                        <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+                        <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
                       </div>
+
+                      {/* 🧠 मैन्युअल क्विक क्विज़ मेकर फ़ील्ड्स (New Quizlet Feature) */}
+                      <div className="bg-slate-950/40 p-3 rounded-xl border border-indigo-500/20 space-y-2">
+                        <label className="block font-bold text-indigo-400 text-[10px] uppercase tracking-wide">💡 क्विक सेल्फ़-क्विज़ कार्ड जोड़ें (वैकल्पिक)</label>
+                        <input type="text" placeholder="प्रश्न यहाँ टाइप करें..." value={newLog.quizQ} onChange={(e) => setNewLog({ ...newLog, quizQ: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
+                        <input type="text" placeholder="उत्तर यहाँ टाइप करें..." value={newLog.quizA} onChange={(e) => setNewLog({ ...newLog, quizA: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
+                      </div>
+
                       <div>
-                        <label className="block font-semibold mb-1">स्टडी नोट्स लिंक (PDF, Max 5MB):</label>
-                        <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 file:py-1 file:px-3 file:rounded file:bg-indigo-950 file:text-indigo-300" />
+                        <label className="block font-semibold mb-1">स्टडी नोट्स लिंक (PDF केवल, Max 5MB):</label>
+                        <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2 file:py-1 file:px-3 file:rounded file:bg-indigo-950 file:text-indigo-300" />
                       </div>
                       <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl text-white text-xs shadow-lg hover:bg-indigo-700 transition">🚀 सिस्टम में सुरक्षित करें</button>
                     </form>
@@ -529,8 +602,11 @@
 
                 {activeTab === 'timer' && (
                   <div className="space-y-6 flex flex-col items-center justify-center min-h-[350px]">
-                    <div className="bg-slate-950/40 border border-slate-800 px-4 py-2 rounded-xl text-center text-xs">
-                      <span className="font-bold text-indigo-400 uppercase tracking-wider">⏱️ आज के सफल पोमोडोरो राउंड्स: {user.pomodoroRounds || 0}</span>
+                    <div className="bg-slate-950/40 border border-slate-800 px-4 py-2 rounded-xl text-center text-xs flex items-center gap-4">
+                      <span className="font-bold text-indigo-400 uppercase tracking-wider">⏱️ सफल सेशन्स: {user.pomodoroRounds || 0}</span>
+                      
+                      {/* 🌳 फ़ॉरेस्ट ट्री विज़ुअल स्टेट (New Forest App Feature) */}
+                      <span className="text-lg bg-slate-900 p-1 rounded border border-slate-800 animate-bounce">{treeState}</span>
                     </div>
                     <div className="relative w-44 h-44 rounded-full border-4 border-indigo-500/20 flex flex-col items-center justify-center bg-slate-950 shadow-md">
                       <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">{timer.mode}</span>
@@ -554,7 +630,7 @@
                           <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
                           <p className="text-[11px] text-slate-300">{notif.text}</p>
                         </div>
-                        {notif.actionTopic && ( <button onClick={() => handleGenerateQuiz(notif.actionTopic)} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 flex-shrink-0"><Icon name="brain" className="w-3 h-3" /><span>अभी टेस्ट लें</span></button> )}
+                        {notif.actionTopic && ( <button onClick={() => handleGenerateQuiz(notif.actionTopic)} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 flex-shrink-0"><Icon name="brain" className="w-3 h-3" /><span>अभी变स लें</span></button> )}
                       </div>
                     ))}
                   </div>
@@ -564,7 +640,15 @@
                   <div className="max-w-xl mx-auto grid grid-cols-1 gap-6">
                     <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs dark:text-slate-200 light:text-slate-800">
                       <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 space-y-3">
-                        <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">विद्यार्थी प्रोफाइल विन्यास</h4>
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">विद्यार्थी प्रोफाइल विन्यास</h4>
+                          
+                          {/* 🎖️ अनलॉक किए गए अचीवमेंट बैज (New Gamification Feature) */}
+                          <div className="flex gap-1.5">
+                            {user.points >= 500 && <span className="text-xs p-1 bg-slate-900 rounded border border-amber-500/40" title="मेमोरी मास्टर बैज">🎖️</span>}
+                            {user.pomodoroRounds >= 1 && <span className="text-xs p-1 bg-slate-900 rounded border border-indigo-500/40" title="फोकस निंजा बैज">🥷</span>}
+                          </div>
+                        </div>
                         <div>
                           <label className="block text-slate-400 mb-1">आपका नाम:</label>
                           <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
@@ -572,13 +656,6 @@
                         <div>
                           <label className="block text-slate-400 mb-1">दैनिक उपलब्ध घंटे लक्ष्य:</label>
                           <input type="number" min="1" max="24" value={profileForm.availableHours} onChange={(e) => setProfileForm({ ...profileForm, availableHours: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
-                        </div>
-                        <div>
-                          <label className="block text-slate-400 mb-1">श्रेणी:</label>
-                          <select value={profileForm.category} onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2">
-                            <option value="प्रतियोगी परीक्षा (Competitive Exams)">प्रतियोगी परीक्षा (Competitive Exams)</option>
-                            <option value="स्कूली शिक्षा (School Education)">स्कूली शिक्षा (School Education)</option>
-                          </select>
                         </div>
                       </div>
                       <button type="submit" className="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white shadow-md hover:bg-indigo-700 transition">💾 प्रोफाइल डेटा सुरक्षित करें</button>
@@ -597,7 +674,7 @@
               </div>
             </main>
 
-            {/* 📱 मोबाइल बॉटम टैब बार (यह केवल मोबाइल स्क्रीन `md:hidden` पर ही दिखेगा) */}
+            {/* 📱 मोबाइल बॉटम बार */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-30">
               <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="book-open" /><span className="text-[8px] mt-0.5">ट्रैकर</span></button>
               <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="plus-circle" /><span className="text-[8px] mt-0.5">दर्ज करें</span></button>
