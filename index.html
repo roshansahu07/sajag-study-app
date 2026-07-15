@@ -13,14 +13,12 @@
       @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
       .animate-spin-slow { animation: spin 8s linear infinite; }
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      
-      /* स्क्रोलबार स्टाइलिंग */
       ::-webkit-scrollbar { width: 4px; }
-      ::-webkit-scrollbar-track { background: #020617; }
+      ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #1e1b4b; border-radius: 999px; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100">
+<body class="bg-slate-950 text-slate-100 transition-colors duration-300">
     <div id="root"></div>
 
     <!-- React, ReactDOM, Babel और Lucide Icons के आवश्यक CDN पैकेजेस -->
@@ -44,8 +42,105 @@
         return <i data-lucide={name} className={className}></i>;
       }
 
+      // 💰 AdSense डिस्प्ले कंपोनेंट
+      function AdSenseUnit({ slotId }) {
+        useEffect(() => {
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (e) {
+            console.error("AdSense Blocked or Empty", e);
+          }
+        }, [slotId]);
+
+        return (
+          <div className="my-2 mx-auto bg-slate-900/40 dark:bg-slate-950/40 p-1 rounded-xl border border-slate-800/40 flex items-center justify-center overflow-hidden min-h-[60px] w-full text-[9px] text-slate-600">
+             <ins className="adsbygoogle"
+                  style={{ display: 'block' }}
+                  data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                  data-ad-slot={slotId}
+                  data-ad-format="horizontal"
+                  data-full-width-responsive="true"></ins>
+          </div>
+        );
+      }
+
+      // --- 💾 FREE LOCAL INDEXEDDB UTILITY ENGINE ---
+      const initDB = () => {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open("SajagStudentDB", 1);
+          request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("pdfs")) {
+              db.createObjectStore("pdfs", { keyPath: "id" });
+            }
+          };
+          request.onsuccess = (e) => resolve(e.target.result);
+          request.onerror = (e) => reject("DB Open Error");
+        });
+      };
+
+      const savePDFToDB = async (id, base64Data, fileName) => {
+        const db = await initDB();
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction("pdfs", "readwrite");
+          const store = transaction.objectStore("pdfs");
+          const request = store.put({ id, data: base64Data, name: fileName });
+          request.onsuccess = () => resolve(true);
+          request.onerror = () => reject(false);
+        });
+      };
+
+      const getPDFFromDB = async (id) => {
+        const db = await initDB();
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction("pdfs", "readonly");
+          const store = transaction.objectStore("pdfs");
+          const request = store.get(id);
+          request.onsuccess = (e) => resolve(e.target.result);
+          request.onerror = () => reject(null);
+        });
+      };
+
+      const deletePDFFromDB = async (id) => {
+        const db = await initDB();
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction("pdfs", "readwrite");
+          const store = transaction.objectStore("pdfs");
+          const request = store.delete(id);
+          request.onsuccess = () => resolve(true);
+          request.onerror = () => reject(false);
+        });
+      };
+
+      // 🔔 मुफ़्त अलार्म बीप साउंड जनरेटर फंक्शन (HTML5 Web Audio API)
+      const playTimerAlarm = () => {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note (क्लियर अलर्ट साउंड)
+          gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+          
+          oscillator.start();
+          oscillator.stop(audioCtx.currentTime + 0.8); // 0.8 सेकंड तक बजेगा
+        } catch (e) {
+          console.error("Audio error", e);
+        }
+      };
+
       function App() {
-        // --- 1. लोकल स्टोरेज से डेटा इनिशियलाइजेशन (डेटा परसिस्टेंस सुधार) ---
+        // --- थीम मैनेजर स्टेट (डार्क / लाइट) ---
+        const [isDarkMode, setIsDarkMode] = useState(() => {
+          const savedTheme = localStorage.getItem('sajag_theme');
+          return savedTheme ? savedTheme === 'dark' : true;
+        });
+
+        // लोकल स्टोरेज से यूजर डेटा लोड करना
         const [user, setUser] = useState(() => {
           const localUser = localStorage.getItem('sajag_user');
           return localUser ? JSON.parse(localUser) : {
@@ -67,6 +162,7 @@
               date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
               difficulty: 'कठिन (Hard)',
               timeSpent: 2,
+              hasPdf: false,
               currentStage: 1, 
               stages: [
                 { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
@@ -78,21 +174,12 @@
           ];
         });
 
-        // प्रोफाइल एडिट करने के लिए फॉर्म स्टेट
-        const [profileForm, setProfileForm] = useState({
-          name: user.name,
-          availableHours: user.availableHours,
-          category: user.category
-        });
+        const [profileForm, setProfileForm] = useState({ name: user.name, availableHours: user.availableHours, category: user.category });
+        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
+        const [pdfFile, setPdfFile] = useState(null);
+        const [backupInputCode, setBackupInputCode] = useState(''); // रिस्टोर के लिए इनपुट स्ट्रिंग
 
-        const [newLog, setNewLog] = useState({
-          subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2
-        });
-
-        const [timer, setTimer] = useState({
-          minutes: 25, seconds: 0, isActive: false, mode: 'Focus' 
-        });
-
+        const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
         const [activeTab, setActiveTab] = useState('dashboard');
         const [alertMsg, setAlertMsg] = useState(null);
         const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
@@ -107,170 +194,100 @@
           setTimeout(() => setAlertMsg(null), 4000);
         };
 
-        // --- 2. ऑटो-सेव इंजन (जब भी स्टेट बदलेगी, डेटा सेव होगा) ---
+        // थीम अपडेटर इफ़ेक्ट
         useEffect(() => {
-          localStorage.setItem('sajag_user', JSON.stringify(user));
-        }, [user]);
+          const root = window.document.documentElement;
+          if (isDarkMode) {
+            root.classList.add('dark');
+            root.style.backgroundColor = "#020617";
+            localStorage.setItem('sajag_theme', 'dark');
+          } else {
+            root.classList.remove('dark');
+            root.style.backgroundColor = "#f8fafc";
+            localStorage.setItem('sajag_theme', 'light');
+          }
+        }, [isDarkMode]);
 
-        useEffect(() => {
-          localStorage.setItem('sajag_logs', JSON.stringify(studyLogs));
-        }, [studyLogs]);
+        // ऑटो-सेव प्रणालियाँ
+        useEffect(() => { localStorage.setItem('sajag_user', JSON.stringify(user)); }, [user]);
+        useEffect(() => { localStorage.setItem('sajag_logs', JSON.stringify(studyLogs)); }, [studyLogs]);
+        useEffect(() => { setProfileForm({ name: user.name, availableHours: user.availableHours, category: user.category }); }, [user]);
 
-        // बाहरी बदलाव होने पर प्रोफाइल फॉर्म सिंक रखना
-        useEffect(() => {
-          setProfileForm({
-            name: user.name,
-            availableHours: user.availableHours,
-            category: user.category
-          });
-        }, [user.name, user.availableHours, user.category]);
-
-        // --- 3. स्मार्ट सुझाव विश्लेषक ---
+        // स्मार्ट सुझाव विश्लेषक
         useEffect(() => {
           const todayStr = new Date().toISOString().split('T')[0];
           const generatedAlerts = [];
-
           studyLogs.forEach(log => {
             const activeStage = log.stages.find(s => !s.completed);
             if (activeStage && activeStage.due === todayStr) {
               generatedAlerts.push({
                 id: `alert-${log.id}`,
                 title: `स्मार्ट रिवीजन अलर्ट: ${log.subject} 💡`,
-                text: `आपने पहले "${log.topic}" पढ़ा था। आज वैज्ञानिक अंतराल के अनुसार "${activeStage.name}" का समय है। स्मरण शक्ति बनाए रखने के लिए अभ्यास टेस्ट लें!`,
+                text: `आपने पहले "${log.topic}" पढ़ा था। आज रिवीजन का समय है। स्मरण शक्ति बनाए रखने के लिए अभ्यास टेस्ट लें!`,
                 type: 'urgent',
                 actionTopic: log
               });
             }
           });
-
-          if (studyLogs.length > 0) {
-            const subjectsCount = studyLogs.reduce((acc, curr) => {
-              acc[curr.subject] = (acc[curr.subject] || 0) + 1;
-              return acc;
-            }, {});
-            if (Object.keys(subjectsCount).length < 2 && studyLogs.length >= 3) {
-              generatedAlerts.push({
-                id: 'balance-tip',
-                title: 'विषय संतुलन चेतावनी ⚖️',
-                text: 'आप केवल एक ही विषय पर अधिक ध्यान दे रहे हैं। अन्य विषयों का संतुलन बनाए रखने के लिए आज नया विषय शुरू करें।',
-                type: 'tip'
-              });
-            }
-          }
-
-          generatedAlerts.push({
-            id: 'focus-tip-1',
-            title: 'एकाग्रता सुधार गाइड ⚡',
-            text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर टैब में जाकर 25 मिनट का एक सेशन अभी चालू करें!',
-            type: 'tip'
-          });
-
+          generatedAlerts.push({ id: 'focus-tip-1', title: 'एकाग्रता सुधार गाइड ⚡', text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर में 25 मिनट का सेशन शुरू करें!', type: 'tip' });
           setNotifications(generatedAlerts);
         }, [studyLogs]);
 
-        // --- 4. एआई मॉक टेस्ट जेनरेटर ---
-        const handleGenerateQuiz = async (log) => {
-          setSelectedTopicForTest(log);
-          setAiQuiz(null);
-          setUserAnswers({});
-          setQuizSubmitted(false);
-          setLoadingQuiz(true);
-          setActiveTab('test-arena');
-
-          setTimeout(() => {
-            const simulatedQuestions = [
-              {
-                question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पना के संदर्भ में सबसे महत्वपूर्ण पहलू को दर्शाता है?`,
-                options: ["सैद्धांतिक अनुप्रयोग और नियम", "दैनिक जीवन के व्यावहारिक अनुभव", "गणितीय समीकरणों का विश्लेषण", "उपरोक्त सभी आयाम"],
-                correctIndex: 3,
-                explanation: "यह अवधारणा सैद्धांतिक, व्यावहारिक और गणितीय तीनों पहलुओं को संतुलित तरीके से समझाने में सक्षम है।"
-              },
-              {
-                question: `यदि हम "${log.subject}" में इस टॉपिक की गहराई को समझें, तो इसके मुख्य प्रभाव का क्या कारण है?`,
-                options: ["ऊर्जा का ह्रास होना", "प्रतिक्रिया बल में वृद्धि होना", "प्रकृति के बुनियादी नियमों का पालन", "अस्थिर संतुलन"],
-                correctIndex: 2,
-                explanation: "प्रकृति के बुनियादी नियमों के संतुलन के कारण ही इस प्रक्रिया को पूर्ण रूप से समझा जा सकता है।"
-              },
-              {
-                question: `इस विषय में याद रखने की क्षमता (Memory Retention) बढ़ाने का सबसे बेहतर वैज्ञानिक तरीका क्या है?`,
-                options: ["सिर्फ एक बार ध्यान से पढ़ना", "नियमित स्पैस्ड रिपीटीशन और सक्रिय टेस्ट देना", "लगातार 5 घंटे तक नोट्स बनाना", "परीक्षा के ठीक एक दिन पहले रटना"],
-                correctIndex: 1,
-                explanation: "वैज्ञानिक शोधों के अनुसार, सक्रिय रिकॉल (Active Recall) और स्पैस्ड रिपीटीशन ही लंबे समय तक याद रखने का सर्वोत्तम साधन हैं।"
-              }
-            ];
-            setAiQuiz(simulatedQuestions);
-            setLoadingQuiz(false);
-          }, 1500);
-        };
-
-        const handleSubmitQuiz = () => {
-          setQuizSubmitted(true);
-          let correctCount = 0;
-          aiQuiz.forEach((q, idx) => {
-            if (userAnswers[idx] === q.correctIndex) correctCount++;
-          });
-
-          const pointsWon = correctCount * 20;
-          setUser(prev => ({ 
-            ...prev, 
-            points: prev.points + pointsWon,
-            streak: prev.streak + 1 
-          }));
-
-          showAlert(`🎉 टेस्ट समाप्त! स्कोर: ${correctCount}/3. आपको मिले +${pointsWon} XP!`);
-          
-          if (correctCount >= 2 && selectedTopicForTest) {
-            promoteRevisionStage(selectedTopicForTest.id);
+        const handleViewPdf = async (logId) => {
+          const pdfRecord = await getPDFFromDB(logId);
+          if (pdfRecord && pdfRecord.data) {
+            const newWindow = window.open();
+            newWindow.document.write(`<iframe src="${pdfRecord.data}" style="width:100%; height:100%; border:none;"></iframe>`);
+          } else {
+            showAlert("⚠️ इस टॉपिक के लिए कोई PDF फाइल नहीं मिली!");
           }
         };
 
-        const promoteRevisionStage = (logId) => {
-          setStudyLogs(prev => prev.map(log => {
-            if (log.id === logId) {
-              const nextStage = log.currentStage + 1;
-              const updatedStages = log.stages.map((stage, sIdx) => {
-                if (sIdx === log.currentStage - 1) return { ...stage, completed: true };
-                return stage;
-              });
-              return {
-                ...log,
-                currentStage: nextStage > 4 ? 4 : nextStage,
-                stages: updatedStages
-              };
-            }
-            return log;
-          }));
+        // IndexedDB से PDF फाइल पूरी तरह डिलीट करने का सुधार
+        const handleDeletePdf = async (logId) => {
+          const success = await deletePDFFromDB(logId);
+          if (success) {
+            setStudyLogs(prev => prev.map(log => log.id === logId ? { ...log, hasPdf: false } : log));
+            showAlert("🗑️ PDF फाइल लोकल स्टोरेज से सफलतापूर्वक डिलीट कर दी गई है!");
+          } else {
+            showAlert("⚠️ फ़ाइल डिलीट करने में समस्या हुई।");
+          }
         };
 
-        const handleMarkStageCompleted = (logId, stageIndex) => {
-          setStudyLogs(prev => prev.map(log => {
-            if (log.id === logId) {
-              const updatedStages = [...log.stages];
-              updatedStages[stageIndex].completed = true;
-              const nextStage = stageIndex + 2;
-              return {
-                ...log,
-                currentStage: nextStage > 4 ? 4 : nextStage,
-                stages: updatedStages
-              };
+        const handleFileChange = (e) => {
+          const file = e.target.files[0];
+          if (file && file.type === "application/pdf") {
+            if (file.size > 5 * 1024 * 1024) {
+              showAlert("⚠️ फाइल का साइज 5MB से कम होना चाहिए!");
+              e.target.value = "";
+              return;
             }
-            return log;
-          }));
-          setUser(prev => ({ ...prev, points: prev.points + 15 }));
-          showAlert('✅ रिवीजन记录 दर्ज हो गया! +15 XP पॉइंट्स।');
+            setPdfFile(file);
+          } else {
+            showAlert("⚠️ केवल PDF फाइल ही अपलोड करना मुमकिन है!");
+            e.target.value = "";
+          }
         };
 
-        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
-        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
-
-        // नया डेटा जोड़ने का हैंडलर (पुराने और नए डेटा को मिक्स करने का सुधार)
-        const handleAddLog = (e) => {
+        const handleAddLog = async (e) => {
           e.preventDefault();
           const finalSubject = newLog.subject === 'अन्य (Custom)' ? newLog.customSubject : newLog.subject;
 
           if (!finalSubject || !newLog.topic) {
             showAlert('⚠️ कृपया विषय और मुख्य टॉपिक का नाम दर्ज करें!');
             return;
+          }
+
+          const logId = Date.now();
+          let hasPdf = false;
+
+          if (pdfFile) {
+            hasPdf = true;
+            const reader = new FileReader();
+            reader.readAsDataURL(pdfFile);
+            reader.onload = async () => {
+              await savePDFToDB(logId, reader.result, pdfFile.name);
+            };
           }
 
           const todayStr = new Date().toISOString().split('T')[0];
@@ -280,12 +297,13 @@
           let d4 = new Date(); d4.setDate(d4.getDate() + 15);
 
           const newEntry = {
-            id: Date.now(),
+            id: logId,
             subject: finalSubject,
             topic: newLog.topic,
             date: todayStr,
             difficulty: newLog.difficulty,
             timeSpent: parseFloat(newLog.timeSpent) || 1,
+            hasPdf: hasPdf,
             currentStage: 1,
             stages: [
               { name: 'R1 (24h)', due: d1.toISOString().split('T')[0], completed: false },
@@ -297,63 +315,151 @@
 
           setStudyLogs([newEntry, ...studyLogs]);
           setUser(prev => ({ ...prev, points: prev.points + 50 }));
-          showAlert('🚀 शानदार! पढ़ाई का ब्यौरा दर्ज हो गया। +50 XP!');
+          showAlert('🚀 शानदार! पढ़ाई का ब्यौरा और PDF सेव हो गए। +50 XP!');
           setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
+          setPdfFile(null);
           setActiveTab('dashboard');
         };
 
-        // प्रोफाइल क्रिएशन और अपडेट हैंडलर
         const handleUpdateProfile = (e) => {
           e.preventDefault();
-          if (!profileForm.name.trim()) {
-            showAlert('⚠️ कृपया एक वैध नाम दर्ज करें!');
-            return;
-          }
-          setUser(prev => ({
-            ...prev,
-            name: profileForm.name,
-            availableHours: parseInt(profileForm.availableHours) || 6,
-            category: profileForm.category
-          }));
+          if (!profileForm.name.trim()) return;
+          setUser(prev => ({ ...prev, name: profileForm.name, availableHours: parseInt(profileForm.availableHours) || 6, category: profileForm.category }));
           showAlert('👤 प्रोफाइल डेटा सफलतापूर्वक सुरक्षित हो गया!');
           setActiveTab('dashboard');
         };
+
+        // 💾 डेटा बैकअप जनरेटर मैकेनिज्म (मुफ़्त)
+        const generateTextBackup = () => {
+          const backupData = { user, studyLogs };
+          const base64Str = btoa(unescape(encodeURIComponent(JSON.stringify(backupData))));
+          navigator.clipboard.writeText(base64Str);
+          showAlert("📋 बैकअप कोड कॉपी हो गया है! इसे कहीं सुरक्षित नोट कर लें।");
+        };
+
+        // 💾 डेटा रिस्टोर मैकेनिज्म (मुफ़्त)
+        const handleRestoreData = (e) => {
+          e.preventDefault();
+          try {
+            if (!backupInputCode.trim()) return;
+            const decodedData = JSON.parse(decodeURIComponent(escape(atob(backupInputCode.trim()))));
+            if (decodedData.user && decodedData.studyLogs) {
+              setUser(decodedData.user);
+              setStudyLogs(decodedData.studyLogs);
+              showAlert("✅ डेटा सफलतापूर्वक रिस्टोर हो गया है!");
+              setBackupInputCode('');
+              setActiveTab('dashboard');
+            } else {
+              showAlert("⚠️ अमान्य बैकअप कोड!");
+            }
+          } catch (err) {
+            showAlert("⚠️ कोड सही नहीं है, कृपया दोबारा जांचें।");
+          }
+        };
+
+        // एआई अभ्यास टेस्ट इंजन (सिम्युलेटेड)
+        const handleGenerateQuiz = async (log) => {
+          setSelectedTopicForTest(log);
+          setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
+          setTimeout(() => {
+            const simulatedQuestions = [
+              {
+                question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पना के संदर्भ में सबसे महत्वपूर्ण पहलू को दर्शाता है?`,
+                options: ["सैद्धांतिक अनुप्रयोग और नियम", "दैनिक जीवन के व्यावहारिक अनुभव", "गणितीय समीकरणों का विश्लेषण", "उपरोक्त सभी आयाम"],
+                correctIndex: 3,
+                explanation: "यह अवधारणा सैद्धांतिक, व्यावहारिक और गणितीय तीनों पहलुओं को संतुलित तरीके से समझाने में सक्षम है।"
+              },
+              {
+                question: `इस विषय में याद रखने की क्षमता (Memory Retention) बढ़ाने का सबसे बेहतर वैज्ञानिक तरीका क्या है?`,
+                options: ["सिर्फ एक बार ध्यान से पढ़ना", "नियमित स्पैस्ड रिपीटीशन और सक्रिय टेस्ट देना", "लगातार 5 घंटे तक नोट्स बनाना", "परीक्षा के ठीक एक दिन पहले रटना"],
+                correctIndex: 1,
+                explanation: "वैज्ञानिक शोधों के अनुसार, सक्रिय रिकॉल (Active Recall) और स्पैस्ड रिपीटीशन ही लंबे समय तक याद रखने का सर्वोत्तम साधन हैं।"
+              }
+            ];
+            setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
+          }, 1200);
+        };
+
+        const handleSubmitQuiz = () => {
+          setQuizSubmitted(true);
+          let correctCount = 0;
+          aiQuiz.forEach((q, idx) => { if (userAnswers[idx] === q.correctIndex) correctCount++; });
+          const pointsWon = correctCount * 20;
+          setUser(prev => ({ ...prev, points: prev.points + pointsWon, streak: prev.streak + 1 }));
+          showAlert(`🎉 टेस्ट समाप्त! स्कोर: ${correctCount}/${aiQuiz.length}. +${pointsWon} XP!`);
+          if (correctCount >= 1 && selectedTopicForTest) promoteRevisionStage(selectedTopicForTest.id);
+        };
+
+        const promoteRevisionStage = (logId) => {
+          setStudyLogs(prev => prev.map(log => {
+            if (log.id === logId) {
+              const nextStage = log.currentStage + 1;
+              const updatedStages = log.stages.map((stage, sIdx) => {
+                if (sIdx === log.currentStage - 1) return { ...stage, completed: true };
+                return stage;
+              });
+              return { ...log, currentStage: nextStage > 4 ? 4 : nextStage, stages: updatedStages };
+            }
+            return log;
+          }));
+        };
+
+        const handleMarkStageCompleted = (logId, stageIndex) => {
+          setStudyLogs(prev => prev.map(log => {
+            if (log.id === logId) {
+              const updatedStages = [...log.stages];
+              updatedStages[stageIndex].completed = true;
+              const nextStage = stageIndex + 2;
+              return { ...log, currentStage: nextStage > 4 ? 4 : nextStage, stages: updatedStages };
+            }
+            return log;
+          }));
+          setUser(prev => ({ ...prev, points: prev.points + 15 }));
+          showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP絆।');
+        };
+
+        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
+        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
 
         useEffect(() => {
           let interval = null;
           if (timer.isActive) {
             interval = setInterval(() => {
-              if (timer.seconds > 0) {
-                setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
-              } else if (timer.seconds === 0 && timer.minutes > 0) {
-                setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
-              } else {
+              if (timer.seconds > 0) setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
+              else if (timer.seconds === 0 && timer.minutes > 0) setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
+              else {
                 clearInterval(interval);
+                playTimerAlarm(); // 🔔 अलार्म बीप एक्टिवेट करें
                 const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
                 setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
                 showAlert(`🔔 फोकस सत्र समाप्त!`);
               }
             }, 1000);
-          } else {
-            clearInterval(interval);
-          }
+          } else clearInterval(interval);
           return () => clearInterval(interval);
         }, [timer.isActive, timer.seconds, timer.minutes]);
 
         return (
-          <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between items-center p-2 sm:p-4 w-full">
-            <header className="w-full max-w-md text-center py-2">
-              <h1 className="text-xl sm:text-2xl font-black text-indigo-400 flex items-center justify-center gap-2">
-                <Icon name="brain" className="w-6 h-6 text-indigo-500 animate-pulse" />
-                <span>सजग छात्र</span>
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-[9px] text-white px-2 py-0.5 rounded-full font-bold">ULTIMATE v2.5</span>
-              </h1>
-              <p className="text-[10px] text-slate-400 mt-1">वैज्ञानिक 4-स्टेज रिवीजन ट्रैकर व फोकस टाइमर</p>
+          <div className="min-h-screen bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100 light:bg-slate-50 light:text-slate-900 flex flex-col justify-between items-center p-2 sm:p-4 w-full transition-colors duration-300">
+            <header className="w-full max-w-md flex justify-between items-center py-2 px-1">
+              <div className="text-left">
+                <h1 className="text-xl font-black text-indigo-400 dark:text-indigo-400 light:text-indigo-600 flex items-center gap-1">
+                  <Icon name="brain" className="w-5 h-5 text-indigo-500 animate-pulse" />
+                  <span>सजोग छात्र</span>
+                </h1>
+                <p className="text-[9px] text-slate-400 mt-0.5">वैज्ञानिक 4-स्टेज मेमोरी ट्रैकर व टूल्स</p>
+              </div>
+              
+              {/* 🌓 थीम टॉगल बटन (UI सुधार) */}
+              <button 
+                onClick={() => setIsDarkMode(!isDarkMode)} 
+                className="p-2 rounded-xl bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-slate-800 dark:border-slate-800 light:border-slate-300 text-indigo-400 transition"
+              >
+                <Icon name={isDarkMode ? "sun" : "moon"} className="w-4 h-4" />
+              </button>
             </header>
 
-            <div className="w-full max-w-md bg-slate-900 rounded-[32px] border-4 border-slate-800 shadow-2xl relative flex flex-col overflow-hidden h-[84vh] max-h-[790px]">
-              
-              {/* फोन नॉच */}
+            <div className="w-full max-w-md bg-slate-900 dark:bg-slate-900 light:bg-white rounded-[32px] border-4 border-slate-800 dark:border-slate-800 light:border-slate-200 shadow-2xl relative flex flex-col overflow-hidden h-[84vh] max-h-[790px] transition-colors duration-300">
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-4 w-32 bg-slate-800 rounded-b-xl z-20 flex justify-center items-center">
                 <div className="w-2.5 h-2.5 rounded-full bg-slate-950 mr-2"></div>
                 <div className="w-10 h-1 rounded-full bg-slate-950"></div>
@@ -374,20 +480,23 @@
                 </div>
               </div>
 
-              <main className="flex-1 overflow-y-auto p-4 pb-16">
+              <main className="flex-1 overflow-y-auto p-4 pb-16 dark:text-slate-100 light:text-slate-800">
+                
+                <AdSenseUnit slotId="HEADER_SLOT_ID" />
+
                 {activeTab === 'dashboard' && (
                   <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 p-4 rounded-2xl border border-indigo-900/40 space-y-3">
+                    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 dark:from-slate-900 dark:to-indigo-950 light:from-indigo-50 light:to-slate-100 p-4 rounded-2xl border border-indigo-900/40 light:border-slate-200 space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h2 className="text-xs text-indigo-300 font-bold uppercase tracking-wide">दैनिक अध्ययन समय बजट</h2>
-                          <h3 className="text-lg font-black text-white mt-1">{todayTotalAllocated} / {user.availableHours} घंटे book हैं</h3>
+                          <h2 className="text-xs text-indigo-300 light:text-indigo-600 font-bold uppercase tracking-wide">दैनिक अध्ययन समय बजट</h2>
+                          <h3 className="text-lg font-black dark:text-white light:text-slate-900 mt-1">{todayTotalAllocated} / {user.availableHours} घंटे book हैं</h3>
                         </div>
                         <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] py-1 px-2 rounded-lg font-bold">
                           {remainingTime > 0 ? `${remainingTime}h उपलब्ध` : 'पूर्ण!'}
                         </span>
                       </div>
-                      <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div className="w-full bg-slate-800 light:bg-slate-200 h-2 rounded-full overflow-hidden">
                         <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (todayTotalAllocated / user.availableHours) * 100)}%` }}></div>
                       </div>
                     </div>
@@ -401,19 +510,22 @@
                         <p className="text-xs text-slate-500 text-center py-6 italic">कोई रिकॉर्ड नहीं मिला। 'दर्ज करें' टैब में जाएँ।</p>
                       ) : (
                         studyLogs.map(log => (
-                          <div key={log.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+                          <div key={log.id} className="bg-slate-950 dark:bg-slate-950 light:bg-slate-50 p-3.5 rounded-xl border border-slate-800/80 light:border-slate-200 space-y-2">
                             <div className="flex justify-between items-start">
                               <div>
-                                <span className="text-[9px] bg-indigo-950 border border-indigo-800 text-indigo-300 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
-                                <h4 className="text-xs font-bold text-white mt-1">{log.topic}</h4>
+                                <span className="text-[9px] bg-indigo-950 dark:bg-indigo-950 light:bg-indigo-100 border border-indigo-800 dark:border-indigo-800 light:border-indigo-300 text-indigo-300 dark:text-indigo-300 light:text-indigo-700 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
+                                <h4 className="text-xs font-bold dark:text-white light:text-slate-900 mt-1">{log.topic}</h4>
                               </div>
-                              <button 
-                                onClick={() => handleGenerateQuiz(log)}
-                                className="bg-slate-900 border border-indigo-500/40 text-indigo-400 p-1 rounded-lg text-[9px] font-bold flex items-center gap-1"
-                              >
-                                <Icon name="brain" className="w-3 h-3" />
-                                <span>AI टेस्ट</span>
-                              </button>
+                              <div className="flex gap-1">
+                                {log.hasPdf && (
+                                  <div className="flex gap-1">
+                                    <button onClick={() => handleViewPdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-emerald-500/40 text-emerald-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="file-text" className="w-3 h-3" /></button>
+                                    {/* 🗑️ PDF डिलीट बटन सुधार */}
+                                    <button onClick={() => handleDeletePdf(log.id)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-rose-500/40 text-rose-400 p-1 rounded-lg text-[9px] font-bold"><Icon name="trash-2" className="w-3 h-3" /></button>
+                                  </div>
+                                )}
+                                <button onClick={() => handleGenerateQuiz(log)} className="bg-slate-900 dark:bg-slate-900 light:bg-white border border-indigo-500/40 text-indigo-400 p-1 rounded-lg text-[9px] font-bold flex items-center gap-0.5"><Icon name="brain" className="w-3 h-3" /><span>AI</span></button>
+                              </div>
                             </div>
                             <div className="grid grid-cols-4 gap-1.5 mt-2">
                               {log.stages.map((stage, idx) => (
@@ -421,7 +533,7 @@
                                   key={idx}
                                   disabled={stage.completed || (idx !== log.currentStage - 1)}
                                   onClick={() => handleMarkStageCompleted(log.id, idx)}
-                                  className={`text-[9px] p-1.5 rounded border text-center transition ${stage.completed ? 'bg-emerald-950 border-emerald-500 text-emerald-400' : (idx === log.currentStage - 1 ? 'bg-indigo-950 border-indigo-500 text-indigo-300 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400')}`}
+                                  className={`text-[9px] p-1.5 rounded border text-center transition ${stage.completed ? 'bg-emerald-950 dark:bg-emerald-950 light:bg-emerald-100 border-emerald-500 text-emerald-400 dark:text-emerald-400 light:text-emerald-700' : (idx === log.currentStage - 1 ? 'bg-indigo-950 border-indigo-500 text-indigo-300 font-bold' : 'bg-slate-800 light:bg-slate-200 border-slate-700 light:border-slate-300 text-slate-400')}`}
                                 >
                                   <span>{stage.name}</span>
                                 </button>
@@ -435,10 +547,10 @@
                 )}
 
                 {activeTab === 'log' && (
-                  <form onSubmit={handleAddLog} className="space-y-4 text-xs">
+                  <form onSubmit={handleAddLog} className="space-y-4 text-xs dark:text-slate-200 light:text-slate-800">
                     <div>
-                      <label className="block text-slate-300 font-semibold mb-1">विषय (Subject):</label>
-                      <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
+                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">विषय (Subject):</label>
+                      <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5">
                         <option value="">-- चुनें --</option>
                         <option value="भौतिक विज्ञान (Physics)">भौतिक विज्ञान (Physics)</option>
                         <option value="रसायन विज्ञान (Chemistry)">रसायन विज्ञान (Chemistry)</option>
@@ -448,23 +560,27 @@
                       </select>
                     </div>
                     {newLog.subject === 'अन्य (Custom)' && (
-                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
+                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5" />
                     )}
                     <div>
-                      <label className="block text-slate-300 font-semibold mb-1">टॉपिक:</label>
-                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
+                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">टॉपिक:</label>
+                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5" />
                     </div>
                     <div>
-                      <label className="block text-slate-300 font-semibold mb-1">पढ़ाई का समय (घंटे):</label>
-                      <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
+                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">पढ़ाई का समय (घंटे):</label>
+                      <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5" />
                     </div>
-                    <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl shadow-lg text-white text-xs">🚀 सुरक्षित करें</button>
+                    <div>
+                      <label className="block text-slate-300 light:text-slate-600 font-semibold mb-1">स्टडी नोट्स (PDF, Max 5MB):</label>
+                      <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:bg-indigo-950 file:text-indigo-300" />
+                    </div>
+                    <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl text-white text-xs shadow-lg">🚀 सुरक्षित करें</button>
                   </form>
                 )}
 
                 {activeTab === 'test-arena' && (
                   <div className="space-y-4">
-                    <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800/60 text-center">
+                    <div className="bg-slate-950 p-4 rounded-2xl text-center border border-slate-800">
                       <span className="text-[9px] bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded font-black uppercase">{selectedTopicForTest?.subject}</span>
                       <h3 className="text-sm font-bold text-white mt-1.5">{selectedTopicForTest?.topic}</h3>
                     </div>
@@ -544,57 +660,52 @@
                 )}
 
                 {activeTab === 'profile' && (
-                  <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
-                    <div className="text-center py-2">
-                      <div className="w-16 h-16 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto mt-2 text-xl">👤</div>
-                      <h3 className="text-sm font-bold text-white mt-2">{user.name}</h3>
-                      <p className="text-[10px] text-slate-400">{user.category}</p>
-                    </div>
+                  <div className="space-y-4">
+                    <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+                      <div className="text-center py-1">
+                        <div className="w-14 h-14 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto text-xl">👤</div>
+                        <h3 className="text-sm font-bold mt-2">{user.name}</h3>
+                        <p className="text-[10px] text-slate-400">{user.category}</p>
+                      </div>
 
-                    <div className="bg-slate-950 rounded-xl p-4 border border-slate-800/60 space-y-3">
-                      <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">विद्यार्थी प्रोफाइल विन्यास</h4>
+                      <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 light:border-slate-300 space-y-3">
+                        <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">विद्यार्थी प्रोफाइल विन्यास</h4>
+                        <div>
+                          <label className="block text-slate-400 mb-1">आपका नाम:</label>
+                          <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2" />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">दैनिक उपलब्ध घंटे लक्ष्य:</label>
+                          <input type="number" min="1" max="24" value={profileForm.availableHours} onChange={(e) => setProfileForm({ ...profileForm, availableHours: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2" />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">श्रेणी:</label>
+                          <select value={profileForm.category} onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2">
+                            <option value="प्रतियोगी परीक्षा (Competitive Exams)">प्रतियोगी परीक्षा (Competitive Exams)</option>
+                            <option value="स्कूली शिक्षा (School Education)">स्कूली शिक्षा (School Education)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <button type="submit" className="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white shadow-md">💾 प्रोफाइल डेटा सुरक्षित करें</button>
+                    </form>
+
+                    {/* 💾 बैकअप और रिस्टोर यूटिलिटी ब्लॉक (सुधार) */}
+                    <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 light:border-slate-300 space-y-3 text-xs">
+                      <h4 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">डेटा बैकअप सुरक्षा केंद्र</h4>
+                      <p className="text-[10px] text-slate-400">ब्राउज़र बदलने या मोबाइल चेंज होने पर अपना डेटा सुरक्षित रखने का मुफ़्त मैकेनिज्म।</p>
+                      <button onClick={generateTextBackup} type="button" className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-emerald-500/40 text-emerald-400 font-bold py-2 rounded-xl">📋 बैकअप कोड कॉपी करें</button>
                       
-                      <div>
-                        <label className="block text-slate-400 mb-1">आपका नाम:</label>
-                        <input 
-                          type="text" 
-                          value={profileForm.name}
-                          onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                          className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-200 focus:outline-none focus:border-indigo-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-400 mb-1">दैनिक उपलब्ध घंटे लक्ष्य:</label>
-                        <input 
-                          type="number" 
-                          min="1" 
-                          max="24"
-                          value={profileForm.availableHours}
-                          onChange={(e) => setProfileForm({ ...profileForm, availableHours: e.target.value })}
-                          className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-200 focus:outline-none focus:border-indigo-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-400 mb-1">तैयारी श्रेणी (Category):</label>
-                        <select 
-                          value={profileForm.category} 
-                          onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })}
-                          className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-200 focus:outline-none focus:border-indigo-500"
-                        >
-                          <option value="प्रतियोगी परीक्षा (Competitive Exams)">प्रतियोगी परीक्षा (Competitive Exams)</option>
-                          <option value="स्कूली शिक्षा (School Education)">स्कूली शिक्षा (School Education)</option>
-                          <option value="उच्च शिक्षा (Higher Studies)">उच्च शिक्षा (Higher Studies)</option>
-                        </select>
-                      </div>
+                      <form onSubmit={handleRestoreData} className="pt-2 border-t border-slate-800 space-y-2">
+                        <label className="block text-[10px] text-slate-400">पुराना बैकअप कोड यहाँ पेस्ट करें:</label>
+                        <input type="text" placeholder="कोड यहाँ पेस्ट करें..." value={backupInputCode} onChange={(e) => setBackupInputCode(e.target.value)} className="w-full bg-slate-900 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2 text-slate-200" />
+                        <button type="submit" className="w-full bg-emerald-700 font-bold py-2 rounded-xl text-white">🔄 डेटा रिस्टोर करें</button>
+                      </form>
                     </div>
-
-                    <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl shadow-lg text-white text-xs transition hover:bg-indigo-700">
-                      💾 प्रोफाइल डेटा सुरक्षित करें
-                    </button>
-                  </form>
+                  </div>
                 )}
+                
+                <AdSenseUnit slotId="FOOTER_SLOT_ID" />
+
               </main>
 
               <nav className="absolute bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-20">
