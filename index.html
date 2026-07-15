@@ -1,25 +1,22 @@
 <!DOCTYPE html>
 <html lang="hi">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>सजग छात्र</title>
-    <!-- Tailwind CSS (डिजाइन के लिए) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  </head>
-  <body>
+</head>
+<body>
     <div id="root"></div>
-    <!-- React और Lucide Icons लोड करना -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- React, ReactDOM, Lucide Icons, and Babel CDN Links -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- आपकी App.jsx फाइल को कनेक्ट करना -->
+    <!-- App.jsx फ़ाइल का पाथ (यहाँ आगे . बिंदु लगा है) -->
     <script type="text/babel" src="./App.jsx"></script>
-    <script type="text/babel">
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(React.createElement(App));
-    </script>
-  </body>
+</body>
 </html>
