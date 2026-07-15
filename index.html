@@ -13,13 +13,6 @@
       @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
       .animate-spin-slow { animation: spin 8s linear infinite; }
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      
-      /* फ़्लैशकार्ड फ्लिप एनीमेशन */
-      .perspective-1000 { perspective: 1000px; }
-      .transform-style-3d { transform-style: preserve-3d; }
-      .backface-hidden { backface-visibility: hidden; }
-      .rotate-y-180 { transform: rotateY(180deg); }
-
       ::-webkit-scrollbar { width: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #1e1b4b; border-radius: 999px; }
@@ -30,7 +23,7 @@
 
     <!-- React, ReactDOM, Babel और Lucide Icons के आवश्यक CDN पैकेजेस -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -313,8 +306,8 @@
           setSelectedTopicForTest(log); setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
           setTimeout(() => {
             const simulatedQuestions = [
-              { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पना के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
-              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और एक्टिव टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
+              { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पने के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
+              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्पैस्ड रिपीटीशन और एक्टिव टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
             ];
             setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
           }, 1200);
@@ -364,28 +357,6 @@
           if (totalHours < 4) return 'bg-emerald-700';
           return 'bg-emerald-500';
         };
-
-        useEffect(() => {
-          let interval = null;
-          if (timer.isActive) {
-            interval = setInterval(() => {
-              if (timer.seconds > 0) setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
-              else if (timer.seconds === 0 && timer.minutes > 0) setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
-              else {
-                clearInterval(interval); playTimerAlarm();
-                if (timer.mode === 'Focus') {
-                  setUser(prev => ({ ...prev, pomodoroRounds: (prev.pomodoroRounds || 0) + 1, points: prev.points + 30 }));
-                  showAlert(`🔔 फोकस सत्र समाप्त! आपको मिले +30 बोनस XP!`);
-                  setTimer({ minutes: 5, seconds: 0, isActive: false, mode: 'Break' });
-                } else {
-                  showAlert(`🔔 ब्रेक सत्र समाप्त! वापस पढ़ाई शुरू करें।`);
-                  setTimer({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
-                }
-              }
-            }, 1000);
-          } else clearInterval(interval);
-          return () => clearInterval(interval);
-        }, [timer.isActive, timer.seconds, timer.minutes, timer.mode]);
 
         return (
           <div className="w-full flex-1 flex flex-col justify-between pb-14 md:pb-0">
@@ -445,7 +416,7 @@
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-slate-950 to-indigo-950 dark:from-slate-950 dark:to-indigo-950 light:from-indigo-50/60 light:to-slate-100 p-4 rounded-xl border border-indigo-900/30 light:border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div className="bg-gradient-to-br from-slate-950 to-indigo-950 dark:from-slate-955 dark:to-indigo-955 light:from-indigo-50/60 light:to-slate-100 p-4 rounded-xl border border-indigo-900/30 light:border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <div className="space-y-1">
                         <h2 className="text-xs text-indigo-300 light:text-indigo-600 font-bold uppercase tracking-wider">दैनिक अध्ययन समय बजट प्रोग्रेस</h2>
                         <h3 className="text-base sm:text-xl font-black dark:text-white light:text-slate-900">{todayTotalAllocated} / {user.availableHours} घंटे बुक हैं</h3>
@@ -667,8 +638,9 @@
         );
       }
 
-      const rootElement = document.getElementById('root');
-      const root = ReactDOM.createRoot(rootElement); root.render(React.createElement(App));
+      // React 18 को CDN और Babel एनवायरनमेंट में सुरक्षित रेंडर करने का फाइनल सिंटैक्स फिक्स
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
     </script>
 </body>
 </html>
