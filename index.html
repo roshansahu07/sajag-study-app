@@ -149,7 +149,7 @@
         const [flippedCards, setFlippedCards] = useState({});
 
         const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
-        const [treeState, setTreeState] = useState('🌱'); // Forest tree state
+        const [treeState, setTreeState] = useState('🌱');
         const [activeTab, setActiveTab] = useState('dashboard');
         const [alertMsg, setAlertMsg] = useState(null);
         const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
@@ -186,11 +186,10 @@
           setNotifications(generatedAlerts);
         }, [studyLogs]);
 
-        // विज़ुअल स्टडी ट्री ग्रोथ इंजन
         useEffect(() => {
           if (!timer.isActive) {
             if (timer.minutes === 25 && timer.seconds === 0) setTreeState('🌱');
-            else if (timer.mode === 'Focus') setTreeState('🍂'); // Stopped middle
+            else if (timer.mode === 'Focus') setTreeState('🍂');
             return;
           }
           if (timer.mode === 'Focus') {
@@ -355,7 +354,6 @@
           setUser(prev => ({ ...prev, points: prev.points + 15 })); showAlert('✅ रिवीजन रिकॉर्ड दर्ज हो गया! +15 XP');
         };
 
-        // वीकली स्टडी हीटमैप डेटा जनरेटर (Consistency Tracker)
         const getHeatmapColor = (dayOffset) => {
           const checkDate = new Date();
           checkDate.setDate(checkDate.getDate() - dayOffset);
@@ -391,7 +389,6 @@
 
         return (
           <div className="w-full flex-1 flex flex-col justify-between pb-14 md:pb-0">
-            {/* Nav Bar */}
             <nav className="w-full bg-slate-900 border-b border-slate-800 dark:bg-slate-900 light:bg-white light:border-slate-200 px-4 sm:px-8 py-3 flex justify-between items-center transition-colors">
               <div className="flex items-center gap-3">
                 <div className="bg-indigo-600/10 p-2 rounded-xl border border-indigo-500/20">
@@ -419,10 +416,7 @@
 
             <AdSenseUnit slotId="HEADER_SLOT_ID" />
 
-            {/* Grid Container */}
             <main className="flex-1 w-full max-w-6xl mx-auto p-3 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-              
-              {/* 🖥️ डेस्कटॉप साइडबार बार */}
               <div className="hidden md:block md:col-span-1 bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl p-4 space-y-2 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block px-2 mb-2">मुख्य मेनू</span>
                 <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><Icon name="book-open" /><span>मेमोरी ट्रैक</span></button>
@@ -432,15 +426,7 @@
                 <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'profile' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><Icon name="user" /><span>प्रोफाइल सेटिंग्स</span></button>
               </div>
 
-              {/* राइट वर्किंग विंडो */}
               <div className="col-span-1 md:col-span-3 bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm min-h-[460px]">
-                
-                {alertMsg && (
-                  <div className="mb-4 bg-indigo-600 text-white p-3 rounded-xl shadow-md text-xs flex items-center gap-2 border border-indigo-400 animate-fadeIn">
-                    <Icon name="info" className="w-4 h-4 flex-shrink-0" /><span>{alertMsg}</span>
-                  </div>
-                )}
-
                 <div className="md:hidden flex justify-between items-center bg-slate-950/40 light:bg-slate-100 p-2.5 rounded-xl mb-4 border border-slate-800/60 light:border-slate-200 text-[10px] text-slate-400">
                   <span className="font-bold text-indigo-400">🔥 {user.streak} दिन स्ट्रीक</span>
                   <span className="font-bold text-amber-400">⭐ {user.points} XP</span>
@@ -448,12 +434,11 @@
 
                 {activeTab === 'dashboard' && (
                   <div className="space-y-6">
-                    {/* 📊 वीकली कंसिस्टेंसी हीटमैप (New Analytics Feature) */}
                     <div className="bg-slate-950/40 dark:bg-slate-950/40 light:bg-slate-100 p-4 rounded-xl border border-slate-800 light:border-slate-200 space-y-2">
                       <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider block">📆 साप्ताहिक निरंतरता ग्रिड (Consistency Heatmap)</span>
                       <div className="flex gap-2 pt-1">
                         {[6, 5, 4, 3, 2, 1, 0].map(day => (
-                          <div key={day} className={`w-7 h-7 rounded-md transition-colors ${getHeatmapColor(day)} flex items-center justify-center text-[8px] font-bold text-white/40`} title="स्टडी गतिविधि ग्रिड">
+                          <div key={day} className={`w-7 h-7 rounded-md transition-colors ${getHeatmapColor(day)} flex items-center justify-center text-[8px] font-bold text-white/40`}>
                             {new Date(Date.now() - day * 24 * 60 * 60 * 1000).getDate()}
                           </div>
                         ))}
@@ -500,7 +485,6 @@
                                 <h4 className="text-xs font-bold dark:text-white light:text-slate-900 mt-2">{log.topic}</h4>
                                 <p className="text-[9px] text-slate-500 mt-0.5">शुरू किया गया: {log.date}</p>
 
-                                {/* 🧠 क्विक क्विज़ फ़्लैशकार्ड इंटरफ़ेस (Anki Card System Style) */}
                                 {log.customQuiz && (
                                   <div className="mt-3 perspective-1000 w-full h-12">
                                     <div onClick={() => setFlippedCards(p => ({...p, [log.id]: !p[log.id]}))} className={`w-full h-full relative transition-transform duration-500 transform-style-3d cursor-pointer ${flippedCards[log.id] ? 'rotate-y-180' : ''}`}>
@@ -554,7 +538,6 @@
                         <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
                       </div>
 
-                      {/* 🧠 मैन्युअल क्विक क्विज़ मेकर फ़ील्ड्स (New Quizlet Feature) */}
                       <div className="bg-slate-950/40 p-3 rounded-xl border border-indigo-500/20 space-y-2">
                         <label className="block font-bold text-indigo-400 text-[10px] uppercase tracking-wide">💡 क्विक सेल्फ़-क्विज़ कार्ड जोड़ें (वैकल्पिक)</label>
                         <input type="text" placeholder="प्रश्न यहाँ टाइप करें..." value={newLog.quizQ} onChange={(e) => setNewLog({ ...newLog, quizQ: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
@@ -604,8 +587,6 @@
                   <div className="space-y-6 flex flex-col items-center justify-center min-h-[350px]">
                     <div className="bg-slate-950/40 border border-slate-800 px-4 py-2 rounded-xl text-center text-xs flex items-center gap-4">
                       <span className="font-bold text-indigo-400 uppercase tracking-wider">⏱️ सफल सेशन्स: {user.pomodoroRounds || 0}</span>
-                      
-                      {/* 🌳 फ़ॉरेस्ट ट्री विज़ुअल स्टेट (New Forest App Feature) */}
                       <span className="text-lg bg-slate-900 p-1 rounded border border-slate-800 animate-bounce">{treeState}</span>
                     </div>
                     <div className="relative w-44 h-44 rounded-full border-4 border-indigo-500/20 flex flex-col items-center justify-center bg-slate-950 shadow-md">
@@ -630,7 +611,7 @@
                           <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
                           <p className="text-[11px] text-slate-300">{notif.text}</p>
                         </div>
-                        {notif.actionTopic && ( <button onClick={() => handleGenerateQuiz(notif.actionTopic)} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 flex-shrink-0"><Icon name="brain" className="w-3 h-3" /><span>अभी变स लें</span></button> )}
+                        {notif.actionTopic && ( <button onClick={() => handleGenerateQuiz(notif.actionTopic)} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 flex-shrink-0"><Icon name="brain" className="w-3 h-3" /><span>अभी टेस्ट लें</span></button> )}
                       </div>
                     ))}
                   </div>
@@ -642,8 +623,6 @@
                       <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 space-y-3">
                         <div className="flex justify-between items-center">
                           <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">विद्यार्थी प्रोफाइल विन्यास</h4>
-                          
-                          {/* 🎖️ अनलॉक किए गए अचीवमेंट बैज (New Gamification Feature) */}
                           <div className="flex gap-1.5">
                             {user.points >= 500 && <span className="text-xs p-1 bg-slate-900 rounded border border-amber-500/40" title="मेमोरी मास्टर बैज">🎖️</span>}
                             {user.pomodoroRounds >= 1 && <span className="text-xs p-1 bg-slate-900 rounded border border-indigo-500/40" title="फोकस निंजा बैज">🥷</span>}
@@ -674,7 +653,6 @@
               </div>
             </main>
 
-            {/* 📱 मोबाइल बॉटम बार */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-30">
               <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="book-open" /><span className="text-[8px] mt-0.5">ट्रैकर</span></button>
               <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="plus-circle" /><span className="text-[8px] mt-0.5">दर्ज करें</span></button>
