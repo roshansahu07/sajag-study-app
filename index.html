@@ -3,279 +3,134 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>सजक छात्र</title>
+    <title>सजग छात्र Ultimate</title>
     
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
     <!-- Tailwind CSS v4 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
     <style>
       .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
       @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-      .animate-spin-slow { animation: spin 8s linear infinite; }
-      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      ::-webkit-scrollbar { width: 4px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #1e1b4b; border-radius: 999px; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 transition-colors duration-300 min-h-screen flex flex-col justify-between">
-    <div id="root" class="w-full flex-1 flex flex-col justify-between"></div>
+<body class="bg-slate-950 text-slate-100">
+    <div id="root"></div>
 
-    <!-- React, ReactDOM, Babel और Lucide Icons के आवश्यक CDN पैकेजेस -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- React, ReactDOM, and Babel CDN Packages -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- React Logic Script -->
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker Registered'))
+            .catch(err => console.log('Service Worker Failed', err));
+        });
+      }
+    </script>
+
+    <!-- React Application Logic -->
     <script type="text/babel">
-      const useState = React.useState;
-      const useEffect = React.useEffect;
-
-      function Icon({ name, className = "w-4 h-4" }) {
-        useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
-        return <i data-lucide={name} className={className}></i>;
-      }
-
-      function AdSenseUnit({ slotId }) {
-        useEffect(() => {
-          try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } 
-          catch (e) { console.error("AdSense Blocked or Empty", e); }
-        }, [slotId]);
-        return (
-          <div className="my-2 mx-auto bg-slate-900/40 dark:bg-slate-950/40 p-1 rounded-xl border border-slate-800/40 flex items-center justify-center overflow-hidden min-h-[60px] w-full max-w-6xl text-[9px] text-slate-600">
-             <ins className="adsbygoogle" style={{ display: 'block' }} data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot={slotId} data-ad-format="horizontal" data-full-width-responsive="true"></ins>
-          </div>
-        );
-      }
-
-      // --- 💾 FREE LOCAL INDEXEDDB UTILITY ENGINE ---
-      const initDB = () => {
-        return new Promise((resolve, reject) => {
-          const request = indexedDB.open("SajagStudentDB", 1);
-          request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains("pdfs")) db.createObjectStore("pdfs", { keyPath: "id" });
-          };
-          request.onsuccess = (e) => resolve(e.target.result);
-          request.onerror = (e) => reject("DB Open Error");
-        });
-      };
-
-      const savePDFToDB = async (id, base64Data, fileName) => {
-        const db = await initDB();
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction("pdfs", "readwrite");
-          const store = transaction.objectStore("pdfs");
-          const request = store.put({ id, data: base64Data, name: fileName });
-          request.onsuccess = () => resolve(true); request.onerror = () => reject(false);
-        });
-      };
-
-      const getPDFFromDB = async (id) => {
-        const db = await initDB();
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction("pdfs", "readonly");
-          const store = transaction.objectStore("pdfs");
-          const request = store.get(id);
-          request.onsuccess = (e) => resolve(e.target.result); request.onerror = () => reject(null);
-        });
-      };
-
-      const deletePDFFromDB = async (id) => {
-        const db = await initDB();
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction("pdfs", "readwrite");
-          const store = transaction.objectStore("pdfs");
-          const request = store.delete(id);
-          request.onsuccess = () => resolve(true); request.onerror = () => reject(false);
-        });
-      };
-
-      const playTimerAlarm = () => {
-        try {
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const oscillator = audioCtx.createOscillator();
-          const gainNode = audioCtx.createGain();
-          oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
-          oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-          gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-          oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.8);
-        } catch (e) { console.error("Audio error", e); }
-      };
+      const { useState, useEffect } = React;
 
       function App() {
-        const [isDarkMode, setIsDarkMode] = useState(() => {
-          const savedTheme = localStorage.getItem('sajag_theme');
-          return savedTheme ? savedTheme === 'dark' : true;
+        // --- स्टेट मैनेजमेंट ---
+        const [user, setUser] = useState({
+          name: 'रोशन लाल साहू',
+          category: 'प्रतियोगी परीक्षा (Competitive Exams)',
+          availableHours: 6,
+          streak: 5, 
+          points: 350
         });
 
-        const [user, setUser] = useState(() => {
-          const localUser = localStorage.getItem('sajag_user');
-          return localUser ? JSON.parse(localUser) : {
-            name: 'रोशन लाल साहू', category: 'प्रतियोगी परीक्षा (Competitive Exams)', availableHours: 6, streak: 5, points: 350, pomodoroRounds: 0
-          };
+        const [studyLogs, setStudyLogs] = useState([
+          {
+            id: 1,
+            subject: 'भौतिक विज्ञान (Physics)',
+            topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
+            date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
+            difficulty: 'कठिन (Hard)',
+            timeSpent: 2,
+            currentStage: 1, 
+            stages: [
+              { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
+              { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
+              { name: 'R3 (7d)', due: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
+              { name: 'Test (15d)', due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
+            ]
+          },
+          {
+            id: 2,
+            subject: 'इतिहास (History)',
+            topic: 'सिंधु घाटी सभ्यता (Indus Valley Civilization)',
+            date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
+            difficulty: 'मध्यम (Medium)',
+            timeSpent: 1.5,
+            currentStage: 2, 
+            stages: [
+              { name: 'R1 (24h)', due: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: true },
+              { name: 'R2 (3d)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
+              { name: 'R3 (7d)', due: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
+              { name: 'Test (15d)', due: new Date(Date.now() + 11 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
+            ]
+          }
+        ]);
+
+        const [newLog, setNewLog] = useState({
+          subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2
         });
 
-        const [studyLogs, setStudyLogs] = useState(() => {
-          const localLogs = localStorage.getItem('sajag_logs');
-          return localLogs ? JSON.parse(localLogs) : [
-            {
-              id: 1, subject: 'भौतिक विज्ञान (Physics)', topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
-              date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
-              difficulty: 'कठिन (Hard)', timeSpent: 2, hasPdf: false, currentStage: 1,
-              customQuiz: { question: "गति का प्रथम नियम क्या कहलाता है?", answer: "जड़त्व का नियम (Law of Inertia)" },
-              stages: [
-                { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
-                { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-                { name: 'R3 (7d)', due: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-                { name: 'Test (15d)', due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
-              ]
-            }
-          ];
+        const [timer, setTimer] = useState({
+          minutes: 25, seconds: 0, isActive: false, mode: 'Focus' 
         });
 
-        const [profileForm, setProfileForm] = useState({ name: user.name, availableHours: user.availableHours, category: user.category });
-        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2, quizQ: '', quizA: '' });
-        const [pdfFile, setPdfFile] = useState(null);
-        const [backupInputCode, setBackupInputCode] = useState('');
-        const [flippedCards, setFlippedCards] = useState({});
-        const [searchQuery, setSearchQuery] = useState(''); // 🔍 सर्च स्टेट
-        const [reminderTime, setReminderTime] = useState(''); // ⏰ रिमाइंडर अलार्म स्टेट
-
-        const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
-        const [treeState, setTreeState] = useState('🌱');
         const [activeTab, setActiveTab] = useState('dashboard');
         const [alertMsg, setAlertMsg] = useState(null);
-        const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
-        const [aiQuiz, setAiQuiz] = useState(null);
-        const [loadingQuiz, setLoadingQuiz] = useState(false);
-        const [userAnswers, setUserAnswers] = useState({});
-        const [quizSubmitted, setQuizSubmitted] = useState(false);
         const [notifications, setNotifications] = useState([]);
 
         const showAlert = (msg) => {
-          setAlertMsg(msg); setTimeout(() => setAlertMsg(null), 4000);
+          setAlertMsg(msg);
+          setTimeout(() => setAlertMsg(null), 4000);
         };
-
-        // ⏰ सुधार: स्मार्ट थीम शेड्यूलर (सुबह 6 से शाम 6 लाइट, अन्यथा डार्क)
-        useEffect(() => {
-          const currentHour = new Date().getHours();
-          const shouldBeDark = currentHour < 6 || currentHour >= 18;
-          setIsDarkMode(shouldBeDark);
-        }, []);
-
-        useEffect(() => {
-          const root = window.document.documentElement;
-          if (isDarkMode) { root.classList.add('dark'); root.style.backgroundColor = "#020617"; localStorage.setItem('sajag_theme', 'dark'); } 
-          else { root.classList.remove('dark'); root.style.backgroundColor = "#f8fafc"; localStorage.setItem('sajag_theme', 'light'); }
-        }, [isDarkMode]);
-
-        // ⏰ सुधार: बैकग्राउंड रिमाइंडर अलार्म चेकर क्लॉक इंजन
-        useEffect(() => {
-          const interval = setInterval(() => {
-            if (reminderTime) {
-              const now = new Date();
-              const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-              if (timeStr === reminderTime) {
-                playTimerAlarm();
-                showAlert("🔔 अलार्म! आपके पढ़ाई का समय हो गया है, कृपया फोकस करें।");
-                setReminderTime(''); // ट्रिगर के बाद रीसेट
-              }
-            }
-          }, 30000); // हर 30 सेकंड में चेक करेगा
-          return () => clearInterval(interval);
-        }, [reminderTime]);
-
-        useEffect(() => { localStorage.setItem('sajag_user', JSON.stringify(user)); }, [user]);
-        useEffect(() => { localStorage.setItem('sajag_logs', JSON.stringify(studyLogs)); }, [studyLogs]);
-        useEffect(() => { setProfileForm({ name: user.name, availableHours: user.availableHours, category: user.category }); }, [user]);
 
         useEffect(() => {
           const todayStr = new Date().toISOString().split('T')[0];
           const generatedAlerts = [];
+
           studyLogs.forEach(log => {
             const activeStage = log.stages.find(s => !s.completed);
             if (activeStage && activeStage.due === todayStr) {
-              generatedAlerts.push({ id: `alert-${log.id}`, title: `स्मार्ट रिवीजन अलर्ट: ${log.subject} 💡`, text: `आज रिवीजन का समय है। अभ्यास टेस्ट लें!`, type: 'urgent', actionTopic: log });
+              generatedAlerts.push({
+                title: `📚 स्मार्ट रिवीजन अलर्ट: ${log.subject}`,
+                text: `आपने पहले "${log.topic}" पढ़ा था। आज वैज्ञानिक अंतराल के अनुसार रिवीजन का समय है।`
+              });
             }
           });
-          generatedAlerts.push({ id: 'focus-tip-1', title: 'एकाग्रता सुधार गाइड ⚡', text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर का उपयोग करें!', type: 'tip' });
+
+          if (generatedAlerts.length === 0) {
+            generatedAlerts.push({
+              title: "⚡ एकाग्रता सुधार गाइड",
+              text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर टैब में जाकर 25 मिनट का एक सेशन अभी चालू करें!'
+            });
+          }
+
           setNotifications(generatedAlerts);
         }, [studyLogs]);
 
-        useEffect(() => {
-          if (!timer.isActive) {
-            if (timer.minutes === 25 && timer.seconds === 0) setTreeState('🌱');
-            else if (timer.mode === 'Focus') setTreeState('🍂');
-            return;
-          }
-          if (timer.mode === 'Focus') {
-            if (timer.minutes < 5) setTreeState('🌳');
-            else if (timer.minutes < 15) setTreeState('🌿');
-            else setTreeState('🌱');
-          } else {
-            setTreeState('🎉');
-          }
-        }, [timer.minutes, timer.isActive, timer.mode]);
-
-        const handleViewPdf = async (logId) => {
-          try {
-            const pdfRecord = await getPDFFromDB(logId);
-            if (!pdfRecord || !pdfRecord.data) { showAlert("⚠️ कोई PDF फाइल नहीं मिली!"); return; }
-            const base64Parts = pdfRecord.data.split(',');
-            const mimeType = base64Parts[0].match(/:(.*?);/)[1];
-            const rawBinary = atob(base64Parts[1]);
-            const arrayLength = rawBinary.length;
-            const uint8Array = new Uint8Array(arrayLength);
-            for (let i = 0; i < arrayLength; i++) uint8Array[i] = rawBinary.charCodeAt(i);
-            const blob = new Blob([uint8Array], { type: mimeType });
-            const blobUrl = URL.createObjectURL(blob);
-            window.open(blobUrl, '_blank');
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-          } catch (error) { showAlert("⚠️ PDF खोलने में समस्या हुई।"); }
-        };
-
-        const handleDeletePdf = async (logId) => {
-          const success = await deletePDFFromDB(logId);
-          if (success) {
-            setStudyLogs(prev => prev.map(log => log.id === logId ? { ...log, hasPdf: false } : log));
-            showAlert("🗑️ PDF फाइल डिलीट कर दी गई!");
-          }
-        };
-
-        const handleDeleteLog = async (logId) => {
-          if(confirm("क्या आप वाकई इस पूरे स्टडी टॉपिक को हटाना चाहते हैं?")) {
-            await deletePDFFromDB(logId);
-            setStudyLogs(prev => prev.filter(log => log.id !== logId));
-            showAlert("🗑️ स्टडी टॉपिक सफलतापूर्वक हटा दिया गया है!");
-          }
-        };
-
-        const handleFileChange = (e) => {
-          const file = e.target.files[0];
-          if (file && file.type === "application/pdf") {
-            if (file.size > 5 * 1024 * 1024) { showAlert("⚠️ साइज 5MB से कम होना चाहिए!"); e.target.value = ""; return; }
-            setPdfFile(file);
-          } else { showAlert("⚠️ केवल PDF फाइल चुनें!"); e.target.value = ""; }
-        };
-
-        const handleAddLog = async (e) => {
+        const handleAddLog = (e) => {
           e.preventDefault();
           const finalSubject = newLog.subject === 'अन्य (Custom)' ? newLog.customSubject : newLog.subject;
-          if (!finalSubject || !newLog.topic) { showAlert('⚠️ कृपया विषय और टॉपिक दर्ज करें!'); return; }
 
-          const logId = Date.now();
-          let hasPdf = false;
-          if (pdfFile) {
-            hasPdf = true;
-            const reader = new FileReader(); reader.readAsDataURL(pdfFile);
-            reader.onload = async () => { await savePDFToDB(logId, reader.result, pdfFile.name); };
-          }
-
-          let cQuiz = null;
-          if (newLog.quizQ.trim() && newLog.quizA.trim()) {
-            cQuiz = { question: newLog.quizQ, answer: newLog.quizA };
+          if (!finalSubject || !newLog.topic) {
+            showAlert('⚠️ कृपया विषय और मुख्य टॉपिक का नाम दर्ज करें!');
+            return;
           }
 
           const todayStr = new Date().toISOString().split('T')[0];
@@ -285,8 +140,13 @@
           let d4 = new Date(); d4.setDate(d4.getDate() + 15);
 
           const newEntry = {
-            id: logId, subject: finalSubject, topic: newLog.topic, date: todayStr, difficulty: newLog.difficulty,
-            timeSpent: parseFloat(newLog.timeSpent) || 1, hasPdf: hasPdf, currentStage: 1, customQuiz: cQuiz,
+            id: Date.now(),
+            subject: finalSubject,
+            topic: newLog.topic,
+            date: todayStr,
+            difficulty: newLog.difficulty,
+            timeSpent: parseFloat(newLog.timeSpent) || 1,
+            currentStage: 1,
             stages: [
               { name: 'R1 (24h)', due: d1.toISOString().split('T')[0], completed: false },
               { name: 'R2 (3d)', due: d2.toISOString().split('T')[0], completed: false },
@@ -297,489 +157,183 @@
 
           setStudyLogs([newEntry, ...studyLogs]);
           setUser(prev => ({ ...prev, points: prev.points + 50 }));
-          showAlert('🚀 पढ़ाई का ब्यौरा सुरक्षित हो गया! +50 XP!');
-          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2, quizQ: '', quizA: '' });
-          setPdfFile(null); setActiveTab('dashboard');
+          showAlert('🚀 शानदार! पढ़ाई का ब्यौरा दर्ज हो गया। +50 XP!');
+          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
+          setActiveTab('dashboard');
         };
 
-        const handleUpdateProfile = (e) => {
-          e.preventDefault();
-          if (!profileForm.name.trim()) return;
-          setUser(prev => ({ ...prev, name: profileForm.name, availableHours: parseInt(profileForm.availableHours) || 6, category: profileForm.category }));
-          showAlert('👤 प्रोफाइल डेटा सुरक्षित हो गया!'); setActiveTab('dashboard');
-        };
-
-        // 📊 सुधार: वीकली स्टडी रिपोर्ट को CSV फाइल के रूप में एक्सपोर्ट/डाउनलोड करने का इंजन
-        const exportToCSVReport = () => {
-          if (studyLogs.length === 0) { showAlert("⚠️ निर्यात करने के लिए कोई डेटा नहीं है!"); return; }
-          let csvContent = "data:text/csv;charset=utf-8,विषय,टॉपिक,तारीख,समय बिताया (घंटे),स्थिति\n";
-          studyLogs.forEach(log => {
-            const status = log.stages.every(s => s.completed) ? "मास्टर (Complete)" : "सक्रिय (In-Progress)";
-            csvContent += `"${log.subject}","${log.topic}","${log.date}",${log.timeSpent},"${status}"\n`;
-          });
-          const encodedUri = encodeURI(csvContent);
-          const link = document.createElement("a");
-          link.setAttribute("href", encodedUri);
-          link.setAttribute("download", `Sajag_Chhatra_Report_${new Date().toISOString().split('T')[0]}.csv`);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          showAlert("📊 आपकी साप्ताहिक रिपोर्ट सफलतापूर्वक डाउनलोड हो गई है!");
-        };
-
-        const generateTextBackup = () => {
-          const backupData = { user, studyLogs };
-          const jsonString = JSON.stringify(backupData);
-          const base64Str = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, (match, p1) => {
-            return String.fromCharCode(parseInt(p1, 16));
-          }));
-          navigator.clipboard.writeText(base64Str); 
-          showAlert("📋 बैकअप कोड कॉपी हो गया है!");
-        };
-
-        const handleRestoreData = (e) => {
-          e.preventDefault();
-          try {
-            if (!backupInputCode.trim()) return;
-            const decodedJson = decodeURIComponent(atob(backupInputCode.trim()).split('').map((c) => {
-              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            const decodedData = JSON.parse(decodedJson);
-            if (decodedData.user && decodedData.studyLogs) {
-              setUser(decodedData.user); setStudyLogs(decodedData.studyLogs);
-              showAlert("✅ डेटा सफलतापूर्वक रिस्टोर हो गया!"); setBackupInputCode(''); setActiveTab('dashboard');
-            }
-          } catch (err) { showAlert("⚠️ कोड सही नहीं है या विकृत है।"); }
-        };
-
-        const handleGenerateQuiz = async (log) => {
-          setSelectedTopicForTest(log); setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
-          setTimeout(() => {
-            const simulatedQuestions = [
-              { question: `निम्न में से कौन सा विकल्प "${log.topic}" संकल्पने के संदर्भ में सबसे महत्वपूर्ण है?`, options: ["सैद्धांतिक अनुप्रयोग", "व्यावहारिक अनुभव", "गणितीय समीकरण", "उपरोक्त सभी"], correctIndex: 3, explanation: "यह अवधारणा तीनों आयामों को संतुलित तरीके से समझाती है।" },
-              { question: `इस विषय में मेमोरी रिटेंशन बढ़ाने का वैज्ञानिक तरीका क्या है?`, options: ["एक बार पढ़ना", "स्टैस्ड रिपीटीशन और सक्रिय टेस्ट", "नोट्स रटना", "परीक्षा से पहले पढ़ना"], correctIndex: 1, explanation: "वैज्ञानिक शोधों के अनुसार एक्टिव रिकॉल और स्पैस्ड रिपीटीशन ही सर्वोत्तम है।" }
-            ];
-            setAiQuiz(simulatedQuestions); setLoadingQuiz(false);
-          }, 1200);
-        };
-
-        const handleSubmitQuiz = () => {
-          setQuizSubmitted(true);
-          let correctCount = 0;
-          aiQuiz.forEach((q, idx) => { if (userAnswers[idx] === q.correctIndex) correctCount++; });
-          const pointsWon = correctCount * 20;
-          setUser(prev => ({ ...prev, points: prev.points + pointsWon, streak: prev.streak + 1 }));
-          showAlert(`🎉 टेस्ट समाप्त! स्कोर: ${correctCount}/${aiQuiz.length}. +${pointsWon} XP!`);
-          if (correctCount >= 1 && selectedTopicForTest) promoteRevisionStage(selectedTopicForTest.id);
-        };
-
-        const promoteRevisionStage = (logId) => {
-          setStudyLogs(prev => prev.map(log => {
-            if (log.id === logId) {
-              const nextStage = log.currentStage + 1;
-              const isFinalTestCompleting = log.currentStage === 4;
-              
-              const updatedStages = log.stages.map((stage, sIdx) => {
-                if (sIdx === log.currentStage - 1) return { ...stage, completed: true }; return stage;
-              });
-
-              if (isFinalTestCompleting) {
-                setTimeout(() => showAlert("🏆 अद्भुत! आपने इस टॉपिक पर 100% महारत हासिल कर ली है! +100 XP बोनस!"), 500);
-                setUser(prev => ({ ...prev, points: prev.points + 100 }));
+        useEffect(() => {
+          let interval = null;
+          if (timer.isActive) {
+            interval = setInterval(() => {
+              if (timer.seconds > 0) {
+                setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
+              } else if (timer.seconds === 0 && timer.minutes > 0) {
+                setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
+              } else {
+                clearInterval(interval);
+                const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
+                setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
+                showAlert(`🔔 फोकस सत्र समाप्त!`);
               }
+            }, 1000);
+          } else {
+            clearInterval(interval);
+          }
+          return () => clearInterval(interval);
+        }, [timer.isActive, timer.seconds, timer.minutes]);
 
-              return { ...log, currentStage: nextStage > 4 ? 4 : nextStage, stages: updatedStages };
-            }
-            return log;
-          }));
-        };
-
-        const handleMakeStageCompletedDirect = (logId, stageIndex) => {
-          setStudyLogs(prev => prev.map(log => {
-            if (log.id === logId) {
-              const updatedStages = [...log.stages]; 
-              updatedStages[stageIndex].completed = true;
-              const nextStage = stageIndex + 2;
-              const isFinalTestCompleting = stageIndex === 3;
-
-              if (isFinalTestCompleting) {
-                setTimeout(() => showAlert("🏆 अद्भुत! आपने इस टॉपिक पर 100% महारत हासिल कर ली है! +100 XP बोनस!"), 500);
-                setUser(prev => ({ ...prev, points: prev.points + 100 }));
-              }
-
-              return { ...log, currentStage: nextStage > 4 ? 4 : nextStage, stages: updatedStages };
-            }
-            return log;
-          }));
-        };
-
-        const getHeatmapColor = (dayOffset) => {
-          const checkDate = new Date();
-          checkDate.setDate(checkDate.getDate() - dayOffset);
-          const dateStr = checkDate.toISOString().split('T')[0];
-          const totalHours = studyLogs.filter(log => log.date === dateStr).reduce((sum, current) => sum + current.timeSpent, 0);
-          if (totalHours === 0) return 'bg-slate-800';
-          if (totalHours < 2) return 'bg-emerald-900';
-          if (totalHours < 4) return 'bg-emerald-700';
-          return 'bg-emerald-500';
-        };
-
-        // 🔍 सुधार: सर्च क्वेरी के हिसाब से फ़िल्टर्ड डेटा एरे इंजनों की रेंडरिंग संरचना
-        const filteredLogs = studyLogs.filter(log => 
-          log.topic.toLowerCase().includes(searchQuery.toLowerCase()) || 
-          log.subject.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-
-        const activeTopics = filteredLogs.filter(log => log.stages.some(s => !s.completed));
-        const masteredTopics = filteredLogs.filter(log => log.stages.every(s => s.completed));
-        
         const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
         const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
 
         return (
-          <div className="w-full flex-1 flex flex-col justify-between pb-14 md:pb-0">
-            <nav className="w-full bg-slate-900 border-b border-slate-800 dark:bg-slate-900 light:bg-white light:border-slate-200 px-4 sm:px-8 py-3 flex justify-between items-center transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="bg-indigo-600/10 p-2 rounded-xl border border-indigo-500/20">
-                  <Icon name="brain" className="w-6 h-6 text-indigo-400" />
+          <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between items-center p-2 sm:p-4 w-full">
+            <header className="w-full max-w-md text-center py-2">
+              <h1 className="text-xl sm:text-2xl font-black text-indigo-400 flex items-center justify-center gap-2">
+                🧠 सजग छात्र <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-[9px] text-white px-2 py-0.5 rounded-full font-bold">ULTIMATE v2.5</span>
+              </h1>
+              <p className="text-[10px] text-slate-400 mt-1">वैज्ञानिक 4-स्टेज रिवीजन ट्रैकर व फोकस टाइमर</p>
+            </header>
+
+            <div className="w-full max-w-md bg-slate-900 rounded-[32px] border-4 border-slate-800 shadow-2xl relative flex flex-col overflow-hidden h-[84vh] max-h-[790px]">
+              {alertMsg && (
+                <div className="absolute top-4 left-4 right-4 bg-indigo-600 text-white p-3 rounded-xl shadow-xl z-50 text-xs border border-indigo-400 animate-fadeIn">
+                  <span>{alertMsg}</span>
                 </div>
-                <div>
-                  <h1 className="text-lg sm:text-2xl font-black text-indigo-400 dark:text-indigo-400 light:text-indigo-600 tracking-tight">सजक छात्र</h1>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">वैज्ञानिक 4-स्टेश मेमोरी ट्रैकर व टूल्स</p>
+              )}
+
+              <div className="bg-slate-950 text-[10px] px-6 pt-4 pb-2 text-slate-400 flex justify-between items-center border-b border-slate-800/40">
+                <div>📱 app.pmevidya.com</div>
+                <div className="flex items-center gap-1.5 font-semibold text-slate-300">
+                  <span className="bg-indigo-900/40 border border-indigo-700/50 text-[9px] px-1.5 py-0.5 rounded text-indigo-300">🔥 {user.streak} दिन</span>
+                  <span>⭐ {user.points} XP</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 text-xs">
-                <div className="hidden sm:flex items-center gap-2 bg-slate-950/40 light:bg-slate-100 py-1.5 px-3 rounded-xl border border-slate-800 light:border-slate-200 text-[11px] text-slate-300 light:text-slate-700">
-                  <span>📱 app.pmevidya.com</span>
-                  <span className="text-slate-600">|</span>
-                  <span className="font-semibold text-indigo-400">🔥 {user.streak} दिन</span>
-                  <span className="text-slate-600">|</span>
-                  <span className="font-bold text-amber-400">⭐ {user.points} XP</span>
-                </div>
-                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-indigo-400 light:bg-slate-100 light:border-slate-200 shadow-sm transition active:scale-95">
-                  <Icon name={isDarkMode ? "sun" : "moon"} className="w-4 h-4" />
-                </button>
-              </div>
-            </nav>
-
-            <AdSenseUnit slotId="HEADER_SLOT_ID" />
-
-            <main className="flex-1 w-full max-w-6xl mx-auto p-3 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-              <div className="hidden md:block md:col-span-1 bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl p-4 space-y-2 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block px-2 mb-2">मुख्य मेनू</span>
-                <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><Icon name="book-open" /><span>मेमोरी ट्रैक</span></button>
-                <button onClick={() => setActiveTab('log')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'log' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><Icon name="plus-circle" /><span>पढ़ाई दर्ज करें</span></button>
-                <button onClick={() => setActiveTab('timer')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'timer' ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><Icon name="clock" /><span>फोकस टाइमर</span></button>
-                <button onClick={() => setActiveTab('notifications')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'notifications' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><div className="flex items-center gap-3"><Icon name="bell" /><span>स्मार्ट सुझाव</span></div>{notifications.filter(n => n.type === 'urgent').length > 0 && <span className="w-2 h-2 rounded-full bg-rose-500"></span>}</button>
-                <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'profile' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-950/40 dark:hover:bg-slate-950/40 light:hover:bg-slate-50 light:text-slate-600'}`}><Icon name="user" /><span>प्रोफाइल सेटिंग्स</span></button>
-              </div>
-
-              <div className="col-span-1 md:col-span-3 bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm min-h-[460px]">
-                <div className="md:hidden flex justify-between items-center bg-slate-950/40 light:bg-slate-100 p-2.5 rounded-xl mb-4 border border-slate-800/60 light:border-slate-200 text-[10px] text-slate-400">
-                  <span className="font-bold text-indigo-400">🔥 {user.streak} दिन स्ट्रीक</span>
-                  <span className="font-bold text-amber-400">⭐ {user.points} XP</span>
-                </div>
-
+              <main className="flex-1 overflow-y-auto p-4 pb-16">
                 {activeTab === 'dashboard' && (
-                  <div className="space-y-6">
-                    {/* 🔍 सर्च बार विजेट (New Filtering Control Layout) */}
-                    <div className="relative w-full">
-                      <input 
-                        type="text" 
-                        placeholder="🔍 यहाँ विषय या टॉपिक का नाम टाइप करके खोजें..." 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-slate-950 dark:bg-slate-950 light:bg-slate-100 border border-slate-800 light:border-slate-300 rounded-xl py-2 px-3 text-xs focus:border-indigo-500 outline-none shadow-inner"
-                      />
-                    </div>
-
-                    <div className="bg-slate-950/40 dark:bg-slate-950/40 light:bg-slate-100 p-4 rounded-xl border border-slate-800 light:border-slate-200 space-y-2">
-                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 light:text-slate-600 uppercase tracking-wider block">📆 साप्ताहिक निरंतरता ग्रिड (Consistency Heatmap)</span>
-                      <div className="flex gap-2 pt-1">
-                        {[6, 5, 4, 3, 2, 1, 0].map(day => (
-                          <div key={day} className={`w-7 h-7 rounded-md transition-colors ${getHeatmapColor(day)} flex items-center justify-center text-[8px] font-bold text-white/40`}>
-                            {new Date(Date.now() - day * 24 * 60 * 60 * 1000).getDate()}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-slate-950 to-indigo-950 dark:from-slate-950 dark:to-indigo-950 light:from-indigo-50/60 light:to-slate-100 p-4 rounded-xl border border-indigo-900/30 light:border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                      <div className="space-y-1">
-                        <h2 className="text-xs text-indigo-300 light:text-indigo-600 font-bold uppercase tracking-wider">दैनिक अध्ययन समय बजट प्रोग्रेस</h2>
-                        <h3 className="text-base sm:text-xl font-black dark:text-white light:text-slate-900">{todayTotalAllocated} / {user.availableHours} घंटे बुक हैं</h3>
-                        <div className="w-48 bg-slate-800 light:bg-slate-200 h-1.5 rounded-full overflow-hidden mt-2">
-                          <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (todayTotalAllocated / user.availableHours) * 100)}%` }}></div>
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 p-4 rounded-2xl border border-indigo-900/40 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h2 className="text-xs text-indigo-300 font-bold uppercase tracking-wide">दैनिक अध्ययन समय बजट</h2>
+                          <h3 className="text-lg font-black text-white mt-1">{todayTotalAllocated} / {user.availableHours} घंटे बुक हैं</h3>
                         </div>
+                        <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] py-1 px-2 rounded-lg font-bold">
+                          {remainingTime > 0 ? `${remainingTime}h उपलब्ध` : 'पूर्ण!'}
+                        </span>
                       </div>
-                      <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs py-1.5 px-3 rounded-xl font-bold self-start sm:self-center">
-                        {remainingTime > 0 ? `${remainingTime} घंटे उपलब्ध` : 'आज का कोटा पूर्ण!'}
-                      </span>
+                      <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (todayTotalAllocated / user.availableHours) * 100)}%` }}></div>
+                      </div>
                     </div>
 
                     <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Icon name="calendar" className="text-emerald-400" /><span>📅 सक्रिय मेमोरी ट्रैकर (Progressing)</span>
-                      </h3>
-                      
-                      {activeTopics.length === 0 ? (
-                        <p className="text-xs text-slate-500 text-center py-6 italic border border-dashed border-slate-800 rounded-xl">कोई सक्रिय डेटा मेल नहीं खाया या पेंडिंग नहीं है!</p>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {activeTopics.map(log => (
-                            <div key={log.id} className="bg-slate-950 dark:bg-slate-950 light:bg-slate-50/60 p-4 rounded-xl border border-slate-800/80 light:border-slate-200 flex flex-col justify-between space-y-3 animate-fadeIn">
-                              <div>
-                                <div className="flex justify-between items-start">
-                                  <span className="text-[9px] bg-indigo-950 dark:bg-indigo-950 light:bg-indigo-100 border border-indigo-800 text-indigo-300 dark:text-indigo-300 light:text-indigo-700 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
-                                  <div className="flex items-center gap-1">
-                                    {log.hasPdf && (
-                                      <button onClick={() => handleViewPdf(log.id)} className="bg-slate-900 border border-emerald-500/40 text-emerald-400 p-1 rounded-md text-[9px] font-bold light:bg-white"><Icon name="file-text" className="w-3 h-3" /></button>
-                                    )}
-                                    <button onClick={() => handleGenerateQuiz(log)} className="bg-slate-900 border border-indigo-500/40 text-indigo-400 p-1 rounded-md text-[9px] font-bold flex items-center gap-0.5 light:bg-white"><Icon name="brain" className="w-3 h-3" /><span>AI</span></button>
-                                    <button onClick={() => handleDeleteLog(log.id)} className="bg-slate-900 border border-rose-500/40 text-rose-400 p-1 rounded-md text-[9px] font-bold shadow-sm light:bg-white"><Icon name="trash-2" className="w-3 h-3" /></button>
-                                  </div>
-                                </div>
-                                <h4 className="text-xs font-bold dark:text-white light:text-slate-900 mt-2">{log.topic}</h4>
-                                <p className="text-[9px] text-slate-500 mt-0.5">शुरू किया गया: {log.date}</p>
-
-                                {log.customQuiz && (
-                                  <div className="mt-3 perspective-1000 w-full h-12">
-                                    <div onClick={() => setFlippedCards(p => ({...p, [log.id]: !p[log.id]}))} className={`w-full h-full relative transition-transform duration-500 transform-style-3d cursor-pointer ${flippedCards[log.id] ? 'rotate-y-180' : ''}`}>
-                                      <div className="absolute inset-0 bg-slate-900 dark:bg-slate-900 light:bg-slate-200 border border-indigo-500/20 rounded-lg p-2 flex items-center justify-between backface-hidden">
-                                        <span className="text-[9px] truncate">❓ प्रश्न: {log.customQuiz.question}</span>
-                                        <span className="text-[7px] text-indigo-400 font-bold shrink-0">पलटें 🔄</span>
-                                      </div>
-                                      <div className="absolute inset-0 bg-indigo-950/50 border border-emerald-500/30 rounded-lg p-2 flex items-center rotate-y-180 backface-hidden">
-                                        <span className="text-[9px] text-emerald-400 font-bold truncate">💡 उत्तर: {log.customQuiz.answer}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">📅 सक्रिय मेमोरी ट्रैकर</h3>
+                      {studyLogs.map(log => (
+                        <div key={log.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+                          <span className="text-[9px] bg-indigo-950 border border-indigo-800 text-indigo-300 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
+                          <h4 className="text-xs font-bold text-white mt-1">{log.topic}</h4>
+                          <div className="grid grid-cols-4 gap-1.5 mt-2">
+                            {log.stages.map((stage, idx) => (
+                              <div key={idx} className={`text-[9px] p-1.5 rounded border text-center ${stage.completed ? 'bg-emerald-950 border-emerald-500 text-emerald-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+                                {stage.name}
                               </div>
-
-                              <div className="grid grid-cols-4 gap-1 pt-2 border-t border-slate-900/60 light:border-slate-200">
-                                {log.stages.map((stage, idx) => (
-                                  <button key={idx} disabled={stage.completed || (idx !== log.currentStage - 1)} onClick={() => handleMakeStageCompletedDirect(log.id, idx)}
-                                    className={`text-[8px] py-1 rounded border text-center transition ${stage.completed ? 'bg-emerald-950 border-emerald-500 text-emerald-400' : (idx === log.currentStage - 1 ? 'bg-indigo-950 border-indigo-500 text-indigo-300 font-bold' : 'bg-slate-800 light:bg-slate-200 border-slate-700 text-slate-400')}`}>
-                                    <span>{stage.name}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-3 pt-4 border-t border-slate-800/40">
-                      <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Icon name="award" className="text-amber-400" /><span>🏆 महारत हासिल टॉपिक्स (Mastered Archive)</span>
-                      </h3>
-                      
-                      {masteredTopics.length === 0 ? (
-                        <p className="text-xs text-slate-500 italic">खोजे गए शब्दों के हिसाब से कोई मास्टर आर्काइव डेटा नहीं मिला।</p>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {masteredTopics.map(log => (
-                            <div key={log.id} className="bg-emerald-950/10 border border-emerald-500/30 p-4 rounded-xl flex flex-col justify-between space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-[9px] bg-emerald-900/30 border border-emerald-500 text-emerald-400 px-2 py-0.5 rounded font-bold uppercase">{log.subject}</span>
-                                <button onClick={() => handleDeleteLog(log.id)} className="text-slate-500 hover:text-rose-400 transition p-1"><Icon name="trash-2" className="w-3.5 h-3.5" /></button>
-                              </div>
-                              <h4 className="text-xs font-bold text-slate-200 line-through decoration-slate-500/50">{log.topic}</h4>
-                              <div className="flex justify-between items-center text-[9px] text-emerald-400/80 font-semibold pt-1">
-                                <span>✨ 100% स्थायी स्मृति (Long-term)</span>
-                                <span className="bg-emerald-500/10 py-0.5 px-2 rounded-full text-[8px]">कम्प्लीट 👑</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      ))}
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'log' && (
-                  <div className="max-w-xl mx-auto space-y-4">
-                    <h3 className="text-sm font-bold border-b border-slate-800 pb-2 flex items-center gap-1.5"><Icon name="plus-circle" className="text-indigo-400" /><span>नया अध्ययन ब्यौरा सुरक्षित करें</span></h3>
-                    <form onSubmit={handleAddLog} className="space-y-4 text-xs dark:text-slate-200 light:text-slate-800">
+                  <form onSubmit={handleAddLog} className="space-y-4 text-xs">
+                    <div>
+                      <label className="block text-slate-300 font-semibold mb-1">विषय (Subject):</label>
+                      <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
+                        <option value="">-- चुनें --</option>
+                        <option value="भौतिक विज्ञान (Physics)">भौतिक विज्ञान (Physics)</option>
+                        <option value="रसायन विज्ञान (Chemistry)">रसायन विज्ञान (Chemistry)</option>
+                        <option value="गणित (Maths)">गणित (Maths)</option>
+                        <option value="इतिहास (History)">इतिहास (History)</option>
+                        <option value="अन्य (Custom)">अन्य</option>
+                      </select>
+                    </div>
+                    {newLog.subject === 'अन्य (Custom)' && (
+                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
+                    )}
+                    <div>
+                      <label className="block text-slate-300 font-semibold mb-1">टॉपिक:</label>
+                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-semibold mb-1">विषय (Subject):</label>
-                        <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 light:border-slate-300 rounded-xl p-2.5">
-                          <option value="">-- विषय चुनें --</option><option value="भौतिक विज्ञान (Physics)">भौतिक विज्ञान (Physics)</option><option value="रसायन विज्ञान (Chemistry)">रसायन विज्ञान (Chemistry)</option><option value="गणित (Maths)">गणित (Maths)</option><option value="इतिहास (History)">इतिहास (History)</option><option value="अन्य (Custom)">अन्य</option>
+                        <label className="block text-slate-300 font-semibold mb-1">समय (घंटे):</label>
+                        <input type="number" step="0.5" min="0.5" max="8" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
+                      </div>
+                      <div>
+                        <label className="block text-slate-300 font-semibold mb-1">कठिनाई:</label>
+                        <select value={newLog.difficulty} onChange={(e) => setNewLog({ ...newLog, difficulty: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
+                          <option value="आसान (Easy)">आसान (Easy)</option>
+                          <option value="मध्यम (Medium)">मध्यम (Medium)</option>
+                          <option value="कठिन (Hard)">कठिन (Hard)</option>
                         </select>
                       </div>
-                      {newLog.subject === 'अन्य (Custom)' && (
-                        <input type="text" placeholder="कस्टम विषय का नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2.5" />
-                      )}
-                      <div>
-                        <label className="block font-semibold mb-1">पढ़ा गया टॉपिक:</label>
-                        <input type="text" placeholder="टॉपिक का नाम दर्ज करें..." value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
-                      </div>
-                      <div>
-                        <label className="block font-semibold mb-1">लगाया गया समय (घंटे):</label>
-                        <input type="number" step="0.5" min="0.5" max="12" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
-                      </div>
-
-                      <div className="bg-slate-950/40 p-3 rounded-xl border border-indigo-500/20 space-y-2">
-                        <label className="block font-bold text-indigo-400 text-[10px] uppercase tracking-wide">💡 क्विक सेल्फ़-क्विज़ कार्ड जोड़ें (वैकल्पिक)</label>
-                        <input type="text" placeholder="प्रश्न यहाँ टाइप करें..." value={newLog.quizQ} onChange={(e) => setNewLog({ ...newLog, quizQ: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
-                        <input type="text" placeholder="उत्तर यहाँ टाइप करें..." value={newLog.quizA} onChange={(e) => setNewLog({ ...newLog, quizA: e.target.value })} className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2 text-[11px]" />
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold mb-1">स्टडी नोट्स लिंक (PDF केवल, Max 5MB):</label>
-                        <input type="file" accept="application/pdf" onChange={handleFileChange} className="w-full bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 rounded-xl p-2 file:py-1 file:px-3 file:rounded file:bg-indigo-950 file:text-indigo-300" />
-                      </div>
-                      <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl text-white text-xs shadow-lg hover:bg-indigo-700 transition">🚀 सिस्टम में सुरक्षित करें</button>
-                    </form>
-                  </div>
-                )}
-
-                {activeTab === 'test-arena' && (
-                  <div className="max-w-2xl mx-auto space-y-4">
-                    <div className="bg-slate-950 p-4 rounded-xl text-center border border-slate-800">
-                      <span className="text-[9px] bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded font-black uppercase">{selectedTopicForTest?.subject}</span>
-                      <h3 className="text-sm font-bold text-white mt-1.5">{selectedTopicForTest?.topic}</h3>
                     </div>
-                    {loadingQuiz ? (
-                      <div className="flex flex-col items-center justify-center py-16 space-y-3">
-                        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-xs text-slate-400">AI अभ्यास टेस्ट तैयार कर रहा है...</p>
-                      </div>
-                    ) : aiQuiz ? (
-                      <div className="space-y-4 text-xs">
-                        {aiQuiz.map((q, qIdx) => (
-                          <div key={qIdx} className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 animate-fadeIn">
-                            <h4 className="font-bold text-slate-200">प्रश्न {qIdx + 1}: {q.question}</h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {q.options.map((opt, oIdx) => (
-                                <button key={oIdx} type="button" disabled={quizSubmitted} onClick={() => setUserAnswers({ ...userAnswers, [qIdx]: oIdx })} className="w-full text-left p-2.5 rounded-xl border border-slate-800 text-[11px] bg-slate-950">{oIdx + 1}. {opt}</button>
-                              ))}
-                            </div>
-                            {quizSubmitted && <div className="bg-slate-900 p-2.5 rounded text-[10px] text-slate-400 border border-slate-800"><strong className="text-indigo-400">व्याख्या: </strong>{q.explanation}</div>}
-                          </div>
-                        ))}
-                        {!quizSubmitted ? ( <button onClick={handleSubmitQuiz} disabled={Object.keys(userAnswers).length < aiQuiz.length} className="w-full bg-emerald-600 font-bold py-3 rounded-xl text-white">टेस्ट सबमिट करें</button> ) : ( <button onClick={() => setActiveTab('dashboard')} className="w-full bg-slate-800 font-bold py-3 rounded-xl text-slate-200">डैशबोर्ड पर जाएँ</button> )}
-                      </div>
-                    ) : null}
-                  </div>
+                    <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl shadow-lg text-white text-xs">🚀 सुरक्षित करें</button>
+                  </form>
                 )}
 
                 {activeTab === 'timer' && (
                   <div className="space-y-6 flex flex-col items-center justify-center min-h-[350px]">
-                    <div className="bg-slate-950/40 border border-slate-800 px-4 py-2 rounded-xl text-center text-xs flex items-center gap-4">
-                      <span className="font-bold text-indigo-400 uppercase tracking-wider">⏱️ सफल सेशन्स: {user.pomodoroRounds || 0}</span>
-                      <span className="text-lg bg-slate-900 p-1 rounded border border-slate-800 animate-bounce">{treeState}</span>
+                    <div className="relative w-40 h-40 rounded-full border-4 border-indigo-500/20 flex flex-col items-center justify-center bg-slate-900">
+                      <span className="text-[10px] font-bold text-indigo-300 uppercase">{timer.mode}</span>
+                      <span className="text-3xl font-black text-white my-1 font-mono">{String(timer.minutes).padStart(2, '0')}:{String(timer.seconds).padStart(2, '0')}</span>
                     </div>
-                    <div className="relative w-44 h-44 rounded-full border-4 border-indigo-500/20 flex flex-col items-center justify-center bg-slate-950 shadow-md">
-                      <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">{timer.mode}</span>
-                      <span className="text-4xl font-black text-white my-1 font-mono">{String(timer.minutes).padStart(2, '0')}:{String(timer.seconds).padStart(2, '0')}</span>
-                    </div>
-                    <div className="flex gap-3 text-xs">
-                      <button type="button" onClick={() => setTimer(prev => ({ ...prev, isActive: !prev.isActive }))} className={`px-6 py-2 rounded-full font-bold text-white ${timer.isActive ? 'bg-amber-600' : 'bg-emerald-600'}`}>
+                    <div className="flex gap-3">
+                      <button type="button" onClick={() => setTimer(prev => ({ ...prev, isActive: !prev.isActive }))} className={`px-6 py-2 rounded-full font-bold text-white text-xs ${timer.isActive ? 'bg-amber-600' : 'bg-emerald-600'}`}>
                         {timer.isActive ? '⏸ रोकें' : '▶ शुरू करें'}
                       </button>
-                      <button type="button" onClick={() => setTimer({ minutes: timer.mode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: timer.mode })} className="bg-slate-800 border border-slate-700 text-slate-300 px-5 py-2 rounded-full font-bold">🔄 रीसेट</button>
+                      <button type="button" onClick={() => setTimer({ minutes: timer.mode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: timer.mode })} className="bg-slate-800 border border-slate-700 text-slate-300 px-5 py-2 rounded-full text-xs">🔄 रीसेट</button>
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'notifications' && (
-                  <div className="max-w-xl mx-auto space-y-4 text-xs">
-                    {/* ⏰ रिमाइंडर अलार्म विन्यास (New Alarm Scheduler View) */}
-                    <div className="bg-slate-950/40 border border-slate-800 p-4 rounded-xl space-y-2">
-                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1"><Icon name="clock" /> ककस्टमाइज़्ड डेली स्टडी रिमाइंडर अलार्म</span>
-                      <div className="flex gap-2 pt-1">
-                        <input 
-                          type="time" 
-                          value={reminderTime} 
-                          onChange={(e) => setReminderTime(e.target.value)}
-                          className="bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-200 outline-none"
-                        />
-                        <button type="button" onClick={() => { if(reminderTime) showAlert(`⏰ रिमाइंडर सफलतापूर्वक ${reminderTime} बजे के लिए सेट हो गया!`); }} className="bg-indigo-600 px-4 rounded-xl text-white font-bold text-[11px]">रिमाइंडर लॉक करें</button>
-                      </div>
-                      {reminderTime && <p className="text-[9px] text-emerald-400 font-medium">सक्रिय अलार्म समय: आज {reminderTime} बजे</p>}
-                    </div>
-
-                    <h3 className="text-sm font-bold border-b border-slate-800 pb-2">🧠 एआई विश्लेषक सुझाव केंद्र</h3>
+                  <div className="space-y-3 text-xs">
                     {notifications.map((notif, idx) => (
-                      <div key={idx} className={`p-4 border rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-3 ${notif.type === 'urgent' ? 'bg-rose-950/20 border-rose-900/40 text-rose-300' : 'bg-indigo-950/25 border-indigo-900/40 text-indigo-300'}`}>
-                        <div>
-                          <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
-                          <p className="text-[11px] text-slate-300">{notif.text}</p>
-                        </div>
-                        {notif.actionTopic && ( <button onClick={() => handleGenerateQuiz(notif.actionTopic)} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 flex-shrink-0"><Icon name="brain" className="w-3 h-3" /><span>अभी टेस्ट लें</span></button> )}
+                      <div key={idx} className="p-3 bg-indigo-950/25 border border-indigo-900/40 rounded-xl text-indigo-300">
+                        <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
+                        <p className="text-[11px] text-slate-300">{notif.text}</p>
                       </div>
                     ))}
                   </div>
                 )}
 
                 {activeTab === 'profile' && (
-                  <div className="max-w-xl mx-auto grid grid-cols-1 gap-6">
-                    {/* 📊 वीकली प्रोग्रेस डाउनलोडर ट्रिगर बटन */}
-                    <div className="bg-slate-950/40 border border-slate-800 p-4 rounded-xl space-y-2 text-xs">
-                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">📊 अध्ययन रिपोर्ट डेटा सेंटर</span>
-                      <p className="text-[10px] text-slate-400">अपने पूरे अध्ययन चक्र का सारांश एक्सेल / सीएसवी शीट के रूप में ऑफ़लाइन सुरक्षित करें।</p>
-                      <button type="button" onClick={exportToCSVReport} className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-2 rounded-xl text-center shadow-md">
-                        📥 स्टडी रिपोर्ट (.CSV) डाउनलोड करें
-                      </button>
-                    </div>
-
-                    <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs dark:text-slate-200 light:text-slate-800">
-                      <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 space-y-3">
-                        <div className="flex justify-between items-center">
-                          <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">विद्यार्थी प्रोफाइल विन्यास</h4>
-                          <div className="flex gap-1.5">
-                            {user.points >= 500 && <span className="text-xs p-1 bg-slate-900 rounded border border-amber-500/40" title="मेमोरी मास्टर बैज">🎖️</span>}
-                            {user.pomodoroRounds >= 1 && <span className="text-xs p-1 bg-slate-900 rounded border border-indigo-500/40" title="फोकस निंजा बैज">🥷</span>}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-slate-400 mb-1">आपका नाम:</label>
-                          <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
-                        </div>
-                        <div>
-                          <label className="block text-slate-400 mb-1">दैनिक उपलब्ध घंटे लक्ष्य:</label>
-                          <input type="number" min="1" max="24" value={profileForm.availableHours} onChange={(e) => setProfileForm({ ...profileForm, availableHours: e.target.value })} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
-                        </div>
-                      </div>
-                      <button type="submit" className="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white shadow-md hover:bg-indigo-700 transition">💾 प्रोफाइल डेटा सुरक्षित करें</button>
-                    </form>
-
-                    <div className="bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded-xl p-4 border border-slate-800 space-y-3 text-xs">
-                      <h4 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">डेटा बैकअप सुरक्षा केंद्र</h4>
-                      <button onClick={generateTextBackup} type="button" className="w-full bg-slate-900 dark:bg-slate-900 light:bg-white border border-emerald-500/40 text-emerald-400 font-bold py-2 rounded-xl">📋 बैकअप कोड कॉपी करें</button>
-                      <form onSubmit={handleRestoreData} className="pt-2 border-t border-slate-800 space-y-2">
-                        <input type="text" placeholder="कोड यहाँ पेस्ट करें..." value={backupInputCode} onChange={(e) => setBackupInputCode(e.target.value)} className="w-full bg-slate-900 light:bg-white border border-slate-800 rounded-xl p-2" />
-                        <button type="submit" className="w-full bg-emerald-700 font-bold py-2 rounded-xl text-white">🔄 डेटा रिस्टोर करें</button>
-                      </form>
-                    </div>
+                  <div className="space-y-4 text-center">
+                    <div className="w-16 h-16 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto mt-4 text-xl">👤</div>
+                    <h3 className="text-sm font-bold text-white">{user.name}</h3>
+                    <p className="text-[10px] text-slate-400">{user.category}</p>
                   </div>
                 )}
-              </div>
-            </main>
+              </main>
 
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-30">
-              <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="book-open" /><span className="text-[8px] mt-0.5">ट्रैकर</span></button>
-              <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="plus-circle" /><span className="text-[8px] mt-0.5">दर्ज करें</span></button>
-              <button type="button" onClick={() => setActiveTab('timer')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'timer' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="clock" /><span className="text-[8px] mt-0.5">फोकस</span></button>
-              <button type="button" onClick={() => setActiveTab('notifications')} className={`flex flex-col items-center justify-center flex-1 py-1 relative ${activeTab === 'notifications' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="bell" /><span className="absolute top-2 right-6 bg-rose-500 w-1.5 h-1.5 rounded-full"></span><span className="text-[8px] mt-0.5">सुझाव</span></button>
-              <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><Icon name="user" /><span className="text-[8px] mt-0.5">प्रोफाइल</span></button>
-            </nav>
-
-            <AdSenseUnit slotId="FOOTER_SLOT_ID" />
-            <footer className="w-full text-center py-2 text-[9px] text-slate-500 hidden md:block">सजक छात्र</footer>
+              <nav className="absolute bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-20">
+                <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">📖</span><span className="text-[8px] mt-0.5">ट्रैकर</span></button>
+                <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">➕</span><span className="text-[8px] mt-0.5">दर्ज करें</span></button>
+                <button type="button" onClick={() => setActiveTab('timer')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'timer' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">⏱</span><span className="text-[8px] mt-0.5">फोकस</span></button>
+                <button type="button" onClick={() => setActiveTab('notifications')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'notifications' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">🔔</span><span className="text-[8px] mt-0.5">सुझाव</span></button>
+                <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">👤</span><span className="text-[8px] mt-0.5">प्रोफाइल</span></button>
+              </nav>
+            </div>
+            <footer className="w-full max-w-md text-center py-2 text-[9px] text-slate-500">सजग छात्र v2.5 Ultimate</footer>
           </div>
         );
       }
 
-      const rootElement = document.getElementById('root');
-      if (rootElement) {
-        const root = ReactDOM.createRoot(rootElement);
-        root.render(React.createElement(App));
-      }
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
