@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>सजग छात्र - एडवांस्ड फीचर्स</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 p-4 font-sans">
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      function FeaturesApp() {
+        const [minutes, setMinutes] = useState(25);
+        const [seconds, setSeconds] = useState(0);
+        const [isActive, setIsActive] = useState(false);
+
+        useEffect(() => {
+          let interval = null;
+          if (isActive) {
+            interval = setInterval(() => {
+              if (seconds > 0) { setSeconds(seconds - 1); }
+              else if (minutes > 0) { setMinutes(minutes - 1); setSeconds(59); }
+              else { clearInterval(interval); setIsActive(false); alert("⏱️ समय समाप्त! एक छोटा ब्रेक लें।"); }
+            }, 1000);
+          } else { clearInterval(interval); }
+          return () => clearInterval(interval);
+        }, [isActive, seconds, minutes]);
+
+        return (
+          <div className="max-w-md mx-auto space-y-6 pt-4">
+            <header className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h2 className="text-lg font-bold text-indigo-400">⏱️ टूल्स केंद्र</h2>
+                <p className="text-[9px] text-slate-400">सजग छात्र एडवांस्ड यूटिलिटी</p>
+              </div>
+              <a href="./index.html" className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-700 font-bold transition">🔙 मुख्य ट्रैकर</a>
+            </header>
+
+            <!-- पोमोडोरो टाइमर -->
+            <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 text-center space-y-4 shadow-xl">
+              <h3 className="text-sm font-bold text-slate-300">पोमोडोरो कंटीन्यूอัต फोकस</h3>
+              <div className="text-4xl font-black font-mono tracking-wider text-indigo-400">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</div>
+              <div className="flex gap-2 justify-center">
+                <button onClick={() => setIsActive(!isActive)} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-bold text-xs transition">
+                  {isActive ? '⏸ रोकें' : '▶ शुरू करें'}
+                </button>
+                <button onClick={() => { setIsActive(false); setMinutes(25); setSeconds(0); }} className="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs border border-slate-700 transition">🔄 रीसेट</button>
+              </div>
+            </div>
+
+            <!-- डेटा बैकअप मैनेजमेंट -->
+            <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+              <h3 className="text-sm font-bold text-slate-300">💾 डेटा बैकअप और सुरक्षा</h3>
+              <p className="text-[10px] text-slate-400 leading-relaxed">डिवाइस बदलते समय अपने अध्ययन रिकॉर्ड को खोने से बचाने के लिए फ़ाइल बैकअप का उपयोग करें।</p>
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button onClick={() => {
+                  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('user_study_logs') || '[]');
+                  const dlAnchor = document.createElement('a');
+                  dlAnchor.setAttribute("href", dataStr);
+                  dlAnchor.setAttribute("download", "sajag_backup.json");
+                  dlAnchor.click();
+                }} className="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl font-bold text-[10px] transition text-center">📤 बैकअप डाउनलोड करें</button>
+                <label className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl font-bold text-[10px] text-center cursor-pointer border border-slate-700 block transition">
+                  📥 बैकअप अपलोड करें
+                  <input type="file" accept=".json" onChange={(e) => {
+                    const reader = new FileReader();
+                    if(e.target.files[0]) {
+                      reader.readAsText(e.target.files[0], "UTF-8");
+                      reader.onload = (evt) => { localStorage.setItem('user_study_logs', evt.target.result); alert("📥 डेटा रीस्टोर सफल!"); };
+                    }
+                  }} className="hidden" />
+                </label>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      ReactDOM.createRoot(document.getElementById('root')).render(<FeaturesApp />);
+    </script>
+</body>
+</html>
