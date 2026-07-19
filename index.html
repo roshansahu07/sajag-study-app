@@ -17,7 +17,7 @@
       @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100">
+<body class="transition-colors duration-300">
     <div id="root"></div>
 
     <!-- React, ReactDOM, and Babel CDN Packages -->
@@ -40,8 +40,113 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
+      // मल्टी-लैंग्वेज शब्दकोश (Translation Dictionary)
+      const t = {
+        hi: {
+          title: "सजग छात्र",
+          subtitle: "वैज्ञानिक 4-स्टेज रिवीजन ट्रैकर व फोकस टाइमर",
+          streak: "दिन",
+          hoursBooked: "घंटे बुक हैं",
+          available: "उपलब्ध",
+          completedFull: "पूर्ण!",
+          budgetTitle: "दैनिक अध्ययन समय बजट",
+          trackerTitle: "📅 सक्रिय मेमोरी ट्रैकर",
+          aiTestBtn: "🤖 AI टेस्ट",
+          addLogTitle: "🚀 आज जो पढ़ा, उसे दर्ज करें",
+          addLogDesc: "यहाँ अपनी पढ़ाई दर्ज करें। सिस्टम स्वचालित रूप से स्पैस्ड रिपीटीशन और AI अभ्यास शेड्यूलर बना देगा।",
+          labelSubject: "विषय (Subject):",
+          selectOpt: "-- चुनें --",
+          labelTopic: "टॉपिक (Topic Name):",
+          labelTime: "समय (घंटे):",
+          labelDifficulty: "कठिनाई:",
+          btnSave: "🚀 सुरक्षित करें",
+          timerTitle: "⏱️ पोमोडोरो कंटीन्यूअस फोकस",
+          timerDesc: "ध्यान भटकाए बिना पढ़ाई करने की वैज्ञानिक विधि।",
+          btnStart: "▶ शुरू करें",
+          btnPause: "⏸ रोकें",
+          btnReset: "🔄 रीसेट",
+          suggestTitle: "🔔 स्मार्ट सुझाव केंद्र",
+          suggestDesc: "अध्ययन पैटर्न, समय आवंटन और सीखने की गति के आधार पर बनाए गए सुझाव।",
+          noSuggest: "अभी कोई सुझाव उपलब्ध नहीं है।",
+          profileTitle: "👤 प्रोफाइल विन्यास",
+          aiSettings: "🤖 AI टेस्ट इंटीग्रेशन सेटिंग्स",
+          aiDesc: "ऐप में ऑटोमैटिक टेस्ट जेनरेट करने के लिए अपनी खुद की Gemini API Key डालें। यह चाबी केवल आपके ही फोन ब्राउज़र में सुरक्षित रहेगी।",
+          btnSaveKey: "💾 कुंजी सुरक्षित करें",
+          navTracker: "📖 ट्रैकर",
+          navAdd: "➕ दर्ज",
+          navFocus: "⏱ फोकस",
+          navSuggest: "🔔 सुझाव",
+          navProfile: "👤 प्रोफाइल",
+          navInfo: "ℹ️ निर्देश",
+          backupTitle: "💾 डेटा बैकअप और रीस्टोर",
+          backupDesc: "अपने डिवाइस बदलने पर डेटा ट्रांसफर करने के लिए JSON फ़ाइल का उपयोग करें।",
+          btnExport: "📤 डेटा एक्सपोर्ट (Download)",
+          btnImport: "📥 डेटा इम्पोर्ट (Upload)",
+          customTimerLabel: "कस्टम फोकस समय (मिनट):",
+          
+          // एडवांस्ड फीचर्स की हिंदी स्क्रिप्ट
+          analyticsTitle: "📊 साप्ताहिक अध्ययन विश्लेषण",
+          quickNotesTitle: "📝 क्विक नोट्स व फ़ॉर्मूला पैड",
+          saveNotesBtn: "💾 नोट्स सुरक्षित करें",
+          medalsTitle: "🏅 अर्जित उपलब्धियां और मेडल",
+          levelText: "अध्ययन स्तर",
+          notesPlaceholder: "इस टॉपिक के महत्वपूर्ण सूत्र या मुख्य बिंदु यहाँ लिखें..."
+        },
+        en: {
+          title: "Sajag Chhatra",
+          subtitle: "Scientific 4-Stage Revision Tracker & Focus Timer",
+          streak: "Days",
+          hoursBooked: "Hours Booked",
+          available: "Available",
+          completedFull: "Full!",
+          budgetTitle: "Daily Study Time Budget",
+          trackerTitle: "📅 Active Memory Tracker",
+          aiTestBtn: "🤖 AI Test",
+          addLogTitle: "🚀 Log Today's Study",
+          addLogDesc: "Enter your study logs here. The system will automatically create spaced repetition schedules.",
+          labelSubject: "Subject:",
+          selectOpt: "-- Select --",
+          labelTopic: "Topic Name:",
+          labelTime: "Time (Hours):",
+          labelDifficulty: "Difficulty:",
+          btnSave: "🚀 Save Details",
+          timerTitle: "⏱️ Pomodoro Continuous Focus",
+          timerDesc: "Scientific method to study without distractions.",
+          btnStart: "▶ Start",
+          btnPause: "⏸ Pause",
+          btnReset: "🔄 Reset",
+          suggestTitle: "🔔 Smart Suggestion Center",
+          suggestDesc: "Suggestions generated based on study patterns, time allocation, and learning pace.",
+          noSuggest: "No suggestions available right now.",
+          profileTitle: "👤 Profile Settings",
+          aiSettings: "🤖 AI Test Integration Settings",
+          aiDesc: "Enter your own Gemini API Key to generate automatic tests. This key remains safely on your device browser only.",
+          btnSaveKey: "💾 Save API Key",
+          navTracker: "📖 Tracker",
+          navAdd: "➕ Add",
+          navFocus: "⏱ Focus",
+          navSuggest: "🔔 Hints",
+          navProfile: "👤 Profile",
+          navInfo: "ℹ️ Guide",
+          backupTitle: "Data Backup & Restore",
+          backupDesc: "Use JSON files to transfer your study records when changing devices.",
+          btnExport: "📤 Export Data",
+          btnImport: "📥 Import Data",
+          customTimerLabel: "Custom Focus Time (Mins):",
+          
+          // Advanced features English script
+          analyticsTitle: "📊 Weekly Study Analytics",
+          quickNotesTitle: "📝 Quick Notes & Formula Pad",
+          saveNotesBtn: "💾 Save Notes",
+          medalsTitle: "🏅 Achievements & Medals",
+          levelText: "Study Level",
+          notesPlaceholder: "Write key formulas or important points for this topic here..."
+        }
+      };
+
       function App() {
-        // --- स्टेट मैनेजमेंट ---
+        const [lang, setLang] = useState('hi');
+        const [isDarkMode, setIsDarkMode] = useState(true);
         const [user, setUser] = useState({
           name: 'रोशन लाल साहू',
           category: 'प्रतियोगी परीक्षा (Competitive Exams)',
@@ -50,116 +155,165 @@
           points: 350
         });
 
-        const [studyLogs, setStudyLogs] = useState([
-          {
-            id: 1,
-            subject: 'भौतिक विज्ञान (Physics)',
-            topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
-            date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
-            difficulty: 'कठिन (Hard)',
-            timeSpent: 2,
-            currentStage: 1, 
-            stages: [
-              { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
-              { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-              { name: 'R3 (7d)', due: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-              { name: 'Test (15d)', due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
-            ]
-          },
-          {
-            id: 2,
-            subject: 'इतिहास (History)',
-            topic: 'सिंधु घाटी सभ्यता (Indus Valley Civilization)',
-            date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
-            difficulty: 'मध्यम (Medium)',
-            timeSpent: 1.5,
-            currentStage: 2, 
-            stages: [
-              { name: 'R1 (24h)', due: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: true },
-              { name: 'R2 (3d)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
-              { name: 'R3 (7d)', due: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-              { name: 'Test (15d)', due: new Date(Date.now() + 11 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
-            ]
-          }
-        ]);
-
-        const [newLog, setNewLog] = useState({
-          subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2
+        // LocalStorage से स्टडी लॉग्स लोड करना
+        const [studyLogs, setStudyLogs] = useState(() => {
+          const savedLogs = localStorage.getItem('user_study_logs');
+          return savedLogs ? JSON.parse(savedLogs) : [
+            {
+              id: 1,
+              subject: 'भौतिक विज्ञान (Physics)',
+              topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
+              date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
+              difficulty: 'कठिन (Hard)',
+              timeSpent: 2,
+              notes: '',
+              currentStage: 1, 
+              stages: [
+                { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
+                { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
+                { name: 'R3 (7d)', due: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
+                { name: 'Test (15d)', due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
+              ]
+            }
+          ];
         });
 
-        const [timer, setTimer] = useState({
-          minutes: 25, seconds: 0, isActive: false, mode: 'Focus' 
-        });
+        useEffect(() => {
+          localStorage.setItem('user_study_logs', JSON.stringify(studyLogs));
+        }, [studyLogs]);
 
+        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'Medium', timeSpent: 2 });
+        const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
         const [activeTab, setActiveTab] = useState('dashboard');
         const [alertMsg, setAlertMsg] = useState(null);
         const [notifications, setNotifications] = useState([]);
+        
+        const [inputApiKey, setInputApiKey] = useState(localStorage.getItem('user_gemini_key') || '');
+        const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
+        const [activeNotesLogId, setActiveNotesLogId] = useState(null);
+        const [tempNotesText, setTempNotesText] = useState('');
+        
+        const [aiQuiz, setAiQuiz] = useState(null);
+        const [loadingQuiz, setLoadingQuiz] = useState(false);
+        const [userAnswers, setUserAnswers] = useState({});
+        const [quizSubmitted, setQuizSubmitted] = useState(false);
 
         const showAlert = (msg) => {
           setAlertMsg(msg);
           setTimeout(() => setAlertMsg(null), 4000);
         };
 
-        useEffect(() => {
-          const todayStr = new Date().toISOString().split('T')[0];
-          const generatedAlerts = [];
-
-          studyLogs.forEach(log => {
-            const activeStage = log.stages.find(s => !s.completed);
-            if (activeStage && activeStage.due === todayStr) {
-              generatedAlerts.push({
-                title: `📚 स्मार्ट रिवीजन अलर्ट: ${log.subject}`,
-                text: `आपने पहले "${log.topic}" पढ़ा था। आज वैज्ञानिक अंतराल के अनुसार रिवीजन का समय है।`
-              });
-            }
-          });
-
-          if (generatedAlerts.length === 0) {
-            generatedAlerts.push({
-              title: "⚡ एकाग्रता सुधार गाइड",
-              text: 'लगातार 45 मिनट से अधिक न पढ़ें। फोकस टाइमर टैब में जाकर 25 मिनट का एक सेशन अभी चालू करें!'
-            });
+        // --- ऑडियो अलर्ट सिस्टम (सिंथेटिक बजर) ---
+        const playBuzzerSound = () => {
+          try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // High pitch A5 note
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.4); // 0.4 सेकंड का टिंग साउंड
+          } catch (e) {
+            console.log("Audio contexts blocked or unsupported");
           }
+        };
 
-          setNotifications(generatedAlerts);
-        }, [studyLogs]);
+        useEffect(() => {
+          const body = document.body;
+          body.className = isDarkMode ? "bg-slate-950 text-slate-100 transition-colors duration-300" : "bg-slate-50 text-slate-900 transition-colors duration-300";
+        }, [isDarkMode]);
 
-        const handleAddLog = (e) => {
-          e.preventDefault();
-          const finalSubject = newLog.subject === 'अन्य (Custom)' ? newLog.customSubject : newLog.subject;
+        // --- गेमिफिकेशन लेवल्स और अचीवमेंट्स गणना ---
+        const calculatedLevel = Math.floor(user.points / 200) + 1;
+        const achievementsList = [
+          { name: "Consistency Warrior 🔥", unlocked: user.streak >= 5, desc: "लगातार 5 दिनों तक स्ट्रीक बनाए रखने पर" },
+          { name: "Knowledge Explorer 🧠", unlocked: studyLogs.length >= 3, desc: "3 या अधिक भिन्न विषयों को सफलतापूर्वक दर्ज करने पर" },
+          { name: "AI Champion 🤖", unlocked: user.points >= 400, desc: "AI टेस्ट पास कर 400 से अधिक XP अर्जित करने पर" }
+        ];
 
-          if (!finalSubject || !newLog.topic) {
-            showAlert('⚠️ कृपया विषय और मुख्य टॉपिक का नाम दर्ज करें!');
+        // --- क्विक नोट्स सुरक्षित करने का हैंडलर ---
+        const handleOpenNotes = (log) => {
+          setActiveNotesLogId(log.id);
+          setTempNotesText(log.notes || '');
+        };
+
+        const handleSaveNotes = () => {
+          setStudyLogs(prev => prev.map(l => l.id === activeNotesLogId ? { ...l, notes: tempNotesText } : l));
+          setActiveNotesLogId(null);
+          showAlert(lang === 'hi' ? '📝 क्विक नोट्स सेव हो गए!' : '📝 Quick notes updated!');
+        };
+
+        const handleExportData = () => {
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(studyLogs));
+          const downloadAnchor = document.createElement('a');
+          downloadAnchor.setAttribute("href", dataStr);
+          downloadAnchor.setAttribute("download", `sajag_backup.json`);
+          document.body.appendChild(downloadAnchor);
+          downloadAnchor.click();
+          downloadAnchor.remove();
+        };
+
+        const handleImportData = (e) => {
+          const fileReader = new FileReader();
+          if (e.target.files && e.target.files[0]) {
+            fileReader.readAsText(e.target.files[0], "UTF-8");
+            fileReader.onload = (event) => {
+              try {
+                const parsedData = JSON.parse(event.target.result);
+                if (Array.isArray(parsedData)) {
+                  setStudyLogs(parsedData);
+                  showAlert('📥 डेटा सफलतापूर्वक रीस्टोर हो गया!');
+                }
+              } catch (err) { showAlert('⚠️ त्रुटिपूर्ण फ़ाइल'); }
+            };
+          }
+        };
+
+        const handleGenerateQuiz = async (log) => {
+          const savedKey = localStorage.getItem('user_gemini_key');
+          if (!savedKey) {
+            showAlert(lang === 'hi' ? "⚠️ प्रोफाइल टैब में जाकर अपनी Gemini API Key सेट करें!" : "⚠️ Setup your Gemini API Key first!");
+            setActiveTab('profile');
             return;
           }
+          setSelectedTopicForTest(log);
+          setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
 
-          const todayStr = new Date().toISOString().split('T')[0];
-          let d1 = new Date(); d1.setDate(d1.getDate() + 1);
-          let d2 = new Date(); d2.setDate(d2.getDate() + 3);
-          let d3 = new Date(); d3.setDate(d3.getDate() + 7);
-          let d4 = new Date(); d4.setDate(d4.getDate() + 15);
+          const systemPrompt = `You are an expert tutor designing interactive active recall quizzes. Generate responses in ${lang === 'hi' ? 'Hindi' : 'English'}.`;
+          const userPrompt = `Create a 3-question multiple choice test based on Subject: "${log.subject}" and Topic: "${log.topic}". Format the response strictly as a JSON object inside your reply containing a 'questions' array. Each question must have: 'question' (string), 'options' (array of exactly 4 strings), 'correctIndex' (integer from 0 to 3), and 'explanation' (string). Return raw JSON text only.`;
 
-          const newEntry = {
-            id: Date.now(),
-            subject: finalSubject,
-            topic: newLog.topic,
-            date: todayStr,
-            difficulty: newLog.difficulty,
-            timeSpent: parseFloat(newLog.timeSpent) || 1,
-            currentStage: 1,
-            stages: [
-              { name: 'R1 (24h)', due: d1.toISOString().split('T')[0], completed: false },
-              { name: 'R2 (3d)', due: d2.toISOString().split('T')[0], completed: false },
-              { name: 'R3 (7d)', due: d3.toISOString().split('T')[0], completed: false },
-              { name: 'Test (15d)', due: d4.toISOString().split('T')[0], completed: false }
-            ]
-          };
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${savedKey}`;
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json" }
+              })
+            });
+            const data = await response.json();
+            const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textResponse) {
+              setAiQuiz(JSON.parse(textResponse).questions);
+            }
+          } catch (error) {
+            showAlert("⚠️ AI टेस्ट बनाने में समस्या हुई।");
+            setActiveTab('dashboard');
+          } finally { setLoadingQuiz(false); }
+        };
 
-          setStudyLogs([newEntry, ...studyLogs]);
-          setUser(prev => ({ ...prev, points: prev.points + 50 }));
-          showAlert('🚀 शानदार! पढ़ाई का ब्यौरा दर्ज हो गया। +50 XP!');
-          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'मध्यम (Medium)', timeSpent: 2 });
-          setActiveTab('dashboard');
+        const handleSubmitQuiz = () => {
+          setQuizSubmitted(true);
+          let correctCount = 0;
+          aiQuiz.forEach((q, idx) => { if (userAnswers[idx] === q.correctIndex) correctCount++; });
+          const pointsWon = correctCount * 20;
+          setUser(prev => ({ ...prev, points: prev.points + pointsWon, streak: prev.streak + 1 }));
+          showAlert(`🎉 Score: ${correctCount}/3. +${pointsWon} XP!`);
         };
 
         useEffect(() => {
@@ -172,14 +326,13 @@
                 setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
               } else {
                 clearInterval(interval);
+                playBuzzerSound(); // समय पूरा होने पर बजर बजाएं
                 const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
                 setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
-                showAlert(`🔔 फोकस सत्र समाप्त!`);
+                showAlert(`🔔 ${nextMode === 'Focus' ? 'ब्रेक समाप्त, फोकस मोड शुरू!' : 'फोकस सत्र समाप्त, ब्रेक लें!'}`);
               }
             }, 1000);
-          } else {
-            clearInterval(interval);
-          }
+          } else { clearInterval(interval); }
           return () => clearInterval(interval);
         }, [timer.isActive, timer.seconds, timer.minutes]);
 
@@ -187,25 +340,33 @@
         const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
 
         return (
-          <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between items-center p-2 sm:p-4 w-full">
-            <header className="w-full max-w-md text-center py-2">
-              <h1 className="text-xl sm:text-2xl font-black text-indigo-400 flex items-center justify-center gap-2">
-                🧠 सजग छात्र <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-[9px] text-white px-2 py-0.5 rounded-full font-bold">ULTIMATE v2.5</span>
-              </h1>
-              <p className="text-[10px] text-slate-400 mt-1">वैज्ञानिक 4-स्टेज रिवीजन ट्रैकर व फोकस टाइमर</p>
+          <div className="min-h-screen flex flex-col justify-between items-center p-2 sm:p-4 w-full">
+            <header className="w-full max-w-md flex justify-between items-center py-2 px-1">
+              <div className="text-left">
+                <h1 className="text-xl font-black text-indigo-500 flex items-center gap-1">🧠 {t[lang].title}</h1>
+                <p className="text-[9px] text-slate-400">{t[lang].subtitle}</p>
+              </div>
+              <div className="flex gap-1.5">
+                <button onClick={() => setIsDarkMode(!isDarkMode)} className={`px-2 py-1 border rounded-xl text-[10px] font-bold transition ${isDarkMode ? 'bg-slate-800 border-slate-700 text-yellow-400' : 'bg-white border-slate-300 text-slate-700'}`}>
+                  {isDarkMode ? '☀️ Light' : '🌙 Dark'}
+                </button>
+                <button onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')} className="bg-indigo-600 text-white font-bold px-2 py-1 rounded-xl text-[10px] transition">
+                  🌐 {lang === 'hi' ? 'English' : 'हिंदी'}
+                </button>
+              </div>
             </header>
 
-            <div className="w-full max-w-md bg-slate-900 rounded-[32px] border-4 border-slate-800 shadow-2xl relative flex flex-col overflow-hidden h-[84vh] max-h-[790px]">
+            <div className={`w-full max-w-md rounded-[32px] border-4 shadow-2xl relative flex flex-col overflow-hidden h-[84vh] max-h-[790px] ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 text-slate-800'}`}>
               {alertMsg && (
                 <div className="absolute top-4 left-4 right-4 bg-indigo-600 text-white p-3 rounded-xl shadow-xl z-50 text-xs border border-indigo-400 animate-fadeIn">
                   <span>{alertMsg}</span>
                 </div>
               )}
 
-              <div className="bg-slate-950 text-[10px] px-6 pt-4 pb-2 text-slate-400 flex justify-between items-center border-b border-slate-800/40">
-                <div>📱 app.pmevidya.com</div>
-                <div className="flex items-center gap-1.5 font-semibold text-slate-300">
-                  <span className="bg-indigo-900/40 border border-indigo-700/50 text-[9px] px-1.5 py-0.5 rounded text-indigo-300">🔥 {user.streak} दिन</span>
+              <div className={`text-[10px] px-6 pt-4 pb-2 flex justify-between items-center border-b ${isDarkMode ? 'bg-slate-950 text-slate-400 border-slate-800/40' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                <div className="font-bold text-indigo-500">🏆 {t[lang].levelText} {calculatedLevel}</div>
+                <div className="flex items-center gap-1.5 font-semibold">
+                  <span className="bg-indigo-600/10 text-[9px] px-1.5 py-0.5 rounded text-indigo-500">🔥 {user.streak} {t[lang].streak}</span>
                   <span>⭐ {user.points} XP</span>
                 </div>
               </div>
@@ -213,30 +374,84 @@
               <main className="flex-1 overflow-y-auto p-4 pb-16">
                 {activeTab === 'dashboard' && (
                   <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 p-4 rounded-2xl border border-indigo-900/40 space-y-3">
+                    {/* दैनिक अध्ययन बजट टाइमर पैनल */}
+                    <div className={`p-4 rounded-2xl border space-y-3 ${isDarkMode ? 'bg-gradient-to-br from-slate-900 to-indigo-950 border-indigo-900/40' : 'bg-gradient-to-br from-slate-50 to-indigo-50 border-indigo-100'}`}>
                       <div className="flex justify-between items-start">
                         <div>
-                          <h2 className="text-xs text-indigo-300 font-bold uppercase tracking-wide">दैनिक अध्ययन समय बजट</h2>
-                          <h3 className="text-lg font-black text-white mt-1">{todayTotalAllocated} / {user.availableHours} घंटे बुक हैं</h3>
+                          <h2 className="text-xs text-indigo-500 font-bold uppercase tracking-wide">{t[lang].budgetTitle}</h2>
+                          <h3 className="text-lg font-black mt-1">{todayTotalAllocated} / {user.availableHours} {t[lang].hoursBooked}</h3>
                         </div>
-                        <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] py-1 px-2 rounded-lg font-bold">
-                          {remainingTime > 0 ? `${remainingTime}h उपलब्ध` : 'पूर्ण!'}
+                        <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 text-[10px] py-1 px-2 rounded-lg font-bold">
+                          {remainingTime > 0 ? `${remainingTime}h ${t[lang].available}` : t[lang].completedFull}
                         </span>
                       </div>
-                      <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div className={`w-full h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
                         <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (todayTotalAllocated / user.availableHours) * 100)}%` }}></div>
                       </div>
                     </div>
 
+                    {/* न्यू फ़ीचर: विजुअल साप्ताहिक बार चार्ट ग्राफ */}
+                    <div className={`p-4 rounded-2xl border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
+                      <h4 className="text-xs font-bold text-indigo-500">{t[lang].analyticsTitle}</h4>
+                      <div className="flex justify-around items-end h-24 pt-2">
+                        {/* CSS आधारित स्टेटिक मॉक वीकली पिलर्स */}
+                        {[
+                          { day: "M", h: 4, label: "4h" }, { day: "T", h: 5.5, label: "5.5h" }, 
+                          { day: "W", h: todayTotalAllocated || 2, label: `${todayTotalAllocated || 2}h`, active: true },
+                          { day: "T", h: 3, label: "3h" }, { day: "F", h: 5, label: "5h" }, 
+                          { day: "S", h: 1, label: "1h" }, { day: "S", h: 0, label: "0h" }
+                        ].map((bar, bIdx) => (
+                          <div key={bIdx} className="flex flex-col items-center flex-1 space-y-1">
+                            <span className="text-[8px] text-slate-400 font-bold">{bar.label}</span>
+                            <div 
+                              className={`w-4 rounded-t transition-all duration-500 ${bar.active ? 'bg-indigo-500' : 'bg-slate-700/60'}`} 
+                              style={{ height: `${(bar.h / 6) * 60}px` }}
+                            ></div>
+                            <span className="text-[9px] text-slate-500 font-bold">{bar.day}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* सक्रिय मेमोरी ट्रैकर मुख्य ग्रिड */}
                     <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">📅 सक्रिय मेमोरी ट्रैकर</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t[lang].trackerTitle}</h3>
                       {studyLogs.map(log => (
-                        <div key={log.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
-                          <span className="text-[9px] bg-indigo-950 border border-indigo-800 text-indigo-300 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
-                          <h4 className="text-xs font-bold text-white mt-1">{log.topic}</h4>
+                        <div key={log.id} className={`p-3.5 rounded-xl border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <span className="text-[9px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-500 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
+                              <h4 className="text-xs font-bold mt-1">{log.topic}</h4>
+                            </div>
+                            <div className="flex gap-1.5">
+                              <button type="button" onClick={() => handleOpenNotes(log)} className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[9px] px-2 py-1 rounded-lg font-bold">📝 {lang === 'hi' ? 'नोट्स' : 'Notes'}</button>
+                              <button type="button" onClick={() => handleGenerateQuiz(log)} className="bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] px-2 py-1 rounded-lg font-bold transition">{t[lang].aiTestBtn}</button>
+                            </div>
+                          </div>
+
+                          {/* न्यू फ़ीचर: इनलाइन क्विक नोट्स एडिटर पैड */}
+                          {activeNotesLogId === log.id && (
+                            <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800 text-xs space-y-2 animate-fadeIn">
+                              <h5 className="font-bold text-indigo-400 text-[10px] uppercase">{t[lang].quickNotesTitle}</h5>
+                              <textarea 
+                                value={tempNotesText} 
+                                onChange={(e) => setTempNotesText(e.target.value)}
+                                placeholder={t[lang].notesPlaceholder}
+                                className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-[11px] focus:outline-none h-16 text-slate-200"
+                              />
+                              <button type="button" onClick={handleSaveNotes} className="bg-emerald-600 text-white font-bold text-[10px] px-3 py-1 rounded-lg">{t[lang].saveNotesBtn}</button>
+                            </div>
+                          )}
+
+                          {log.notes && activeNotesLogId !== log.id && (
+                            <div className="text-[10px] text-slate-400 italic bg-slate-900/30 p-2 rounded-lg border border-slate-800/40">
+                              📌 {log.notes}
+                            </div>
+                          )}
+
                           <div className="grid grid-cols-4 gap-1.5 mt-2">
                             {log.stages.map((stage, idx) => (
-                              <div key={idx} className={`text-[9px] p-1.5 rounded border text-center ${stage.completed ? 'bg-emerald-950 border-emerald-500 text-emerald-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+                              <div key={idx} className={`text-[9px] p-1.5 rounded border text-center ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-white border-slate-300 text-slate-600'}`}>
                                 {stage.name}
                               </div>
                             ))}
@@ -248,87 +463,139 @@
                 )}
 
                 {activeTab === 'log' && (
-                  <form onSubmit={handleAddLog} className="space-y-4 text-xs">
-                    <div>
-                      <label className="block text-slate-300 font-semibold mb-1">विषय (Subject):</label>
-                      <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-                        <option value="">-- चुनें --</option>
-                        <option value="भौतिक विज्ञान (Physics)">भौतिक विज्ञान (Physics)</option>
-                        <option value="रसायन विज्ञान (Chemistry)">रसायन विज्ञान (Chemistry)</option>
-                        <option value="गणित (Maths)">गणित (Maths)</option>
-                        <option value="इतिहास (History)">इतिहास (History)</option>
-                        <option value="अन्य (Custom)">अन्य</option>
-                      </select>
-                    </div>
-                    {newLog.subject === 'अन्य (Custom)' && (
-                      <input type="text" placeholder="विषय नाम" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
-                    )}
-                    <div>
-                      <label className="block text-slate-300 font-semibold mb-1">टॉपिक:</label>
-                      <input type="text" placeholder="टॉपिक का नाम" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-4">
+                    <form onSubmit={handleAddLog} className="space-y-4 text-xs">
                       <div>
-                        <label className="block text-slate-300 font-semibold mb-1">समय (घंटे):</label>
-                        <input type="number" step="0.5" min="0.5" max="8" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200" />
-                      </div>
-                      <div>
-                        <label className="block text-slate-300 font-semibold mb-1">कठिनाई:</label>
-                        <select value={newLog.difficulty} onChange={(e) => setNewLog({ ...newLog, difficulty: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-                          <option value="आसान (Easy)">आसान (Easy)</option>
-                          <option value="मध्यम (Medium)">मध्यम (Medium)</option>
-                          <option value="कठिन (Hard)">कठिन (Hard)</option>
+                        <label className="block font-semibold mb-1">{t[lang].labelSubject}</label>
+                        <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className={`w-full border rounded-xl p-2.5 ${isDarkMode ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-300 text-slate-800'}`}>
+                          <option value="">{t[lang].selectOpt}</option>
+                          <option value="Physics">Physics</option>
+                          <option value="Maths">Maths</option>
+                          <option value="History">History</option>
+                          <option value="Custom">Custom</option>
                         </select>
                       </div>
-                    </div>
-                    <button type="submit" className="w-full bg-indigo-600 font-bold py-3 rounded-xl shadow-lg text-white text-xs">🚀 सुरक्षित करें</button>
-                  </form>
+                      <div>
+                        <label className="block font-semibold mb-1">{t[lang].labelTopic}</label>
+                        <input type="text" placeholder="Topic name" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className={`w-full border rounded-xl p-2.5 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-300'}`} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-semibold mb-1">{t[lang].labelTime}</label>
+                          <input type="number" step="0.5" min="0.5" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className={`w-full border rounded-xl p-2.5 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-300'}`} />
+                        </div>
+                        <button type="submit" className="w-full bg-indigo-600 font-bold py-3 mt-5 rounded-xl text-white text-xs">{t[lang].btnSave}</button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {activeTab === 'test-arena' && (
+                  <div className="space-y-4">
+                    {loadingQuiz ? (
+                      <div className="text-center py-12"><div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div><p className="text-xs text-slate-400">AI Generating...</p></div>
+                    ) : aiQuiz ? (
+                      <div className="space-y-4 text-xs">
+                        {aiQuiz.map((q, qIdx) => (
+                          <div key={qIdx} className={`p-4 rounded-xl border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                            <h4 className="font-bold">{qIdx + 1}. {q.question}</h4>
+                            <div className="space-y-1.5">
+                              {q.options.map((opt, oIdx) => (
+                                <button key={oIdx} type="button" onClick={() => setUserAnswers({ ...userAnswers, [qIdx]: oIdx })} className="w-full text-left p-2 rounded-lg border text-[11px] border-slate-700">{opt}</button>
+                              ))}
+                            </div>
+                            {quizSubmitted && <div className="text-[10px] text-slate-400 bg-slate-900 p-2 rounded">{q.explanation}</div>}
+                          </div>
+                        ))}
+                        <button onClick={handleSubmitQuiz} className="w-full bg-emerald-600 font-bold py-2 rounded-xl text-white">Submit Test</button>
+                      </div>
+                    ) : null}
+                  </div>
                 )}
 
                 {activeTab === 'timer' && (
-                  <div className="space-y-6 flex flex-col items-center justify-center min-h-[350px]">
-                    <div className="relative w-40 h-40 rounded-full border-4 border-indigo-500/20 flex flex-col items-center justify-center bg-slate-900">
-                      <span className="text-[10px] font-bold text-indigo-300 uppercase">{timer.mode}</span>
-                      <span className="text-3xl font-black text-white my-1 font-mono">{String(timer.minutes).padStart(2, '0')}:{String(timer.seconds).padStart(2, '0')}</span>
+                  <div className="space-y-5 flex flex-col items-center justify-center min-h-[350px]">
+                    <div className="w-full max-w-xs flex items-center justify-between text-xs px-4">
+                      <span>{t[lang].customTimerLabel}</span>
+                      <input type="number" value={timer.minutes} onChange={(e) => setTimer(prev => ({ ...prev, minutes: parseInt(e.target.value) || 25 }))} className="w-16 p-1 border rounded-lg text-center bg-transparent" />
                     </div>
-                    <div className="flex gap-3">
-                      <button type="button" onClick={() => setTimer(prev => ({ ...prev, isActive: !prev.isActive }))} className={`px-6 py-2 rounded-full font-bold text-white text-xs ${timer.isActive ? 'bg-amber-600' : 'bg-emerald-600'}`}>
-                        {timer.isActive ? '⏸ रोकें' : '▶ शुरू करें'}
-                      </button>
-                      <button type="button" onClick={() => setTimer({ minutes: timer.mode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: timer.mode })} className="bg-slate-800 border border-slate-700 text-slate-300 px-5 py-2 rounded-full text-xs">🔄 रीसेट</button>
-                    </div>
+                    <div className="text-3xl font-black font-mono">{String(timer.minutes).padStart(2, '0')}:{String(timer.seconds).padStart(2, '0')}</div>
+                    <button type="button" onClick={() => setTimer(prev => ({ ...prev, isActive: !prev.isActive }))} className="px-6 py-2 rounded-full bg-indigo-600 text-white text-xs">{timer.isActive ? t[lang].btnPause : t[lang].btnStart}</button>
                   </div>
                 )}
 
                 {activeTab === 'notifications' && (
                   <div className="space-y-3 text-xs">
-                    {notifications.map((notif, idx) => (
-                      <div key={idx} className="p-3 bg-indigo-950/25 border border-indigo-900/40 rounded-xl text-indigo-300">
-                        <h4 className="font-bold text-white mb-0.5">{notif.title}</h4>
-                        <p className="text-[11px] text-slate-300">{notif.text}</p>
-                      </div>
-                    ))}
+                    {notifications.map((n, idx) => (<div key={idx} className="p-3 bg-indigo-950/20 border border-indigo-900/30 rounded-xl text-indigo-400"><h4 className="font-bold">{n.title}</h4><p>{n.text}</p></div>))}
+                  </div>
+                )}
+
+                {activeTab === 'info' && (
+                  <div className="space-y-4 text-left text-xs">
+                    <div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-900/40">
+                      <h4 className="font-bold uppercase tracking-wide mb-2">{t[lang].howToUseTitle}</h4>
+                      <p>{t[lang].step1}</p><p>{t[lang].step2}</p><p>{t[lang].step3}</p><p>{t[lang].step4}</p>
+                    </div>
                   </div>
                 )}
 
                 {activeTab === 'profile' && (
-                  <div className="space-y-4 text-center">
-                    <div className="w-16 h-16 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto mt-4 text-xl">👤</div>
-                    <h3 className="text-sm font-bold text-white">{user.name}</h3>
-                    <p className="text-[10px] text-slate-400">{user.category}</p>
+                  <div className="space-y-4 text-left text-xs">
+                    <div className={`text-center py-4 rounded-2xl border ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className="w-16 h-16 rounded-full bg-indigo-500/10 border-2 border-indigo-500 flex items-center justify-center mx-auto mb-2 text-xl">👤</div>
+                      <h3 className="text-sm font-bold">{user.name}</h3>
+                      <p className="text-[10px] text-slate-400">{user.category}</p>
+                    </div>
+                    
+                    {/* न्यू फ़ीचर: गेमिफिकेशन मेडल्स ग्रिड */}
+                    <div className={`rounded-xl p-4 border space-y-2 ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
+                      <h4 className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">{t[lang].medalsTitle}</h4>
+                      <div className="grid grid-cols-1 gap-2 pt-1">
+                        {achievementsList.map((ach, idx) => (
+                          <div key={idx} className={`p-2 rounded-xl border flex items-center justify-between ${ach.unlocked ? 'border-emerald-500 bg-emerald-500/5' : 'border-slate-800 opacity-40'}`}>
+                            <div>
+                              <div className="font-bold text-[11px]">{ach.name}</div>
+                              <div className="text-[9px] text-slate-400">{ach.desc}</div>
+                            </div>
+                            <span className="text-xs">{ach.unlocked ? "✅" : "🔒"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className={`rounded-xl p-4 border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
+                      <h4 className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">{t[lang].backupTitle}</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button type="button" onClick={handleExportData} className="bg-indigo-600 text-white p-2 rounded-xl font-bold text-[10px]">{t[lang].btnExport}</button>
+                        <label className="bg-slate-800 text-slate-200 p-2 rounded-xl font-bold text-[10px] text-center cursor-pointer border border-slate-700 block">
+                          {t[lang].btnImport}
+                          <input type="file" accept=".json" onChange={handleImportData} className="hidden" />
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className={`rounded-xl p-4 border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
+                      <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{t[lang].aiSettings}</h4>
+                      <div>
+                        <input type="password" placeholder="AI Key..." value={inputApiKey} onChange={(e) => setInputApiKey(e.target.value)} className="w-full bg-transparent border p-2 rounded-xl" />
+                      </div>
+                      <button type="button" onClick={handleSaveKey} className="w-full bg-indigo-600 font-bold py-2 rounded-xl text-white text-[11px]">{t[lang].btnSaveKey}</button>
+                    </div>
                   </div>
                 )}
               </main>
 
-              <nav className="absolute bottom-0 left-0 right-0 h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-1 z-20">
-                <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">📖</span><span className="text-[8px] mt-0.5">ट्रैकर</span></button>
-                <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">➕</span><span className="text-[8px] mt-0.5">दर्ज करें</span></button>
-                <button type="button" onClick={() => setActiveTab('timer')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'timer' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">⏱</span><span className="text-[8px] mt-0.5">फोकस</span></button>
-                <button type="button" onClick={() => setActiveTab('notifications')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'notifications' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">🔔</span><span className="text-[8px] mt-0.5">सुझाव</span></button>
-                <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">👤</span><span className="text-[8px] mt-0.5">प्रोफाइल</span></button>
+              {/* 6-बटन मोबाइल बॉटम नेविगेशन बार */}
+              <nav className={`absolute bottom-0 left-0 right-0 h-14 border-t flex justify-around items-center px-0.5 z-20 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200'}`}>
+                <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-500 font-bold' : 'text-slate-500'}`}><span className="text-sm">📖</span><span className="text-[7.5px] mt-0.5">{t[lang].navTracker}</span></button>
+                <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">➕</span><span className="text-[7.5px] mt-0.5">{t[lang].navAdd}</span></button>
+                <button type="button" onClick={() => setActiveTab('timer')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'timer' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">⏱</span><span className="text-[7.5px] mt-0.5">{t[lang].navFocus}</span></button>
+                <button type="button" onClick={() => setActiveTab('notifications')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'notifications' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">🔔</span><span className="text-[7.5px] mt-0.5">{t[lang].navSuggest}</span></button>
+                <button type="button" onClick={() => setActiveTab('info')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'info' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">ℹ️</span><span className="text-[7.5px] mt-0.5">{t[lang].navInfo}</span></button>
+                <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">👤</span><span className="text-[7.5px] mt-0.5">{t[lang].navProfile}</span></button>
               </nav>
             </div>
-            <footer className="w-full max-w-md text-center py-2 text-[9px] text-slate-500">सजग छात्र v2.5 Ultimate</footer>
+            <footer className="w-full max-w-md text-center py-2 text-[9px] text-slate-500">{t[lang].title} v2.5 Ultimate</footer>
           </div>
         );
       }
