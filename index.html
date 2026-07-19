@@ -390,6 +390,7 @@
 
         const handleSubmitQuiz = () => {
           setQuizSubmitted(true);
+          if (!aiQuiz) return;
           let correctCount = 0;
           aiQuiz.forEach((q, idx) => { if (userAnswers[idx] === q.correctIndex) correctCount++; });
           const pointsWon = correctCount * 20;
