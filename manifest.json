@@ -1,0 +1,17 @@
+{
+  "short_name": "सजग छात्र",
+  "name": "सजग छात्र Ultimate v2.5",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5676/5676059.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#020617",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "orientation": "portrait"
+}
