@@ -40,7 +40,7 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      // 100% कम्प्लीट मल्टी-लैंग्वेज शब्दकोश (Translation Dictionary)
+      // मल्टी-लैंग्वेज शब्दकोश
       const t = {
         hi: {
           title: "सजग छात्र",
@@ -60,13 +60,13 @@
           labelTime: "समय (घंटे):",
           labelDifficulty: "कठिनाई:",
           btnSave: "🚀 सुरक्षित करें",
-          timerTitle: "⏱️ पोमोโดरो कंटीन्यूअस फोकस",
+          timerTitle: "⏱️ पोमोडोरो फोकस",
           timerDesc: "ध्यान भटकाए बिना पढ़ाई करने की वैज्ञानिक विधि।",
           btnStart: "▶ शुरू करें",
           btnPause: "⏸ रोकें",
           btnReset: "🔄 रीसेट",
           suggestTitle: "🔔 स्मार्ट सुझाव केंद्र",
-          suggestDesc: "अध्ययन पैटर्न, समय आवंटन और सीखने की गति के आधार पर बनाए गए सुझाव।",
+          suggestDesc: "अध्ययन पैटर्न के आधार पर बनाए गए सुझाव।",
           noSuggest: "अभी कोई सुझाव उपलब्ध नहीं है।",
           profileTitle: "👤 प्रोफाइल विन्यास",
           aiSettings: "🤖 AI टेस्ट इंटीग्रेशन सेटिंग्स",
@@ -80,8 +80,8 @@
           navInfo: "ℹ️ निर्देश",
           backupTitle: "💾 डेटा बैकअप और रीस्टोर",
           backupDesc: "अपने डिवाइस बदलने पर डेटा ट्रांसफर करने के लिए JSON फ़ाइल का उपयोग करें।",
-          btnExport: "📤 डेटा एक्सपोर्ट (Download)",
-          btnImport: "📥 डेटा इम्पोर्ट (Upload)",
+          btnExport: "📤 एक्सपोर्ट (Download)",
+          btnImport: "📥 इम्पोर्ट (Upload)",
           customTimerLabel: "कस्टम फोकस समय (मिनट):",
           themeToggle: "थीम बदलें",
           analyticsTitle: "📊 साप्ताहिक अध्ययन विश्लेषण",
@@ -89,22 +89,22 @@
           saveNotesBtn: "💾 नोट्स सुरक्षित करें",
           medalsTitle: "🏅 अर्जित उपलब्धियां और मेडल",
           levelText: "अध्ययन स्तर",
-          notesPlaceholder: "इस टॉपिक के महत्वपूर्ण सूत्र या मुख्य बिंदु यहाँ लिखें...",
+          notesPlaceholder: "महत्वपूर्ण सूत्र या मुख्य बिंदु यहाँ लिखें...",
           dueOnly: "केवल आज का रिवीजन दिखाएं (Due Today)",
           feynmanBtn: "🗣️ फेनमैन मोड",
           verifyFeynman: "✅ AI से जांचें",
-          feynmanPlaceholder: "इस टॉपिक को अपनी सरल भाषा में समझाएं (AI आपकी समझ को जाँचेगा)...",
+          feynmanPlaceholder: "इस टॉपिक को अपनी सरल भाषा में समझाएं...",
           resetCycle: "🔄 रीसेट चक्र",
           howToUseTitle: "🛠️ ऐप का उपयोग कैसे करें?",
-          step1: "1. पढ़ाई दर्ज करें: जब भी आप कोई नया टॉपिक पढ़ें, 'दर्ज करें' टैब में जाकर विषय, टॉपिक का नाम और समय सबमिट करें।",
-          step2: "2. मेमोरी ट्रैकर देखें: ऐप आपके लिए वैज्ञानिक 30-दिवसीय चक्र (R1 से Mastery) तय कर देगा। जब तक आप भूलें नहीं, अगले स्टेज को पूर्ण मार्क करें।",
-          step3: "3. रिवीजन चक्र रीसेट: यदि आप किसी पुराने टॉपिक को लंबे समय बाद भूल जाते हैं, तो 'रीसेट चक्र' बटन दबाएं। इससे ट्रैकिंग फिर से शुरू हो जाएगी ताकि वह हमेशा के लिए कंठस्थ रहे।",
-          step4: "4. फेनमैन तकनीक: 'फेनमैन मोड' बटन दबाकर टॉपिक को AI को अपनी भाषा में समझाएं और अपनी समझ को परखें।",
+          step1: "1. पढ़ाई दर्ज करें: जब भी आप कोई नया टॉपिक पढ़ें, 'दर्ज करें' टैब में जाकर सबमिट करें।",
+          step2: "2. मेमोरी ट्रैकर: ऐप आपके लिए वैज्ञानिक 30-दिवसीय चक्र (R1 से Mastery) तय कर देगा।",
+          step3: "3. रिवीजन चक्र रीसेट: यदि आप किसी पुराने टॉपिक को भूल जाते हैं, तो 'रीसेट चक्र' बटन दबाएं।",
+          step4: "4. फेनमैन तकनीक: टॉपिक को AI को समझाएं और अपनी समझ को परखें।",
           benefitsTitle: "📈 इस ऐप के उपयोग के फायदे:",
-          benefit1: "✨ लाइफटाइम लॉन्ग-टर्म मेमोरी: रिपीटीशन साइकिल को बार-बार रीसेट और ट्रैक करने से तथ्य दिमाग में पक्के छप जाते हैं।",
-          benefit2: "🎯 एक्टिव रिकॉल (Active Recall): AI आधारित मॉक टेस्ट देने से परीक्षा के समय चीजें तुरंत याद आती हैं।",
-          benefit3: "⏳ बेहतर समय प्रबंधन: आपका अध्ययन बजट ग्राफ आपको दिखाता है कि आप अपने उपलब्ध समय का कितना सही उपयोग कर रहे हैं।",
-          benefit4: "🔒 डेटा सुरक्षा: आपकी AI Key और सभी रिकॉर्ड्स लोकल ब्राउज़र में रहते हैं, कहीं लीक नहीं होते।"
+          benefit1: "✨ लाइफटाइम लॉन्ग-टर्म मेमोरी: रिपीटीशन साइकिल से तथ्य दिमाग में पक्के छप जाते हैं।",
+          benefit2: "🎯 एक्टिव रिकॉल: AI आधारित मॉक टेस्ट देने से परीक्षा के समय चीजें तुरंत याद आती हैं।",
+          benefit3: "⏳ बेहतर समय प्रबंधन: समय बजट ग्राफ आपको सही उपयोग दिखाता है।",
+          benefit4: "🔒 डेटा सुरक्षा: आपकी AI Key लोकल ब्राउज़र में पूरी तरह सुरक्षित रहती है।"
         },
         en: {
           title: "Sajag Chhatra",
@@ -117,24 +117,24 @@
           trackerTitle: "📅 Active Memory Tracker",
           aiTestBtn: "🤖 AI Test",
           addLogTitle: "🚀 Log Today's Study",
-          addLogDesc: "Enter your study logs here. The system will automatically create a 30-day spaced repetition schedule.",
+          addLogDesc: "Enter your study logs here for a 30-day scientific cycle.",
           labelSubject: "Subject:",
           selectOpt: "-- Select --",
           labelTopic: "Topic Name:",
           labelTime: "Time (Hours):",
           labelDifficulty: "Difficulty:",
           btnSave: "🚀 Save Details",
-          timerTitle: "⏱️ Pomodoro Continuous Focus",
+          timerTitle: "⏱️ Pomodoro Focus",
           timerDesc: "Scientific method to study without distractions.",
           btnStart: "▶ Start",
           btnPause: "⏸ Pause",
           btnReset: "🔄 Reset",
           suggestTitle: "🔔 Smart Suggestion Center",
-          suggestDesc: "Suggestions generated based on study patterns, time allocation, and learning pace.",
+          suggestDesc: "Suggestions generated based on study patterns.",
           noSuggest: "No suggestions available right now.",
           profileTitle: "👤 Profile Settings",
           aiSettings: "🤖 AI Test Integration Settings",
-          aiDesc: "Enter your own Gemini API Key to generate automatic tests. This key remains safely on your device browser only.",
+          aiDesc: "Enter your own Gemini API Key. It remains safely on your device browser only.",
           btnSaveKey: "💾 Save API Key",
           navTracker: "📖 Tracker",
           navAdd: "➕ Add",
@@ -143,7 +143,7 @@
           navProfile: "👤 Profile",
           navInfo: "ℹ️ Guide",
           backupTitle: "Data Backup & Restore",
-          backupDesc: "Use JSON files to transfer your study records when changing devices.",
+          backupDesc: "Use JSON files to transfer your study records.",
           btnExport: "📤 Export Data",
           btnImport: "📥 Import Data",
           customTimerLabel: "Custom Focus Time (Mins):",
@@ -153,22 +153,22 @@
           saveNotesBtn: "💾 Save Notes",
           medalsTitle: "🏅 Achievements & Medals",
           levelText: "Study Level",
-          notesPlaceholder: "Write key formulas or important points for this topic here...",
+          notesPlaceholder: "Write key formulas or important points here...",
           dueOnly: "Show Due Revisions Only",
           feynmanBtn: "🗣️ Feynman Mode",
           verifyFeynman: "✅ Verify with AI",
-          feynmanPlaceholder: "Explain this topic in your own simple words (AI will evaluate)...",
+          feynmanPlaceholder: "Explain this topic in your own simple words...",
           resetCycle: "🔄 Reset Cycle",
           howToUseTitle: "🛠️ How to use the App?",
-          step1: "1. Log Study: Go to 'Add' tab and submit the subject, topic name, and hours spent.",
-          step2: "2. Track Memory: The system schedules scientific spaced repetitions (R1 to Mastery 30d). Keep marking stages complete.",
-          step3: "3. Reset Cycle for Long-Term: If you forget an old topic, hit 'Reset Cycle' to restart tracking for lifetime retention.",
-          step4: "4. Feynman Technique: Click 'Feynman Mode' to explain the topic to AI and check your conceptual depth.",
+          step1: "1. Log Study: Go to 'Add' tab and submit the details.",
+          step2: "2. Track Memory: Follow the scheduled R1 to Mastery 30d stages.",
+          step3: "3. Reset Cycle: Restart tracking anytime if you forget older topics.",
+          step4: "4. Feynman Technique: Explain concepts to AI to test your understanding.",
           benefitsTitle: "📈 Benefits of Using this App:",
-          benefit1: "✨ Permanent Retention: Resetting old topics breaks the forgetting curve for lifetime mastery.",
-          benefit2: "🎯 Active Recall: Real-time AI quizzes ensure quick brain retrieval during actual exams.",
-          benefit3: "⏳ Time Auditing: The visual budget tracker keeps an eye on your remaining daily productive hours.",
-          benefit4: "🔒 Privacy First: All variables, storage logs, and confidential API keys remain offline in your client browser."
+          benefit1: "✨ Permanent Retention: Spaced cycles break the forgetting curve.",
+          benefit2: "🎯 Active Recall: Real-time AI quizzes maximize retention.",
+          benefit3: "⏳ Time Auditing: Keep an eye on your daily productive budget.",
+          benefit4: "🔒 Privacy First: All variables and keys remain offline in your browser."
         }
       };
 
@@ -184,7 +184,6 @@
           points: 350
         });
 
-        // LocalStorage से डेटा लोड करना
         const [studyLogs, setStudyLogs] = useState(() => {
           const savedLogs = localStorage.getItem('user_study_logs');
           return savedLogs ? JSON.parse(savedLogs) : [
@@ -221,7 +220,6 @@
         const [inputApiKey, setInputApiKey] = useState(localStorage.getItem('user_gemini_key') || '');
         const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
         
-        // फेनमैन और क्विक नोट्स स्टेट्स
         const [activeNotesLogId, setActiveNotesLogId] = useState(null);
         const [tempNotesText, setTempNotesText] = useState('');
         const [activeFeynmanLogId, setActiveFeynmanLogId] = useState(null);
@@ -254,11 +252,6 @@
           } catch (e) { console.log("Audio blocked"); }
         };
 
-        useEffect(() => {
-          document.body.className = isDarkMode ? "bg-slate-950 text-slate-100 transition-colors duration-300" : "bg-slate-50 text-slate-900 transition-colors duration-300";
-        }, [isDarkMode]);
-
-        // --- वैज्ञानिक 5-स्टेज प्रोग्रेस और लॉन्ग टर्म रीसेट लॉजिक ---
         const handleMarkNextStage = (logId) => {
           setStudyLogs(prev => prev.map(log => {
             if (log.id === logId) {
@@ -299,7 +292,6 @@
           }));
         };
 
-        // --- फेनमैन मोड: AI विश्लेषण ---
         const handleFeynmanVerify = async (log) => {
           const savedKey = localStorage.getItem('user_gemini_key');
           if (!savedKey) {
@@ -337,6 +329,17 @@
           { name: "Knowledge Explorer 🧠", unlocked: studyLogs.length >= 3, desc: lang === 'hi' ? "3 या अधिक भिन्न विषयों को दर्ज करने पर" : "Log 3 or more distinct subjects" },
           { name: "AI Champion 🤖", unlocked: user.points >= 400, desc: lang === 'hi' ? "AI टेस्ट पास कर 400 से अधिक XP अर्जित करने पर" : "Earn more than 400 XP points via AI tests" }
         ];
+
+        const handleOpenNotes = (log) => {
+          setActiveNotesLogId(log.id);
+          setTempNotesText(log.notes || '');
+        };
+
+        const handleSaveNotes = () => {
+          setStudyLogs(prev => prev.map(l => l.id === activeNotesLogId ? { ...l, notes: tempNotesText } : l));
+          setActiveNotesLogId(null);
+          showAlert(lang === 'hi' ? '📝 क्विक नोट्स सेव हो गए!' : '📝 Quick notes updated!');
+        };
 
         const handleExportData = () => {
           const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(studyLogs));
@@ -385,6 +388,20 @@
           } finally { setLoadingQuiz(false); }
         };
 
+        const handleSubmitQuiz = () => {
+          setQuizSubmitted(true);
+          let correctCount = 0;
+          aiQuiz.forEach((q, idx) => { if (userAnswers[idx] === q.correctIndex) correctCount++; });
+          const pointsWon = correctCount * 20;
+          setUser(prev => ({ ...prev, points: prev.points + pointsWon, streak: prev.streak + 1 }));
+          showAlert(`🎉 Score: ${correctCount}/3. +${pointsWon} XP!`);
+        };
+
+        const handleSaveKey = () => {
+          localStorage.setItem('user_gemini_key', inputApiKey);
+          showAlert(lang === 'hi' ? '✅ API Key सुरक्षित सेव हो गई!' : '✅ API Key saved securely!');
+        };
+
         const handleAddLog = (e) => {
           e.preventDefault();
           const finalSubject = newLog.subject === 'Custom' ? newLog.customSubject : newLog.subject;
@@ -407,6 +424,49 @@
           setActiveTab('dashboard');
         };
 
+        useEffect(() => {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const generatedAlerts = [];
+          studyLogs.forEach(log => {
+            const activeStage = log.stages.find(s => !s.completed);
+            if (activeStage && activeStage.due === todayStr) {
+              generatedAlerts.push({
+                title: lang === 'hi' ? `📚 स्मार्ट रिवीजन: ${log.subject}` : `📚 Smart Revision: ${log.subject}`,
+                text: lang === 'hi' ? `आज "${log.topic}" के रिवीजन का समय है।` : `It's time to revise "${log.topic}" today.`
+              });
+            }
+          });
+          if (generatedAlerts.length === 0) {
+            generatedAlerts.push({
+              title: lang === 'hi' ? "⚡ एकाग्रता गाइड" : "⚡ Focus Guide",
+              text: lang === 'hi' ? 'कस्टम फोकस टाइमर का उपयोग करें!' : 'Use the customizable Focus Timer to boost productivity!'
+            });
+          }
+          setNotifications(generatedAlerts);
+        }, [studyLogs, lang]);
+
+        useEffect(() => {
+          let interval = null;
+          if (timer.isActive) {
+            interval = setInterval(() => {
+              if (timer.seconds > 0) {
+                setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
+              } else if (timer.seconds === 0 && timer.minutes > 0) {
+                setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
+              } else {
+                clearInterval(interval);
+                playBuzzerSound();
+                const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
+                setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
+                showAlert(`🔔 ${nextMode === 'Focus' ? 'ब्रेक समाप्त, फोकस मोड शुरू!' : 'फोकस सत्र समाप्त, ब्रेक लें!'}`);
+              }
+            }, 1000);
+          } else { clearInterval(interval); }
+          return () => clearInterval(interval);
+        }, [timer.isActive, timer.seconds, timer.minutes]);
+
+        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
+        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
         const todayStr = new Date().toISOString().split('T')[0];
 
         return (
@@ -477,7 +537,6 @@
                       </div>
                     </div>
 
-                    {/* Due Today Filter Checkbox */}
                     <div className="flex items-center gap-2 text-xs font-bold px-1 text-slate-400">
                       <input type="checkbox" checked={showDueOnly} onChange={() => setShowDueOnly(!showDueOnly)} className="rounded border-slate-700 bg-transparent w-4 h-4 accent-indigo-600" />
                       <label>{t[lang].dueOnly}</label>
@@ -501,7 +560,6 @@
                             </div>
                           </div>
 
-                          {/* फेनमैन एक्सप्लेनेशन इनलाइन मोड पैनल */}
                           {activeFeynmanLogId === log.id && (
                             <div className="p-3 rounded-xl border border-purple-900/40 text-xs space-y-2 bg-purple-950/10 animate-fadeIn">
                               <h5 className="font-bold text-purple-400 text-[10px] uppercase">🗣️ Feynman Learning Shield</h5>
@@ -523,7 +581,6 @@
                             <div className="text-[10px] text-slate-400 italic bg-slate-900/30 p-2 rounded-lg border border-slate-800/40">📌 {log.notes}</div>
                           )}
 
-                          {/* 5-स्टेज रिपीटीशन स्टेटस */}
                           <div className="grid grid-cols-5 gap-1.5 mt-2">
                             {log.stages.map((stage, idx) => (
                               <div key={idx} className={`text-[8px] p-1.5 rounded border text-center font-bold ${stage.completed ? 'bg-emerald-600/10 border-emerald-500/60 text-emerald-500' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
@@ -532,7 +589,6 @@
                             ))}
                           </div>
 
-                          {/* लॉन्ग-टर्म परमानेंट रिवीजन कंट्रोल बटन्स */}
                           <div className="flex gap-2 pt-1 border-t border-slate-800/40">
                             <button type="button" onClick={() => handleMarkNextStage(log.id)} className="flex-1 bg-emerald-600/10 border border-emerald-500/30 hover:bg-emerald-600/20 text-emerald-500 text-[9px] py-1.5 rounded-lg font-bold transition">
                               ✅ {lang === 'hi' ? 'अगला स्टेज पूर्ण' : 'Mark Stage Done'}
