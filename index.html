@@ -40,11 +40,11 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      // मल्टी-लैंग्वेज शब्दकोश (Translation Dictionary)
+      // 100% कम्प्लीट मल्टी-लैंग्वेज शब्दकोश (Translation Dictionary)
       const t = {
         hi: {
           title: "सजग छात्र",
-          subtitle: "वैज्ञानिक 4-स्टेज रिवीजन ट्रैकर व फोकस टाइमर",
+          subtitle: "वैज्ञानिक 5-स्टेज रिवीजन ट्रैकर व फोकस टाइमर",
           streak: "दिन",
           hoursBooked: "घंटे बुक हैं",
           available: "उपलब्ध",
@@ -53,14 +53,14 @@
           trackerTitle: "📅 सक्रिय मेमोरी ट्रैकर",
           aiTestBtn: "🤖 AI टेस्ट",
           addLogTitle: "🚀 आज जो पढ़ा, उसे दर्ज करें",
-          addLogDesc: "यहाँ अपनी पढ़ाई दर्ज करें। सिस्टम स्वचालित रूप से स्पैस्ड रिपीटीशन और AI अभ्यास शेड्यूलर बना देगा।",
+          addLogDesc: "यहाँ अपनी पढ़ाई दर्ज करें। सिस्टम स्वचालित रूप से 30-दिन का स्पैस्ड रिपीटीशन और AI अभ्यास शेड्यूलर बना देगा।",
           labelSubject: "विषय (Subject):",
           selectOpt: "-- चुनें --",
           labelTopic: "टॉपिक (Topic Name):",
           labelTime: "समय (घंटे):",
           labelDifficulty: "कठिनाई:",
           btnSave: "🚀 सुरक्षित करें",
-          timerTitle: "⏱️ पोमोडोरो कंटीन्यूअस फोकस",
+          timerTitle: "⏱️ पोमोโดरो कंटीन्यूअस फोकस",
           timerDesc: "ध्यान भटकाए बिना पढ़ाई करने की वैज्ञानिक विधि।",
           btnStart: "▶ शुरू करें",
           btnPause: "⏸ रोकें",
@@ -83,18 +83,32 @@
           btnExport: "📤 डेटा एक्सपोर्ट (Download)",
           btnImport: "📥 डेटा इम्पोर्ट (Upload)",
           customTimerLabel: "कस्टम फोकस समय (मिनट):",
-          
-          // एडवांस्ड फीचर्स की हिंदी स्क्रिप्ट
+          themeToggle: "थीम बदलें",
           analyticsTitle: "📊 साप्ताहिक अध्ययन विश्लेषण",
           quickNotesTitle: "📝 क्विक नोट्स व फ़ॉर्मूला पैड",
           saveNotesBtn: "💾 नोट्स सुरक्षित करें",
           medalsTitle: "🏅 अर्जित उपलब्धियां और मेडल",
           levelText: "अध्ययन स्तर",
-          notesPlaceholder: "इस टॉपिक के महत्वपूर्ण सूत्र या मुख्य बिंदु यहाँ लिखें..."
+          notesPlaceholder: "इस टॉपिक के महत्वपूर्ण सूत्र या मुख्य बिंदु यहाँ लिखें...",
+          dueOnly: "केवल आज का रिवीजन दिखाएं (Due Today)",
+          feynmanBtn: "🗣️ फेनमैन मोड",
+          verifyFeynman: "✅ AI से जांचें",
+          feynmanPlaceholder: "इस टॉपिक को अपनी सरल भाषा में समझाएं (AI आपकी समझ को जाँचेगा)...",
+          resetCycle: "🔄 रीसेट चक्र",
+          howToUseTitle: "🛠️ ऐप का उपयोग कैसे करें?",
+          step1: "1. पढ़ाई दर्ज करें: जब भी आप कोई नया टॉपिक पढ़ें, 'दर्ज करें' टैब में जाकर विषय, टॉपिक का नाम और समय सबमिट करें।",
+          step2: "2. मेमोरी ट्रैकर देखें: ऐप आपके लिए वैज्ञानिक 30-दिवसीय चक्र (R1 से Mastery) तय कर देगा। जब तक आप भूलें नहीं, अगले स्टेज को पूर्ण मार्क करें।",
+          step3: "3. रिवीजन चक्र रीसेट: यदि आप किसी पुराने टॉपिक को लंबे समय बाद भूल जाते हैं, तो 'रीसेट चक्र' बटन दबाएं। इससे ट्रैकिंग फिर से शुरू हो जाएगी ताकि वह हमेशा के लिए कंठस्थ रहे।",
+          step4: "4. फेनमैन तकनीक: 'फेनमैन मोड' बटन दबाकर टॉपिक को AI को अपनी भाषा में समझाएं और अपनी समझ को परखें।",
+          benefitsTitle: "📈 इस ऐप के उपयोग के फायदे:",
+          benefit1: "✨ लाइफटाइम लॉन्ग-टर्म मेमोरी: रिपीटीशन साइकिल को बार-बार रीसेट और ट्रैक करने से तथ्य दिमाग में पक्के छप जाते हैं।",
+          benefit2: "🎯 एक्टिव रिकॉल (Active Recall): AI आधारित मॉक टेस्ट देने से परीक्षा के समय चीजें तुरंत याद आती हैं।",
+          benefit3: "⏳ बेहतर समय प्रबंधन: आपका अध्ययन बजट ग्राफ आपको दिखाता है कि आप अपने उपलब्ध समय का कितना सही उपयोग कर रहे हैं।",
+          benefit4: "🔒 डेटा सुरक्षा: आपकी AI Key और सभी रिकॉर्ड्स लोकल ब्राउज़र में रहते हैं, कहीं लीक नहीं होते।"
         },
         en: {
           title: "Sajag Chhatra",
-          subtitle: "Scientific 4-Stage Revision Tracker & Focus Timer",
+          subtitle: "Scientific 5-Stage Revision Tracker & Focus Timer",
           streak: "Days",
           hoursBooked: "Hours Booked",
           available: "Available",
@@ -103,7 +117,7 @@
           trackerTitle: "📅 Active Memory Tracker",
           aiTestBtn: "🤖 AI Test",
           addLogTitle: "🚀 Log Today's Study",
-          addLogDesc: "Enter your study logs here. The system will automatically create spaced repetition schedules.",
+          addLogDesc: "Enter your study logs here. The system will automatically create a 30-day spaced repetition schedule.",
           labelSubject: "Subject:",
           selectOpt: "-- Select --",
           labelTopic: "Topic Name:",
@@ -133,20 +147,35 @@
           btnExport: "📤 Export Data",
           btnImport: "📥 Import Data",
           customTimerLabel: "Custom Focus Time (Mins):",
-          
-          // Advanced features English script
+          themeToggle: "Change Theme",
           analyticsTitle: "📊 Weekly Study Analytics",
           quickNotesTitle: "📝 Quick Notes & Formula Pad",
           saveNotesBtn: "💾 Save Notes",
           medalsTitle: "🏅 Achievements & Medals",
           levelText: "Study Level",
-          notesPlaceholder: "Write key formulas or important points for this topic here..."
+          notesPlaceholder: "Write key formulas or important points for this topic here...",
+          dueOnly: "Show Due Revisions Only",
+          feynmanBtn: "🗣️ Feynman Mode",
+          verifyFeynman: "✅ Verify with AI",
+          feynmanPlaceholder: "Explain this topic in your own simple words (AI will evaluate)...",
+          resetCycle: "🔄 Reset Cycle",
+          howToUseTitle: "🛠️ How to use the App?",
+          step1: "1. Log Study: Go to 'Add' tab and submit the subject, topic name, and hours spent.",
+          step2: "2. Track Memory: The system schedules scientific spaced repetitions (R1 to Mastery 30d). Keep marking stages complete.",
+          step3: "3. Reset Cycle for Long-Term: If you forget an old topic, hit 'Reset Cycle' to restart tracking for lifetime retention.",
+          step4: "4. Feynman Technique: Click 'Feynman Mode' to explain the topic to AI and check your conceptual depth.",
+          benefitsTitle: "📈 Benefits of Using this App:",
+          benefit1: "✨ Permanent Retention: Resetting old topics breaks the forgetting curve for lifetime mastery.",
+          benefit2: "🎯 Active Recall: Real-time AI quizzes ensure quick brain retrieval during actual exams.",
+          benefit3: "⏳ Time Auditing: The visual budget tracker keeps an eye on your remaining daily productive hours.",
+          benefit4: "🔒 Privacy First: All variables, storage logs, and confidential API keys remain offline in your client browser."
         }
       };
 
       function App() {
         const [lang, setLang] = useState('hi');
         const [isDarkMode, setIsDarkMode] = useState(true);
+        const [showDueOnly, setShowDueOnly] = useState(false);
         const [user, setUser] = useState({
           name: 'रोशन लाल साहू',
           category: 'प्रतियोगी परीक्षा (Competitive Exams)',
@@ -155,7 +184,7 @@
           points: 350
         });
 
-        // LocalStorage से स्टडी लॉग्स लोड करना
+        // LocalStorage से डेटा लोड करना
         const [studyLogs, setStudyLogs] = useState(() => {
           const savedLogs = localStorage.getItem('user_study_logs');
           return savedLogs ? JSON.parse(savedLogs) : [
@@ -166,13 +195,14 @@
               date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
               difficulty: 'कठिन (Hard)',
               timeSpent: 2,
-              notes: '',
+              notes: 'F=ma, घर्षण बल = uN',
               currentStage: 1, 
               stages: [
-                { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: false },
+                { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: true },
                 { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
                 { name: 'R3 (7d)', due: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-                { name: 'Test (15d)', due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
+                { name: 'R4 (15d)', due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
+                { name: 'Mastery (30d)', due: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
               ]
             }
           ];
@@ -190,8 +220,14 @@
         
         const [inputApiKey, setInputApiKey] = useState(localStorage.getItem('user_gemini_key') || '');
         const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
+        
+        // फेनमैन और क्विक नोट्स स्टेट्स
         const [activeNotesLogId, setActiveNotesLogId] = useState(null);
         const [tempNotesText, setTempNotesText] = useState('');
+        const [activeFeynmanLogId, setActiveFeynmanLogId] = useState(null);
+        const [feynmanText, setFeynmanText] = useState('');
+        const [feynmanEvaluation, setFeynmanEvaluation] = useState('');
+        const [loadingFeynman, setLoadingFeynman] = useState(false);
         
         const [aiQuiz, setAiQuiz] = useState(null);
         const [loadingQuiz, setLoadingQuiz] = useState(false);
@@ -203,7 +239,6 @@
           setTimeout(() => setAlertMsg(null), 4000);
         };
 
-        // --- ऑडियो अलर्ट सिस्टम (सिंथेटिक बजर) ---
         const playBuzzerSound = () => {
           try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -212,39 +247,96 @@
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // High pitch A5 note
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
             oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.4); // 0.4 सेकंड का टिंग साउंड
-          } catch (e) {
-            console.log("Audio contexts blocked or unsupported");
-          }
+            oscillator.stop(audioCtx.currentTime + 0.4);
+          } catch (e) { console.log("Audio blocked"); }
         };
 
         useEffect(() => {
-          const body = document.body;
-          body.className = isDarkMode ? "bg-slate-950 text-slate-100 transition-colors duration-300" : "bg-slate-50 text-slate-900 transition-colors duration-300";
+          document.body.className = isDarkMode ? "bg-slate-950 text-slate-100 transition-colors duration-300" : "bg-slate-50 text-slate-900 transition-colors duration-300";
         }, [isDarkMode]);
 
-        // --- गेमिफिकेशन लेवल्स और अचीवमेंट्स गणना ---
+        // --- वैज्ञानिक 5-स्टेज प्रोग्रेस और लॉन्ग टर्म रीसेट लॉजिक ---
+        const handleMarkNextStage = (logId) => {
+          setStudyLogs(prev => prev.map(log => {
+            if (log.id === logId) {
+              const updatedStages = [...log.stages];
+              const nextPendingIdx = updatedStages.findIndex(s => !s.completed);
+              if (nextPendingIdx !== -1) {
+                updatedStages[nextPendingIdx].completed = true;
+                showAlert(`Stage ${updatedStages[nextPendingIdx].name} ${lang === 'hi' ? 'पूर्ण मार्क हुआ!' : 'marked completed!'} +20 XP`);
+                setUser(u => ({ ...u, points: u.points + 20 }));
+                return { ...log, currentStage: nextPendingIdx + 1, stages: updatedStages };
+              } else {
+                showAlert(lang === 'hi' ? "🎉 यह टॉपिक आप पूरी तरह मास्टर कर चुके हैं!" : "🎉 Topic already fully mastered!");
+              }
+            }
+            return log;
+          }));
+        };
+
+        const handleResetRevisionCycle = (logId) => {
+          setStudyLogs(prev => prev.map(log => {
+            if (log.id === logId) {
+              const today = new Date();
+              const getDue = (days) => new Date(today.getTime() + days * 24*60*60*1000).toISOString().split('T')[0];
+              showAlert(lang === 'hi' ? "🔄 रिवीजन चक्र रीसेट! शेड्यूल R1 से दोबारा शुरू होगा।" : "🔄 Cycle reset! Tracking restarted from R1.");
+              return {
+                ...log,
+                currentStage: 0,
+                stages: [
+                  { name: 'R1 (24h)', due: getDue(1), completed: false },
+                  { name: 'R2 (3d)', due: getDue(3), completed: false },
+                  { name: 'R3 (7d)', due: getDue(7), completed: false },
+                  { name: 'R4 (15d)', due: getDue(15), completed: false },
+                  { name: 'Mastery (30d)', due: getDue(30), completed: false }
+                ]
+              };
+            }
+            return log;
+          }));
+        };
+
+        // --- फेनमैन मोड: AI विश्लेषण ---
+        const handleFeynmanVerify = async (log) => {
+          const savedKey = localStorage.getItem('user_gemini_key');
+          if (!savedKey) {
+            showAlert("⚠️ Please set Gemini API Key first!");
+            return;
+          }
+          if (!feynmanText.trim()) return;
+
+          setLoadingFeynman(true);
+          setFeynmanEvaluation('');
+
+          const prompt = `Review this student's explanation in ${lang === 'hi' ? 'Hindi' : 'English'} for Subject: "${log.subject}" and Topic: "${log.topic}". Student Explanation: "${feynmanText}". Evaluate using Feynman technique rules: verify correctness, point out any conceptual gaps or mistakes clearly, and give a constructive tip to make it simpler. Keep the response under 100 words.`;
+
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${savedKey}`;
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await response.json();
+            const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            setFeynmanEvaluation(resultText || "Analysis error.");
+            setUser(u => ({ ...u, points: u.points + 30 }));
+          } catch (err) {
+            setFeynmanEvaluation("❌ AI Connection Failed.");
+          } finally {
+            setLoadingFeynman(false);
+          }
+        };
+
         const calculatedLevel = Math.floor(user.points / 200) + 1;
         const achievementsList = [
-          { name: "Consistency Warrior 🔥", unlocked: user.streak >= 5, desc: "लगातार 5 दिनों तक स्ट्रीक बनाए रखने पर" },
-          { name: "Knowledge Explorer 🧠", unlocked: studyLogs.length >= 3, desc: "3 या अधिक भिन्न विषयों को सफलतापूर्वक दर्ज करने पर" },
-          { name: "AI Champion 🤖", unlocked: user.points >= 400, desc: "AI टेस्ट पास कर 400 से अधिक XP अर्जित करने पर" }
+          { name: "Consistency Warrior 🔥", unlocked: user.streak >= 5, desc: lang === 'hi' ? "लगातार 5 दिनों तक स्ट्रीक बनाए रखने पर" : "Maintain a 5-day study streak" },
+          { name: "Knowledge Explorer 🧠", unlocked: studyLogs.length >= 3, desc: lang === 'hi' ? "3 या अधिक भिन्न विषयों को दर्ज करने पर" : "Log 3 or more distinct subjects" },
+          { name: "AI Champion 🤖", unlocked: user.points >= 400, desc: lang === 'hi' ? "AI टेस्ट पास कर 400 से अधिक XP अर्जित करने पर" : "Earn more than 400 XP points via AI tests" }
         ];
-
-        // --- क्विक नोट्स सुरक्षित करने का हैंडलर ---
-        const handleOpenNotes = (log) => {
-          setActiveNotesLogId(log.id);
-          setTempNotesText(log.notes || '');
-        };
-
-        const handleSaveNotes = () => {
-          setStudyLogs(prev => prev.map(l => l.id === activeNotesLogId ? { ...l, notes: tempNotesText } : l));
-          setActiveNotesLogId(null);
-          showAlert(lang === 'hi' ? '📝 क्विक नोट्स सेव हो गए!' : '📝 Quick notes updated!');
-        };
 
         const handleExportData = () => {
           const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(studyLogs));
@@ -263,81 +355,59 @@
             fileReader.onload = (event) => {
               try {
                 const parsedData = JSON.parse(event.target.result);
-                if (Array.isArray(parsedData)) {
-                  setStudyLogs(parsedData);
-                  showAlert('📥 डेटा सफलतापूर्वक रीस्टोर हो गया!');
-                }
-              } catch (err) { showAlert('⚠️ त्रुटिपूर्ण फ़ाइल'); }
+                if (Array.isArray(parsedData)) { setStudyLogs(parsedData); showAlert('📥 Success!'); }
+              } catch (err) { showAlert('⚠️ Error'); }
             };
           }
         };
 
         const handleGenerateQuiz = async (log) => {
           const savedKey = localStorage.getItem('user_gemini_key');
-          if (!savedKey) {
-            showAlert(lang === 'hi' ? "⚠️ प्रोफाइल टैब में जाकर अपनी Gemini API Key सेट करें!" : "⚠️ Setup your Gemini API Key first!");
-            setActiveTab('profile');
-            return;
-          }
+          if (!savedKey) { setActiveTab('profile'); return; }
           setSelectedTopicForTest(log);
           setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
 
-          const systemPrompt = `You are an expert tutor designing interactive active recall quizzes. Generate responses in ${lang === 'hi' ? 'Hindi' : 'English'}.`;
-          const userPrompt = `Create a 3-question multiple choice test based on Subject: "${log.subject}" and Topic: "${log.topic}". Format the response strictly as a JSON object inside your reply containing a 'questions' array. Each question must have: 'question' (string), 'options' (array of exactly 4 strings), 'correctIndex' (integer from 0 to 3), and 'explanation' (string). Return raw JSON text only.`;
+          const userPrompt = `Create a 3-question multiple choice test based on Subject: "${log.subject}" and Topic: "${log.topic}". Format the response strictly as a JSON object inside your reply containing a 'questions' array. Each question must have: 'question' (string), 'options' (array of exactly 4 strings), 'correctIndex' (integer from 0 to 3), and 'explanation' (string). Return raw JSON text only. Generate output in ${lang === 'hi' ? 'Hindi' : 'English'}.`;
 
           try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${savedKey}`;
             const response = await fetch(url, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: userPrompt }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { responseMimeType: "application/json" }
-              })
+              body: JSON.stringify({ contents: [{ parts: [{ text: userPrompt }] }], generationConfig: { responseMimeType: "application/json" } })
             });
             const data = await response.json();
             const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textResponse) {
-              setAiQuiz(JSON.parse(textResponse).questions);
-            }
+            if (textResponse) { setAiQuiz(JSON.parse(textResponse).questions); }
           } catch (error) {
-            showAlert("⚠️ AI टेस्ट बनाने में समस्या हुई।");
+            showAlert("⚠️ Test generation failed.");
             setActiveTab('dashboard');
           } finally { setLoadingQuiz(false); }
         };
 
-        const handleSubmitQuiz = () => {
-          setQuizSubmitted(true);
-          let correctCount = 0;
-          aiQuiz.forEach((q, idx) => { if (userAnswers[idx] === q.correctIndex) correctCount++; });
-          const pointsWon = correctCount * 20;
-          setUser(prev => ({ ...prev, points: prev.points + pointsWon, streak: prev.streak + 1 }));
-          showAlert(`🎉 Score: ${correctCount}/3. +${pointsWon} XP!`);
+        const handleAddLog = (e) => {
+          e.preventDefault();
+          const finalSubject = newLog.subject === 'Custom' ? newLog.customSubject : newLog.subject;
+          if (!finalSubject || !newLog.topic) return;
+          const today = new Date();
+          const getDue = (days) => new Date(today.getTime() + days * 24*60*60*1000).toISOString().split('T')[0];
+
+          const newEntry = {
+            id: Date.now(), subject: finalSubject, topic: newLog.topic, date: today.toISOString().split('T')[0], difficulty: newLog.difficulty, timeSpent: parseFloat(newLog.timeSpent) || 1, notes: '', currentStage: 0,
+            stages: [
+              { name: 'R1 (24h)', due: getDue(1), completed: false },
+              { name: 'R2 (3d)', due: getDue(3), completed: false },
+              { name: 'R3 (7d)', due: getDue(7), completed: false },
+              { name: 'R4 (15d)', due: getDue(15), completed: false },
+              { name: 'Mastery (30d)', due: getDue(30), completed: false }
+            ]
+          };
+          setStudyLogs([newEntry, ...studyLogs]);
+          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'Medium', timeSpent: 2 });
+          setActiveTab('dashboard');
         };
 
-        useEffect(() => {
-          let interval = null;
-          if (timer.isActive) {
-            interval = setInterval(() => {
-              if (timer.seconds > 0) {
-                setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
-              } else if (timer.seconds === 0 && timer.minutes > 0) {
-                setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
-              } else {
-                clearInterval(interval);
-                playBuzzerSound(); // समय पूरा होने पर बजर बजाएं
-                const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
-                setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
-                showAlert(`🔔 ${nextMode === 'Focus' ? 'ब्रेक समाप्त, फोकस मोड शुरू!' : 'फोकस सत्र समाप्त, ब्रेक लें!'}`);
-              }
-            }, 1000);
-          } else { clearInterval(interval); }
-          return () => clearInterval(interval);
-        }, [timer.isActive, timer.seconds, timer.minutes]);
-
-        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
-        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
+        const todayStr = new Date().toISOString().split('T')[0];
 
         return (
           <div className="min-h-screen flex flex-col justify-between items-center p-2 sm:p-4 w-full">
@@ -374,7 +444,6 @@
               <main className="flex-1 overflow-y-auto p-4 pb-16">
                 {activeTab === 'dashboard' && (
                   <div className="space-y-4">
-                    {/* दैनिक अध्ययन बजट टाइमर पैनल */}
                     <div className={`p-4 rounded-2xl border space-y-3 ${isDarkMode ? 'bg-gradient-to-br from-slate-900 to-indigo-950 border-indigo-900/40' : 'bg-gradient-to-br from-slate-50 to-indigo-50 border-indigo-100'}`}>
                       <div className="flex justify-between items-start">
                         <div>
@@ -390,11 +459,9 @@
                       </div>
                     </div>
 
-                    {/* न्यू फ़ीचर: विजुअल साप्ताहिक बार चार्ट ग्राफ */}
                     <div className={`p-4 rounded-2xl border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
                       <h4 className="text-xs font-bold text-indigo-500">{t[lang].analyticsTitle}</h4>
                       <div className="flex justify-around items-end h-24 pt-2">
-                        {/* CSS आधारित स्टेटिक मॉक वीकली पिलर्स */}
                         {[
                           { day: "M", h: 4, label: "4h" }, { day: "T", h: 5.5, label: "5.5h" }, 
                           { day: "W", h: todayTotalAllocated || 2, label: `${todayTotalAllocated || 2}h`, active: true },
@@ -403,58 +470,76 @@
                         ].map((bar, bIdx) => (
                           <div key={bIdx} className="flex flex-col items-center flex-1 space-y-1">
                             <span className="text-[8px] text-slate-400 font-bold">{bar.label}</span>
-                            <div 
-                              className={`w-4 rounded-t transition-all duration-500 ${bar.active ? 'bg-indigo-500' : 'bg-slate-700/60'}`} 
-                              style={{ height: `${(bar.h / 6) * 60}px` }}
-                            ></div>
+                            <div className={`w-4 rounded-t transition-all duration-500 ${bar.active ? 'bg-indigo-500' : 'bg-slate-700/60'}`} style={{ height: `${(bar.h / 6) * 60}px` }}></div>
                             <span className="text-[9px] text-slate-500 font-bold">{bar.day}</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* सक्रिय मेमोरी ट्रैकर मुख्य ग्रिड */}
+                    {/* Due Today Filter Checkbox */}
+                    <div className="flex items-center gap-2 text-xs font-bold px-1 text-slate-400">
+                      <input type="checkbox" checked={showDueOnly} onChange={() => setShowDueOnly(!showDueOnly)} className="rounded border-slate-700 bg-transparent w-4 h-4 accent-indigo-600" />
+                      <label>{t[lang].dueOnly}</label>
+                    </div>
+
                     <div className="space-y-3">
                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t[lang].trackerTitle}</h3>
-                      {studyLogs.map(log => (
+                      {studyLogs
+                        .filter(log => !showDueOnly || log.stages.some(s => s.due === todayStr && !s.completed))
+                        .map(log => (
                         <div key={log.id} className={`p-3.5 rounded-xl border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <span className="text-[9px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-500 px-1.5 py-0.5 rounded font-bold uppercase">{log.subject}</span>
                               <h4 className="text-xs font-bold mt-1">{log.topic}</h4>
                             </div>
-                            <div className="flex gap-1.5">
-                              <button type="button" onClick={() => handleOpenNotes(log)} className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[9px] px-2 py-1 rounded-lg font-bold">📝 {lang === 'hi' ? 'नोट्स' : 'Notes'}</button>
+                            <div className="flex gap-1">
+                              <button type="button" onClick={() => handleOpenNotes(log)} className="bg-slate-800 text-slate-300 text-[9px] px-2 py-1 rounded-lg border border-slate-700">📝 Notes</button>
+                              <button type="button" onClick={() => { setActiveFeynmanLogId(activeFeynmanLogId === log.id ? null : log.id); setFeynmanText(''); setFeynmanEvaluation(''); }} className="bg-purple-950/40 text-purple-400 border border-purple-800/30 text-[9px] px-2 py-1 rounded-lg font-bold">{t[lang].feynmanBtn}</button>
                               <button type="button" onClick={() => handleGenerateQuiz(log)} className="bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] px-2 py-1 rounded-lg font-bold transition">{t[lang].aiTestBtn}</button>
                             </div>
                           </div>
 
-                          {/* न्यू फ़ीचर: इनलाइन क्विक नोट्स एडिटर पैड */}
+                          {/* फेनमैन एक्सप्लेनेशन इनलाइन मोड पैनल */}
+                          {activeFeynmanLogId === log.id && (
+                            <div className="p-3 rounded-xl border border-purple-900/40 text-xs space-y-2 bg-purple-950/10 animate-fadeIn">
+                              <h5 className="font-bold text-purple-400 text-[10px] uppercase">🗣️ Feynman Learning Shield</h5>
+                              <textarea value={feynmanText} onChange={(e) => setFeynmanText(e.target.value)} placeholder={t[lang].feynmanPlaceholder} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-[11px] text-slate-200 focus:outline-none h-16" />
+                              <button type="button" onClick={() => handleFeynmanVerify(log)} disabled={loadingFeynman} className="bg-purple-600 text-white text-[10px] px-3 py-1 rounded-lg font-bold">{loadingFeynman ? "Analyzing..." : t[lang].verifyFeynman}</button>
+                              {feynmanEvaluation && <div className="p-2.5 rounded bg-slate-950 border border-purple-900/30 text-[10px] text-purple-300 mt-1 leading-normal">{feynmanEvaluation}</div>}
+                            </div>
+                          )}
+
                           {activeNotesLogId === log.id && (
-                            <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800 text-xs space-y-2 animate-fadeIn">
+                            <div className="p-3 rounded-xl border border-slate-800 text-xs space-y-2 animate-fadeIn bg-slate-900/40">
                               <h5 className="font-bold text-indigo-400 text-[10px] uppercase">{t[lang].quickNotesTitle}</h5>
-                              <textarea 
-                                value={tempNotesText} 
-                                onChange={(e) => setTempNotesText(e.target.value)}
-                                placeholder={t[lang].notesPlaceholder}
-                                className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-[11px] focus:outline-none h-16 text-slate-200"
-                              />
+                              <textarea value={tempNotesText} onChange={(e) => setTempNotesText(e.target.value)} placeholder={t[lang].notesPlaceholder} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-[11px] text-slate-200 focus:outline-none h-16" />
                               <button type="button" onClick={handleSaveNotes} className="bg-emerald-600 text-white font-bold text-[10px] px-3 py-1 rounded-lg">{t[lang].saveNotesBtn}</button>
                             </div>
                           )}
 
                           {log.notes && activeNotesLogId !== log.id && (
-                            <div className="text-[10px] text-slate-400 italic bg-slate-900/30 p-2 rounded-lg border border-slate-800/40">
-                              📌 {log.notes}
-                            </div>
+                            <div className="text-[10px] text-slate-400 italic bg-slate-900/30 p-2 rounded-lg border border-slate-800/40">📌 {log.notes}</div>
                           )}
 
-                          <div className="grid grid-cols-4 gap-1.5 mt-2">
+                          {/* 5-स्टेज रिपीटीशन स्टेटस */}
+                          <div className="grid grid-cols-5 gap-1.5 mt-2">
                             {log.stages.map((stage, idx) => (
-                              <div key={idx} className={`text-[9px] p-1.5 rounded border text-center ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-white border-slate-300 text-slate-600'}`}>
+                              <div key={idx} className={`text-[8px] p-1.5 rounded border text-center font-bold ${stage.completed ? 'bg-emerald-600/10 border-emerald-500/60 text-emerald-500' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
                                 {stage.name}
                               </div>
                             ))}
+                          </div>
+
+                          {/* लॉन्ग-टर्म परमानेंट रिवीजन कंट्रोल बटन्स */}
+                          <div className="flex gap-2 pt-1 border-t border-slate-800/40">
+                            <button type="button" onClick={() => handleMarkNextStage(log.id)} className="flex-1 bg-emerald-600/10 border border-emerald-500/30 hover:bg-emerald-600/20 text-emerald-500 text-[9px] py-1.5 rounded-lg font-bold transition">
+                              ✅ {lang === 'hi' ? 'अगला स्टेज पूर्ण' : 'Mark Stage Done'}
+                            </button>
+                            <button type="button" onClick={() => handleResetRevisionCycle(log.id)} className="flex-1 bg-rose-600/10 border border-rose-500/30 hover:bg-rose-600/20 text-rose-500 text-[9px] py-1.5 rounded-lg font-bold transition">
+                              {t[lang].resetCycle}
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -475,6 +560,9 @@
                           <option value="Custom">Custom</option>
                         </select>
                       </div>
+                      {newLog.subject === 'Custom' && (
+                        <input type="text" placeholder="Subject name" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className={`w-full border rounded-xl p-2.5 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-300'}`} />
+                      )}
                       <div>
                         <label className="block font-semibold mb-1">{t[lang].labelTopic}</label>
                         <input type="text" placeholder="Topic name" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className={`w-full border rounded-xl p-2.5 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-300'}`} />
@@ -484,7 +572,9 @@
                           <label className="block font-semibold mb-1">{t[lang].labelTime}</label>
                           <input type="number" step="0.5" min="0.5" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className={`w-full border rounded-xl p-2.5 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-300'}`} />
                         </div>
-                        <button type="submit" className="w-full bg-indigo-600 font-bold py-3 mt-5 rounded-xl text-white text-xs">{t[lang].btnSave}</button>
+                        <div className="pt-5">
+                          <button type="submit" className="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white text-xs">{t[lang].btnSave}</button>
+                        </div>
                       </div>
                     </form>
                   </div>
@@ -532,7 +622,7 @@
 
                 {activeTab === 'info' && (
                   <div className="space-y-4 text-left text-xs">
-                    <div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-900/40">
+                    <div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-900/40 space-y-2">
                       <h4 className="font-bold uppercase tracking-wide mb-2">{t[lang].howToUseTitle}</h4>
                       <p>{t[lang].step1}</p><p>{t[lang].step2}</p><p>{t[lang].step3}</p><p>{t[lang].step4}</p>
                     </div>
@@ -547,9 +637,8 @@
                       <p className="text-[10px] text-slate-400">{user.category}</p>
                     </div>
                     
-                    {/* न्यू फ़ीचर: गेमिफिकेशन मेडल्स ग्रिड */}
                     <div className={`rounded-xl p-4 border space-y-2 ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
-                      <h4 className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">{t[lang].medalsTitle}</h4>
+                      <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{t[lang].medalsTitle}</h4>
                       <div className="grid grid-cols-1 gap-2 pt-1">
                         {achievementsList.map((ach, idx) => (
                           <div key={idx} className={`p-2 rounded-xl border flex items-center justify-between ${ach.unlocked ? 'border-emerald-500 bg-emerald-500/5' : 'border-slate-800 opacity-40'}`}>
@@ -564,7 +653,7 @@
                     </div>
 
                     <div className={`rounded-xl p-4 border space-y-3 ${isDarkMode ? 'bg-slate-950 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
-                      <h4 className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">{t[lang].backupTitle}</h4>
+                      <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{t[lang].backupTitle}</h4>
                       <div className="grid grid-cols-2 gap-2">
                         <button type="button" onClick={handleExportData} className="bg-indigo-600 text-white p-2 rounded-xl font-bold text-[10px]">{t[lang].btnExport}</button>
                         <label className="bg-slate-800 text-slate-200 p-2 rounded-xl font-bold text-[10px] text-center cursor-pointer border border-slate-700 block">
@@ -585,7 +674,6 @@
                 )}
               </main>
 
-              {/* 6-बटन मोबाइल बॉटम नेविगेशन बार */}
               <nav className={`absolute bottom-0 left-0 right-0 h-14 border-t flex justify-around items-center px-0.5 z-20 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200'}`}>
                 <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-500 font-bold' : 'text-slate-500'}`}><span className="text-sm">📖</span><span className="text-[7.5px] mt-0.5">{t[lang].navTracker}</span></button>
                 <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-sm">➕</span><span className="text-[7.5px] mt-0.5">{t[lang].navAdd}</span></button>
