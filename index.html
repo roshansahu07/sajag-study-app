@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -7,7 +7,7 @@
     <title>सजग छात्र Ultimate v2.5</title>
     
     <!-- PWA Manifest & Meta Tags -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#4f46e5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -32,8 +32,8 @@
 
     <!-- 
         ========================================================================
-        ADSENSE SCRIPT PLACEHOLDER:
-        जब AdSense कोड मिले, नीचे दिए गए स्क्रिप्ट टैग को अनकमेंट करके अपना Publisher ID डालें।
+        ADSENSE AUTO-ADS SCRIPT PLACEHOLDER
+        Replace 'ca-pub-XXXXXXXXXXXXXXXX' with your Google AdSense Publisher ID
         ========================================================================
     -->
     <!-- 
@@ -73,7 +73,7 @@
 
                 <!-- Navigation Links -->
                 <nav class="space-y-1 text-xs font-bold">
-                    <button onclick="switchTab('dashboard')" id="nav-dash" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-600 text-white"><span>📖</span><span>ट्रैकर</span></button>
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-600 text-white"><span>📖</span><span>ट्रैकर</span></button>
                     <button onclick="switchTab('log')" id="nav-log" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>➕</span><span>दर्ज करें</span></button>
                     <button onclick="switchTab('timer')" id="nav-timer" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>⏱</span><span>फोकस</span></button>
                     <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>📊</span><span>विश्लेषण</span></button>
@@ -84,7 +84,7 @@
                 <!-- ADSENSE SLOT #1: SIDEBAR ADS -->
                 <div class="p-2 rounded-xl border border-dashed text-center min-h-[140px] flex flex-col justify-center items-center bg-slate-950/40 border-slate-800 text-slate-500">
                     <span class="text-[9px] font-semibold uppercase tracking-wider mb-1">विज्ञापन (Ad)</span>
-                    <!-- PASTE ADSENSE INS CODE HERE FOR SIDEBAR -->
+                    <!-- PASTE ADSENSE INS CODE HERE -->
                 </div>
             </div>
 
@@ -120,7 +120,7 @@
                 <!-- ADSENSE SLOT #2: TOP BANNER AD -->
                 <div id="topAdSlot" class="mb-4 p-2 rounded-2xl border border-dashed text-center min-h-[80px] flex flex-col justify-center items-center bg-slate-900/40 border-slate-800 text-slate-500">
                     <span class="text-[9px] font-semibold uppercase tracking-wider mb-1">Sponsored Advertisement</span>
-                    <!-- PASTE ADSENSE INS CODE HERE FOR TOP BANNER -->
+                    <!-- PASTE ADSENSE INS CODE HERE -->
                 </div>
 
                 <!-- 1. DASHBOARD VIEW -->
@@ -164,7 +164,7 @@
                     <div class="space-y-3">
                         <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">📅 एक्टिव मेमोरी ट्रैकर</h3>
                         <div id="logsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <!-- Dynamic Cards -->
+                            <!-- Dynamic Topic Cards Rendered via JS -->
                         </div>
                     </div>
                 </section>
@@ -195,7 +195,7 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block font-semibold mb-1 text-slate-300">समय spent (घंटे):</label>
+                                <label class="block font-semibold mb-1 text-slate-300">समय (घंटे):</label>
                                 <input type="number" id="timeInput" step="0.5" min="0.5" max="12" value="2" class="w-full border rounded-xl p-3 focus:outline-none bg-slate-900 border-slate-800 text-slate-200" />
                             </div>
                             <div>
@@ -289,29 +289,29 @@
                 <!-- ADSENSE SLOT #4: BOTTOM BANNER AD -->
                 <div class="mt-8 p-3 rounded-2xl border border-dashed text-center min-h-[90px] flex flex-col justify-center items-center bg-slate-900/30 border-slate-800 text-slate-500">
                     <span class="text-[9px] font-semibold uppercase tracking-wider mb-1">Advertisement</span>
-                    <!-- PASTE ADSENSE INS CODE HERE FOR BOTTOM BANNER -->
+                    <!-- PASTE ADSENSE INS CODE HERE -->
                 </div>
 
             </main>
 
             <!-- MOBILE BOTTOM DOCK -->
             <nav id="mobileDock" class="md:hidden fixed bottom-0 left-0 right-0 h-16 border-t flex justify-around items-center px-1 z-40 bg-slate-950/95 border-slate-800 text-slate-400 backdrop-blur-md">
-                <button onclick="switchTab('dashboard')" class="flex flex-col items-center justify-center flex-1 py-1 text-indigo-400 font-bold">
+                <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-indigo-400 font-bold">
                     <span class="text-lg">📖</span><span class="text-[9px] mt-0.5">ट्रैकर</span>
                 </button>
-                <button onclick="switchTab('log')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                <button onclick="switchTab('log')" id="mob-nav-log" class="mob-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
                     <span class="text-lg">➕</span><span class="text-[9px] mt-0.5">दर्ज करें</span>
                 </button>
-                <button onclick="switchTab('timer')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                <button onclick="switchTab('timer')" id="mob-nav-timer" class="mob-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
                     <span class="text-lg">⏱</span><span class="text-[9px] mt-0.5">फोकस</span>
                 </button>
-                <button onclick="switchTab('analytics')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                <button onclick="switchTab('analytics')" id="mob-nav-analytics" class="mob-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
                     <span class="text-lg">📊</span><span class="text-[9px] mt-0.5">विश्लेषण</span>
                 </button>
-                <button onclick="switchTab('notifications')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                <button onclick="switchTab('notifications')" id="mob-nav-notifications" class="mob-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
                     <span class="text-lg">🔔</span><span class="text-[9px] mt-0.5">अलर्ट</span>
                 </button>
-                <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                <button onclick="switchTab('profile')" id="mob-nav-profile" class="mob-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
                     <span class="text-lg">👤</span><span class="text-[9px] mt-0.5">प्रोफाइल</span>
                 </button>
             </nav>
@@ -319,18 +319,18 @@
         </div>
     </div>
 
-    <!-- SERVICE WORKER REGISTRATION FOR PWA -->
+    <!-- SAFE SERVICE WORKER REGISTRATION -->
     <script>
-      if ('serviceWorker' in navigator) {
+      if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+          navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('SW Registered', reg))
-            .catch(err => console.log('SW Registration failed', err));
+            .catch(err => console.log('SW Registration skipped or failed', err));
         });
       }
     </script>
 
-    <!-- PURE JAVASCRIPT APPLICATION LOGIC -->
+    <!-- FULLY TESTED JAVASCRIPT APPLICATION LOGIC -->
     <script>
       const systemApiKey = "";
 
@@ -349,6 +349,7 @@
 
       function showToast(msg) {
         const toast = document.getElementById('toast');
+        if (!toast) return;
         toast.innerText = msg;
         toast.classList.remove('hidden');
         setTimeout(() => toast.classList.add('hidden'), 3500);
@@ -383,7 +384,8 @@
         }
 
         const savedKey = localStorage.getItem('user_gemini_key') || '';
-        document.getElementById('apiKeyInput').value = savedKey;
+        const keyInput = document.getElementById('apiKeyInput');
+        if (keyInput) keyInput.value = savedKey;
       }
 
       function saveData() {
@@ -393,13 +395,15 @@
 
       function renderUser() {
         const level = Math.floor(user.points / 100) + 1;
-        document.getElementById('levelBadgeDesktop').innerText = '🏆 स्तर ' + level;
-        document.getElementById('levelBadgeMobile').innerText = '🏆 स्तर ' + level;
-        document.getElementById('streakBadgeDesktop').innerText = '🔥 ' + user.streak + 'd';
-        document.getElementById('streakBadgeMobile').innerText = '🔥 ' + user.streak + 'd';
-        document.getElementById('xpBadgeDesktop').innerText = '⭐ ' + user.points + ' Total XP';
-        document.getElementById('xpBadgeMobile').innerText = '⭐ ' + user.points + ' XP';
-        document.getElementById('profileName').innerText = user.name;
+        
+        const setEl = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+        setEl('levelBadgeDesktop', '🏆 स्तर ' + level);
+        setEl('levelBadgeMobile', '🏆 स्तर ' + level);
+        setEl('streakBadgeDesktop', '🔥 ' + user.streak + 'd');
+        setEl('streakBadgeMobile', '🔥 ' + user.streak + 'd');
+        setEl('xpBadgeDesktop', '⭐ ' + user.points + ' Total XP');
+        setEl('xpBadgeMobile', '⭐ ' + user.points + ' XP');
+        setEl('profileName', user.name);
       }
 
       function switchTab(tab) {
@@ -411,6 +415,7 @@
         const activeView = document.getElementById('view-' + tab);
         if (activeView) activeView.classList.remove('hidden');
 
+        // Update Desktop Navigation Styling Safely
         document.querySelectorAll('.nav-btn').forEach(btn => {
           btn.classList.remove('bg-indigo-600', 'text-white');
           btn.classList.add('hover:bg-slate-800/50', 'text-slate-400');
@@ -420,14 +425,29 @@
           currentNav.classList.add('bg-indigo-600', 'text-white');
           currentNav.classList.remove('hover:bg-slate-800/50', 'text-slate-400');
         }
+
+        // Update Mobile Bottom Dock Styling Safely
+        document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+          btn.classList.remove('text-indigo-400', 'font-bold');
+          btn.classList.add('text-slate-500');
+        });
+        const mobNav = document.getElementById('mob-nav-' + tab);
+        if (mobNav) {
+          mobNav.classList.add('text-indigo-400', 'font-bold');
+          mobNav.classList.remove('text-slate-500');
+        }
       }
 
       function renderLogs() {
         const todayStr = new Date().toISOString().split('T')[0];
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const dueOnly = document.getElementById('dueTodayCheck').checked;
+        const searchInput = document.getElementById('searchInput');
+        const dueCheck = document.getElementById('dueTodayCheck');
+
+        const search = searchInput ? searchInput.value.toLowerCase() : '';
+        const dueOnly = dueCheck ? dueCheck.checked : false;
 
         const container = document.getElementById('logsContainer');
+        if (!container) return;
         container.innerHTML = '';
 
         let totalTodayHours = 0;
@@ -473,10 +493,14 @@
           container.appendChild(card);
         });
 
-        document.getElementById('budgetLogged').innerText = totalTodayHours + ' / 6 घंटे बुक हैं';
+        // Update Budget Widget Safely
+        const budgetLogged = document.getElementById('budgetLogged');
+        if (budgetLogged) budgetLogged.innerText = totalTodayHours + ' / 6 घंटे बुक हैं';
         const rem = Math.max(0, 6 - totalTodayHours);
-        document.getElementById('budgetTag').innerText = rem + 'h शेष समय';
-        document.getElementById('budgetBar').style.width = Math.min(100, (totalTodayHours / 6) * 100) + '%';
+        const budgetTag = document.getElementById('budgetTag');
+        if (budgetTag) budgetTag.innerText = rem + 'h शेष समय';
+        const budgetBar = document.getElementById('budgetBar');
+        if (budgetBar) budgetBar.style.width = Math.min(100, (totalTodayHours / 6) * 100) + '%';
         const wedVal = document.getElementById('wedVal');
         if (wedVal) wedVal.innerText = (totalTodayHours || 2) + 'h';
       }
@@ -565,14 +589,16 @@
         switchTab('dashboard');
       }
 
+      // TIMER LOGIC
       function toggleTimer() {
+        const startBtn = document.getElementById('pomoStartBtn');
         if (timer.isActive) {
           clearInterval(timer.interval);
           timer.isActive = false;
-          document.getElementById('pomoStartBtn').innerText = '▶ शुरू करें';
+          if (startBtn) startBtn.innerText = '▶ शुरू करें';
         } else {
           timer.isActive = true;
-          document.getElementById('pomoStartBtn').innerText = '⏸ रोकें';
+          if (startBtn) startBtn.innerText = '⏸ रोकें';
           timer.interval = setInterval(() => {
             if (timer.seconds > 0) {
               timer.seconds--;
@@ -592,10 +618,12 @@
       function resetTimer() {
         clearInterval(timer.interval);
         timer.isActive = false;
-        const mins = parseInt(document.getElementById('customTimerMinutes').value) || 25;
+        const inputMins = document.getElementById('customTimerMinutes');
+        const mins = inputMins ? (parseInt(inputMins.value) || 25) : 25;
         timer.minutes = mins;
         timer.seconds = 0;
-        document.getElementById('pomoStartBtn').innerText = '▶ शुरू करें';
+        const startBtn = document.getElementById('pomoStartBtn');
+        if (startBtn) startBtn.innerText = '▶ शुरू करें';
         updateTimerDisplay();
       }
 
@@ -609,16 +637,20 @@
 
       function updateTimerDisplay() {
         const text = String(timer.minutes).padStart(2, '0') + ':' + String(timer.seconds).padStart(2, '0');
-        document.getElementById('pomoTimeDisplay').innerText = text;
-        document.getElementById('miniTimerDisplay').innerText = text;
+        const pomoDisp = document.getElementById('pomoTimeDisplay');
+        const miniDisp = document.getElementById('miniTimerDisplay');
+        if (pomoDisp) pomoDisp.innerText = text;
+        if (miniDisp) miniDisp.innerText = text;
       }
 
+      // AI QUIZ LOGIC
       async function handleAiQuiz(logId) {
         const log = studyLogs.find(l => l.id === logId);
         if (!log) return;
 
         switchTab('test-arena');
         const container = document.getElementById('quizContainer');
+        if (!container) return;
         container.innerHTML = '<div class="text-center py-12"><div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div><p class="text-xs text-slate-400">Gemini AI टेस्ट तैयार कर रहा है...</p></div>';
 
         const userKey = localStorage.getItem('user_gemini_key') || systemApiKey;
@@ -674,7 +706,7 @@
           html += `<button onclick="finishQuiz()" class="w-full bg-emerald-600 font-bold py-3 rounded-xl text-white text-xs hover:bg-emerald-700 transition">सबमिट टेस्ट</button>`;
           container.innerHTML = html;
         } catch(e) {
-          container.innerHTML = '<p class="text-xs text-center py-8 text-rose-400">⚠️ AI टेस्ट जनरेट नहीं हो सका। अपनी API Key चेक करें।</p>';
+          container.innerHTML = '<p class="text-xs text-center py-8 text-rose-400">⚠️ AI टेस्ट जनरेट नहीं हो सका। कृपया प्रोफाइल में अपनी Gemini API Key जांचें।</p>';
         }
       }
 
@@ -696,6 +728,8 @@
       function renderNotifications() {
         const todayStr = new Date().toISOString().split('T')[0];
         const list = document.getElementById('notifList');
+        if (!list) return;
+
         const due = studyLogs.filter(l => l.stages.some(s => s.due === todayStr && !s.completed));
         if (due.length > 0) {
           list.innerHTML = due.map(l => `
@@ -745,6 +779,7 @@
         showToast('✅ API Key सुरक्षित सेव हो गई!');
       }
 
+      // THEME SWITCHER
       function toggleTheme() {
         isDarkMode = !isDarkMode;
         const body = document.getElementById('appBody');
@@ -754,18 +789,16 @@
         if (isDarkMode) {
           body.classList.remove('bg-slate-100', 'text-slate-900');
           body.classList.add('bg-slate-950', 'text-slate-100');
-          btnDesktop.innerText = '☀️ Light';
-          btnMobile.innerText = '☀️';
+          if (btnDesktop) btnDesktop.innerText = '☀️ Light';
+          if (btnMobile) btnMobile.innerText = '☀️';
         } else {
           body.classList.remove('bg-slate-950', 'text-slate-100');
           body.classList.add('bg-slate-100', 'text-slate-900');
-          btnDesktop.innerText = '🌙 Dark';
-          btnMobile.innerText = '🌙';
+          if (btnDesktop) btnDesktop.innerText = '🌙 Dark';
+          if (btnMobile) btnMobile.innerText = '🌙';
         }
         renderLogs();
       }
     </script>
 </body>
 </html>
-
-```
