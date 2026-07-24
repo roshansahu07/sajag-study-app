@@ -1,8 +1,8 @@
 const CACHE_NAME = 'sajag-chhatra-v2.5';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  './',
+  './index.html',
+  './manifest.json',
   'https://cdn.tailwindcss.com'
 ];
 
