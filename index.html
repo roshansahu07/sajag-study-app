@@ -1,765 +1,771 @@
+```html
 <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>सजग छात्र Ultimate</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>सजग छात्र Ultimate v2.5</title>
     
-    <!-- PWA Manifest Link -->
-    <link rel="manifest" href="./manifest.json" />
+    <!-- PWA Manifest & Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#4f46e5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="सजग छात्र" />
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5676/5676059.png" />
 
-    <!-- Tailwind CSS v4 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              mono: ['monospace']
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- 
+        ========================================================================
+        ADSENSE SCRIPT PLACEHOLDER:
+        जब AdSense कोड मिले, नीचे दिए गए स्क्रिप्ट टैग को अनकमेंट करके अपना Publisher ID डालें।
+        ========================================================================
+    -->
+    <!-- 
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    -->
+
     <style>
-      .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-      /* स्मूथ स्क्रॉल और स्क्रॉलबार को साफ़ रखने के लिए */
-      ::-webkit-scrollbar { width: 4px; }
-      ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
     </style>
 </head>
-<body class="transition-colors duration-300 antialiased selection:bg-indigo-500/30">
-    <div id="root"></div>
+<body id="appBody" class="bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-500/30 transition-colors duration-300">
 
-    <!-- React, ReactDOM, and Babel CDN Packages -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 text-xs border border-indigo-400/30 text-center font-bold max-w-sm w-full transition-all"></div>
 
-    <!-- PWA Service Worker Registration -->
+    <div class="min-h-screen flex flex-col md:flex-row">
+
+        <!-- DESKTOP SIDEBAR -->
+        <aside id="desktopSidebar" class="hidden md:flex flex-col w-64 border-r p-4 shrink-0 justify-between bg-slate-900/90 border-slate-800">
+            <div class="space-y-6">
+                <div>
+                    <h1 class="text-xl font-black text-indigo-400 tracking-tight flex items-center gap-2">🧠 सजग छात्र</h1>
+                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">वैज्ञानिक 5-स्टेज रिवीजन ट्रैकर व AI साथी</p>
+                </div>
+
+                <!-- Profile Badge -->
+                <div id="sidebarProfile" class="p-3 rounded-2xl border text-xs space-y-1 bg-slate-950/80 border-slate-800 text-slate-200">
+                    <div class="flex justify-between items-center font-bold text-indigo-400">
+                        <span id="levelBadgeDesktop">🏆 स्तर 1</span>
+                        <span id="streakBadgeDesktop" class="text-amber-400">🔥 5d</span>
+                    </div>
+                    <div id="userNameDesktop" class="text-[11px] font-semibold">रोशन लाल साहू</div>
+                    <div id="xpBadgeDesktop" class="text-[10px] text-slate-400">⭐ 320 Total XP</div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="space-y-1 text-xs font-bold">
+                    <button onclick="switchTab('dashboard')" id="nav-dash" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-600 text-white"><span>📖</span><span>ट्रैकर</span></button>
+                    <button onclick="switchTab('log')" id="nav-log" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>➕</span><span>दर्ज करें</span></button>
+                    <button onclick="switchTab('timer')" id="nav-timer" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>⏱</span><span>फोकस</span></button>
+                    <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>📊</span><span>विश्लेषण</span></button>
+                    <button onclick="switchTab('notifications')" id="nav-notifications" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>🔔</span><span>अलर्ट</span></button>
+                    <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/50 text-slate-400"><span>👤</span><span>प्रोफाइल</span></button>
+                </nav>
+
+                <!-- ADSENSE SLOT #1: SIDEBAR ADS -->
+                <div class="p-2 rounded-xl border border-dashed text-center min-h-[140px] flex flex-col justify-center items-center bg-slate-950/40 border-slate-800 text-slate-500">
+                    <span class="text-[9px] font-semibold uppercase tracking-wider mb-1">विज्ञापन (Ad)</span>
+                    <!-- PASTE ADSENSE INS CODE HERE FOR SIDEBAR -->
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-4 border-t border-slate-800">
+                <button onclick="toggleTheme()" id="themeBtnDesktop" class="flex-1 py-2 rounded-xl text-xs font-bold border bg-slate-950 border-slate-700 text-amber-400">☀️ Light</button>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW WRAPPER -->
+        <div class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+            
+            <!-- MOBILE HEADER -->
+            <header id="mobileHeader" class="md:hidden flex justify-between items-center p-3 border-b border-slate-800">
+                <div>
+                    <h1 class="text-lg font-black text-indigo-400">🧠 सजग छात्र</h1>
+                    <p class="text-[9px] text-slate-400">वैज्ञानिक 5-स्टेज रिवीजन ट्रैकर</p>
+                </div>
+                <button onclick="toggleTheme()" id="themeBtnMobile" class="px-2 py-1 rounded-xl text-xs font-bold border bg-slate-900 border-slate-700 text-amber-400">☀️</button>
+            </header>
+
+            <!-- MOBILE USER STATUS -->
+            <div id="mobileStatusBar" class="md:hidden text-xs px-4 py-2 flex justify-between items-center border-b bg-slate-950/80 text-slate-300 border-slate-800">
+                <div id="levelBadgeMobile" class="font-bold text-indigo-400">🏆 स्तर 1</div>
+                <div class="flex items-center gap-2 font-semibold text-[11px]">
+                    <span id="streakBadgeMobile" class="bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">🔥 5d</span>
+                    <span id="xpBadgeMobile" class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full">⭐ 320 XP</span>
+                </div>
+            </div>
+
+            <!-- MAIN CONTAINER -->
+            <main class="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-20 md:pb-8">
+                
+                <!-- ADSENSE SLOT #2: TOP BANNER AD -->
+                <div id="topAdSlot" class="mb-4 p-2 rounded-2xl border border-dashed text-center min-h-[80px] flex flex-col justify-center items-center bg-slate-900/40 border-slate-800 text-slate-500">
+                    <span class="text-[9px] font-semibold uppercase tracking-wider mb-1">Sponsored Advertisement</span>
+                    <!-- PASTE ADSENSE INS CODE HERE FOR TOP BANNER -->
+                </div>
+
+                <!-- 1. DASHBOARD VIEW -->
+                <section id="view-dashboard" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Budget Widget -->
+                        <div id="budgetCard" class="md:col-span-2 p-4 sm:p-5 rounded-2xl border bg-gradient-to-br from-slate-950 to-indigo-950/30 border-indigo-900/40 text-slate-100">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h2 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-indigo-400">दैनिक अध्ययन समय बजट</h2>
+                                    <h3 id="budgetLogged" class="text-base sm:text-xl font-black mt-0.5">2 / 6 घंटे बुक हैं</h3>
+                                </div>
+                                <span id="budgetTag" class="text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">4h शेष समय</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="budgetBar" class="bg-indigo-500 h-full rounded-full transition-all duration-500" style="width: 33%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Mini Pomodoro Callout for Desktop -->
+                        <div id="miniPomoCard" class="hidden md:flex flex-col justify-between p-4 rounded-2xl border bg-slate-900/80 border-slate-800 text-slate-100">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-indigo-400">⏱️ क्विक पोमोडोरो</span>
+                                <span id="miniTimerMode" class="text-[10px] font-mono text-slate-400">Focus</span>
+                            </div>
+                            <div id="miniTimerDisplay" class="text-2xl font-mono font-black text-center my-1 text-slate-200">25:00</div>
+                            <button onclick="toggleTimer()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">▶ शुरू करें</button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <input type="text" id="searchInput" oninput="renderLogs()" placeholder="🔍 टॉपिक या विषय खोजें..." class="flex-1 p-3 rounded-xl text-xs sm:text-sm border focus:outline-none bg-slate-900 border-slate-800 text-slate-200" />
+                        <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer shrink-0 px-1 text-slate-300">
+                            <input type="checkbox" id="dueTodayCheck" onchange="renderLogs()" class="rounded border-slate-700 accent-indigo-600 w-4 h-4" />
+                            <span>केवल आज देय रिवीजन (Due Today)</span>
+                        </label>
+                    </div>
+
+                    <!-- Active Tracker Topics -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">📅 एक्टिव मेमोरी ट्रैकर</h3>
+                        <div id="logsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Dynamic Cards -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. LOG NEW STUDY VIEW -->
+                <section id="view-log" class="hidden max-w-2xl mx-auto space-y-4">
+                    <h3 class="text-base font-bold text-indigo-400">🚀 आज का अध्ययन दर्ज करें</h3>
+                    <form onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs sm:text-sm">
+                        <div>
+                            <label class="block font-semibold mb-1 text-slate-300">विषय (Subject):</label>
+                            <select id="subSelect" onchange="toggleCustomSub()" class="w-full border rounded-xl p-3 focus:outline-none bg-slate-900 border-slate-800 text-slate-200">
+                                <option value="Physics">भौतिक विज्ञान (Physics)</option>
+                                <option value="Chemistry">रसायन विज्ञान (Chemistry)</option>
+                                <option value="Mathematics">गणित (Mathematics)</option>
+                                <option value="History">भारतीय इतिहास (History)</option>
+                                <option value="Geography">भूगोल (Geography)</option>
+                                <option value="Polity">राजव्यवस्था (Polity)</option>
+                                <option value="English">अंग्रेजी (English)</option>
+                                <option value="Custom">अन्य (कस्टम दर्ज करें)</option>
+                            </select>
+                        </div>
+                        <div id="customSubDiv" class="hidden">
+                            <input type="text" id="customSubInput" placeholder="विषय का नाम दर्ज करें..." class="w-full border rounded-xl p-3 focus:outline-none bg-slate-900 border-slate-800 text-slate-200" />
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-1 text-slate-300">टॉपिक का नाम (Topic Name):</label>
+                            <input type="text" id="topicInput" required placeholder="उदा. घर्षण और गति के नियम" class="w-full border rounded-xl p-3 focus:outline-none bg-slate-900 border-slate-800 text-slate-200" />
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-semibold mb-1 text-slate-300">समय spent (घंटे):</label>
+                                <input type="number" id="timeInput" step="0.5" min="0.5" max="12" value="2" class="w-full border rounded-xl p-3 focus:outline-none bg-slate-900 border-slate-800 text-slate-200" />
+                            </div>
+                            <div>
+                                <label class="block font-semibold mb-1 text-slate-300">कठिनाई का स्तर:</label>
+                                <select id="diffSelect" class="w-full border rounded-xl p-3 focus:outline-none bg-slate-900 border-slate-800 text-slate-200">
+                                    <option value="सरल">सरल (Easy)</option>
+                                    <option value="मध्यम" selected>मध्यम (Medium)</option>
+                                    <option value="कठिन">कठिन (Hard)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 font-bold py-3.5 rounded-xl text-white text-sm hover:bg-indigo-700 transition">🚀 सुरक्षित करें</button>
+                    </form>
+                </section>
+
+                <!-- 3. AI TEST ARENA VIEW -->
+                <section id="view-test-arena" class="hidden max-w-2xl mx-auto space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-base font-bold text-indigo-400">🤖 AI मॉक टेस्ट एरीना</h3>
+                        <button onclick="switchTab('dashboard')" class="text-xs text-slate-400 font-bold">← वापस जाएं</button>
+                    </div>
+                    <div id="quizContainer" class="space-y-4"></div>
+                </section>
+
+                <!-- 4. POMODORO TIMER VIEW -->
+                <section id="view-timer" class="hidden max-w-md mx-auto space-y-6 flex flex-col items-center justify-center py-6">
+                    <h3 class="text-base font-bold text-indigo-400">⏱️ पोमोडोरो कंटीन्यूअस फोकस</h3>
+                    <div class="flex items-center gap-3 text-xs sm:text-sm">
+                        <span class="text-slate-400 font-medium">कस्टम टाइमर (मिनट):</span>
+                        <input type="number" id="customTimerMinutes" value="25" onchange="updateCustomTimer(this.value)" class="w-20 p-2 border rounded-xl text-center font-bold bg-slate-900 border-slate-800 text-slate-200" />
+                    </div>
+                    <div class="relative w-56 h-56 rounded-full border-4 border-indigo-600/30 flex flex-col items-center justify-center bg-slate-900/60 shadow-2xl">
+                        <span id="pomoModeDisplay" class="text-xs font-bold text-indigo-400 uppercase tracking-widest">FOCUS</span>
+                        <span id="pomoTimeDisplay" class="text-5xl font-black font-mono tracking-wider text-slate-100 mt-2">25:00</span>
+                    </div>
+                    <div class="flex gap-3 w-full">
+                        <button id="pomoStartBtn" onclick="toggleTimer()" class="flex-1 py-3.5 rounded-xl bg-indigo-600 font-bold text-white text-sm hover:bg-indigo-700 transition">▶ शुरू करें</button>
+                        <button onclick="resetTimer()" class="py-3.5 px-5 rounded-xl bg-slate-800 font-bold text-slate-300 text-sm border border-slate-700 hover:bg-slate-700 transition">🔄 रीसेट</button>
+                    </div>
+                </section>
+
+                <!-- 5. ANALYTICS VIEW -->
+                <section id="view-analytics" class="hidden max-w-4xl mx-auto space-y-6">
+                    <div class="p-6 rounded-2xl border space-y-4 bg-slate-900/80 border-slate-800">
+                        <h4 class="text-sm font-bold text-indigo-400">📊 साप्ताहिक अध्ययन रुझान</h4>
+                        <div class="flex justify-around items-end h-36 pt-4">
+                            <div class="flex flex-col items-center flex-1 space-y-2"><span class="text-xs text-slate-400">4h</span><div class="w-6 rounded-t-lg bg-slate-800" style="height: 50px;"></div><span class="text-xs text-slate-400 font-bold">सोम</span></div>
+                            <div class="flex flex-col items-center flex-1 space-y-2"><span class="text-xs text-slate-400">5.5h</span><div class="w-6 rounded-t-lg bg-slate-800" style="height: 70px;"></div><span class="text-xs text-slate-400 font-bold">मंगल</span></div>
+                            <div class="flex flex-col items-center flex-1 space-y-2"><span class="text-xs text-slate-400" id="wedVal">2h</span><div id="wedBar" class="w-6 rounded-t-lg bg-indigo-600 shadow-lg shadow-indigo-600/30" style="height: 30px;"></div><span class="text-xs text-slate-400 font-bold">बुध</span></div>
+                            <div class="flex flex-col items-center flex-1 space-y-2"><span class="text-xs text-slate-400">3.5h</span><div class="w-6 rounded-t-lg bg-slate-800" style="height: 45px;"></div><span class="text-xs text-slate-400 font-bold">गुरु</span></div>
+                            <div class="flex flex-col items-center flex-1 space-y-2"><span class="text-xs text-slate-400">5h</span><div class="w-6 rounded-t-lg bg-slate-800" style="height: 65px;"></div><span class="text-xs text-slate-400 font-bold">शुक्र</span></div>
+                            <div class="flex flex-col items-center flex-1 space-y-2"><span class="text-xs text-slate-400">2h</span><div class="w-6 rounded-t-lg bg-slate-800" style="height: 25px;"></div><span class="text-xs text-slate-400 font-bold">शनि</span></div>
+                            <div class="flex flex-col items-center flex-1 space-y-2"><span class="text-xs text-slate-400">1h</span><div class="w-6 rounded-t-lg bg-slate-800" style="height: 15px;"></div><span class="text-xs text-slate-400 font-bold">रवि</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. NOTIFICATIONS VIEW -->
+                <section id="view-notifications" class="hidden max-w-2xl mx-auto space-y-4 text-xs sm:text-sm">
+                    <h3 class="text-base font-bold text-indigo-400">🔔 स्मार्ट रिमाइंडर्स</h3>
+                    <div id="notifList" class="space-y-3"></div>
+                </section>
+
+                <!-- 7. PROFILE & BACKUP VIEW -->
+                <section id="view-profile" class="hidden max-w-xl mx-auto space-y-5 text-xs sm:text-sm">
+                    <div class="p-6 rounded-2xl border text-center space-y-2 bg-slate-900/80 border-slate-800 text-slate-100">
+                        <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mx-auto text-3xl text-white">👤</div>
+                        <h3 id="profileName" class="text-base font-bold mt-2">रोशन लाल साहू</h3>
+                        <p class="text-xs text-slate-400">प्रतियोगी परीक्षा (Competitive Exams)</p>
+                    </div>
+
+                    <div class="p-6 rounded-2xl border space-y-3 bg-slate-900/80 border-slate-800">
+                        <h4 class="font-bold text-sm text-indigo-400">💾 डेटा बैकअप एवं रीस्टोर</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">डिवाइस बदलने या सुरक्षित रखने के लिए JSON बैकअप फ़ाइल एक्सपोर्ट या इम्पोर्ट करें।</p>
+                        <div class="grid grid-cols-2 gap-3 pt-1">
+                            <button onclick="exportData()" class="bg-indigo-600 text-white p-3 rounded-xl font-bold hover:bg-indigo-700 transition">📤 एक्सपोर्ट JSON</button>
+                            <label class="p-3 rounded-xl font-bold text-center cursor-pointer border block transition bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700">
+                                📥 इम्पोर्ट JSON
+                                <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-2xl border space-y-3 bg-slate-900/80 border-slate-800">
+                        <h4 class="font-bold text-sm text-indigo-400">🤖 AI API Key इंटीग्रेशन</h4>
+                        <input type="password" id="apiKeyInput" placeholder="Gemini API Key प्रविष्ट करें..." class="w-full p-3 rounded-xl border focus:outline-none bg-slate-950 border-slate-800 text-slate-200" />
+                        <button onclick="saveApiKey()" class="w-full bg-indigo-600 font-bold py-3 rounded-xl text-white hover:bg-indigo-700 transition">💾 कुंजी सुरक्षित करें</button>
+                    </div>
+                </section>
+
+                <!-- ADSENSE SLOT #4: BOTTOM BANNER AD -->
+                <div class="mt-8 p-3 rounded-2xl border border-dashed text-center min-h-[90px] flex flex-col justify-center items-center bg-slate-900/30 border-slate-800 text-slate-500">
+                    <span class="text-[9px] font-semibold uppercase tracking-wider mb-1">Advertisement</span>
+                    <!-- PASTE ADSENSE INS CODE HERE FOR BOTTOM BANNER -->
+                </div>
+
+            </main>
+
+            <!-- MOBILE BOTTOM DOCK -->
+            <nav id="mobileDock" class="md:hidden fixed bottom-0 left-0 right-0 h-16 border-t flex justify-around items-center px-1 z-40 bg-slate-950/95 border-slate-800 text-slate-400 backdrop-blur-md">
+                <button onclick="switchTab('dashboard')" class="flex flex-col items-center justify-center flex-1 py-1 text-indigo-400 font-bold">
+                    <span class="text-lg">📖</span><span class="text-[9px] mt-0.5">ट्रैकर</span>
+                </button>
+                <button onclick="switchTab('log')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                    <span class="text-lg">➕</span><span class="text-[9px] mt-0.5">दर्ज करें</span>
+                </button>
+                <button onclick="switchTab('timer')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                    <span class="text-lg">⏱</span><span class="text-[9px] mt-0.5">फोकस</span>
+                </button>
+                <button onclick="switchTab('analytics')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                    <span class="text-lg">📊</span><span class="text-[9px] mt-0.5">विश्लेषण</span>
+                </button>
+                <button onclick="switchTab('notifications')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                    <span class="text-lg">🔔</span><span class="text-[9px] mt-0.5">अलर्ट</span>
+                </button>
+                <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500">
+                    <span class="text-lg">👤</span><span class="text-[9px] mt-0.5">प्रोफाइल</span>
+                </button>
+            </nav>
+
+        </div>
+    </div>
+
+    <!-- SERVICE WORKER REGISTRATION FOR PWA -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker Registered'))
-            .catch(err => console.log('Service Worker Failed', err));
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW Registered', reg))
+            .catch(err => console.log('SW Registration failed', err));
         });
       }
     </script>
 
-    <!-- React Application Logic -->
-    <script type="text/babel">
-      const { useState, useEffect } = React;
+    <!-- PURE JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+      const systemApiKey = "";
 
-      // मल्टी-लैंग्वेज शब्दकोश (Translation Dictionary)
-      const t = {
-        hi: {
-          title: "सजग छात्र",
-          subtitle: "वैज्ञानिक 5-स्टेज रिवीजन ट्रैकर व फोकस टाइमर",
-          streak: "दिन",
-          hoursBooked: "घंटे बुक हैं",
-          available: "उपलब्ध",
-          completedFull: "पूर्ण!",
-          budgetTitle: "दैनिक अध्ययन समय बजट",
-          trackerTitle: "📅 सक्रिय मेमोरी ट्रैकर",
-          aiTestBtn: "🤖 AI टेस्ट",
-          addLogTitle: "🚀 आज जो पढ़ा, उसे दर्ज करें",
-          addLogDesc: "यहाँ अपनी पढ़ाई दर्ज करें। सिस्टम स्वचालित रूप से 30-दिन का स्पैस्ड रिपीटीशन और AI अभ्यास शेड्यूलर बना देगा।",
-          labelSubject: "विषय (Subject):",
-          selectOpt: "-- चुनें --",
-          labelTopic: "टॉपिक (Topic Name):",
-          labelTime: "समय (घंटे):",
-          labelDifficulty: "कठिनाई:",
-          btnSave: "🚀 सुरक्षित करें",
-          timerTitle: "⏱️ पोमोडोरो फोकस",
-          timerDesc: "ध्यान भटकाए बिना पढ़ाई करने की वैज्ञानिक विधि।",
-          btnStart: "▶ शुरू करें",
-          btnPause: "⏸ रोकें",
-          btnReset: "🔄 रीसेट",
-          suggestTitle: "🔔 स्मार्ट सुझाव केंद्र",
-          suggestDesc: "अध्ययन पैटर्न के आधार पर बनाए गए सुझाव।",
-          noSuggest: "अभी कोई सुझाव उपलब्ध नहीं है।",
-          profileTitle: "👤 प्रोफाइल विन्यास",
-          aiSettings: "🤖 AI टेस्ट इंटीग्रेशन सेटिंग्स",
-          aiDesc: "ऐप में ऑटोमैटिक टेस्ट जेनरेट करने के लिए अपनी खुद की Gemini API Key डालें। यह चाबी केवल आपके ही फोन ब्राउज़र में सुरक्षित रहेगी।",
-          btnSaveKey: "💾 कुंजी सुरक्षित करें",
-          navTracker: "📖 ट्रैकर",
-          navAdd: "➕ दर्ज",
-          navFocus: "⏱ फोकस",
-          navSuggest: "🔔 सुझाव",
-          navProfile: "👤 प्रोफाइल",
-          navInfo: "ℹ️ निर्देश",
-          backupTitle: "💾 डेटा बैकअप और रीस्टोर",
-          backupDesc: "अपने डिवाइस बदलने पर डेटा ट्रांसफर करने के लिए JSON फ़ाइल का उपयोग करें।",
-          btnExport: "📤 एक्सपोर्ट (Download)",
-          btnImport: "📥 इम्पोर्ट (Upload)",
-          customTimerLabel: "कस्टम फोकस समय (मिनट):",
-          themeToggle: "थीम बदलें",
-          analyticsTitle: "📊 साप्ताहिक अध्ययन विश्लेषण",
-          quickNotesTitle: "📝 क्विक नोट्स व फ़ॉर्मूला पैड",
-          saveNotesBtn: "💾 नोट्स सुरक्षित करें",
-          medalsTitle: "🏅 अर्जित उपलब्धियां और मेडल",
-          levelText: "अध्ययन स्तर",
-          notesPlaceholder: "महत्वपूर्ण सूत्र या मुख्य बिंदु यहाँ लिखें...",
-          dueOnly: "केवल आज का रिवीजन दिखाएं (Due Today)",
-          feynmanBtn: "🗣️ फेनमैन मोड",
-          verifyFeynman: "✅ AI से जांचें",
-          feynmanPlaceholder: "इस टॉपिक को अपनी सरल भाषा में समझाएं...",
-          resetCycle: "🔄 रीसेट चक्र",
-          howToUseTitle: "🛠️ ऐप का उपयोग कैसे करें?",
-          step1: "1. पढ़ाई दर्ज करें: जब भी आप कोई नया टॉपिक पढ़ें, 'दर्ज करें' टैब में जाकर सबमिट करें।",
-          step2: "2. मेमोरी ट्रैकर: ऐप आपके लिए वैज्ञानिक 30-दिवसीय चक्र (R1 से Mastery) तय कर देगा।",
-          step3: "3. रिवीजन चक्र रीसेट: यदि आप किसी पुराने टॉपिक को भूल जाते हैं, तो 'रीसेट चक्र' बटन दबाएं।",
-          step4: "4. फेनमैन तकनीक: टॉपिक को AI को समझाएं और अपनी समझ को परखें।",
-          benefitsTitle: "📈 इस ऐप के उपयोग के फायदे:",
-          benefit1: "✨ लाइफटाइम लॉन्ग-टर्म मेमोरी: रिपीटीशन साइकिल से तथ्य दिमाग में पक्के छप जाते हैं।",
-          benefit2: "🎯 एक्टिव रिकॉल: AI आधारित मॉक टेस्ट देने से परीक्षा के समय चीजें तुरंत याद आती हैं।",
-          benefit3: "⏳ बेहतर समय प्रबंधन: समय बजट ग्राफ आपको सही उपयोग दिखाता है।",
-          benefit4: "🔒 डेटा सुरक्षा: आपकी AI Key लोकल ब्राउज़र में पूरी तरह सुरक्षित रहती है।"
-        },
-        en: {
-          title: "Sajag Chhatra",
-          subtitle: "Scientific 5-Stage Revision Tracker & Focus Timer",
-          streak: "Days",
-          hoursBooked: "Hours Booked",
-          available: "Available",
-          completedFull: "Full!",
-          budgetTitle: "Daily Study Time Budget",
-          trackerTitle: "📅 Active Memory Tracker",
-          aiTestBtn: "🤖 AI Test",
-          addLogTitle: "🚀 Log Today's Study",
-          addLogDesc: "Enter your study logs here for a 30-day scientific cycle.",
-          labelSubject: "Subject:",
-          selectOpt: "-- Select --",
-          labelTopic: "Topic Name:",
-          labelTime: "Time (Hours):",
-          labelDifficulty: "Difficulty:",
-          btnSave: "🚀 Save Details",
-          timerTitle: "⏱️ Pomodoro Focus",
-          timerDesc: "Scientific method to study without distractions.",
-          btnStart: "▶ Start",
-          btnPause: "⏸ Pause",
-          btnReset: "🔄 Reset",
-          suggestTitle: "🔔 Smart Suggestion Center",
-          suggestDesc: "Suggestions generated based on study patterns.",
-          noSuggest: "No suggestions available right now.",
-          profileTitle: "👤 Profile Settings",
-          aiSettings: "🤖 AI Test Integration Settings",
-          aiDesc: "Enter your own Gemini API Key. It remains safely on your device browser only.",
-          btnSaveKey: "💾 Save API Key",
-          navTracker: "📖 Tracker",
-          navAdd: "➕ Add",
-          navFocus: "⏱ Focus",
-          navSuggest: "🔔 Hints",
-          navProfile: "👤 Profile",
-          navInfo: "ℹ️ Guide",
-          backupTitle: "Data Backup & Restore",
-          backupDesc: "Use JSON files to transfer your study records.",
-          btnExport: "📤 Export Data",
-          btnImport: "📥 Import Data",
-          customTimerLabel: "Custom Focus Time (Mins):",
-          themeToggle: "Change Theme",
-          analyticsTitle: "📊 Weekly Study Analytics",
-          quickNotesTitle: "📝 Quick Notes & Formula Pad",
-          saveNotesBtn: "💾 Save Notes",
-          medalsTitle: "🏅 Achievements & Medals",
-          levelText: "Study Level",
-          notesPlaceholder: "Write key formulas or important points here...",
-          dueOnly: "Show Due Revisions Only",
-          feynmanBtn: "🗣️ Feynman Mode",
-          verifyFeynman: "✅ Verify with AI",
-          feynmanPlaceholder: "Explain this topic in your own simple words...",
-          resetCycle: "🔄 Reset Cycle",
-          howToUseTitle: "🛠️ How to use the App?",
-          step1: "1. Log Study: Go to 'Add' tab and submit the details.",
-          step2: "2. Track Memory: Follow the scheduled R1 to Mastery 30d stages.",
-          step3: "3. Reset Cycle: Restart tracking anytime if you forget older topics.",
-          step4: "4. Feynman Technique: Explain concepts to AI to test your understanding.",
-          benefitsTitle: "📈 Benefits of Using this App:",
-          benefit1: "✨ Permanent Retention: Spaced cycles break the forgetting curve.",
-          benefit2: "🎯 Active Recall: Real-time AI quizzes maximize retention.",
-          benefit3: "⏳ Time Auditing: Keep an eye on your daily productive budget.",
-          benefit4: "🔒 Privacy First: All variables and keys remain offline in your browser."
-        }
+      let isDarkMode = true;
+      let activeTab = 'dashboard';
+      let user = { name: 'रोशन लाल साहू', points: 320, streak: 5, targetExam: 'प्रतियोगी परीक्षा' };
+      let studyLogs = [];
+      let timer = { minutes: 25, seconds: 0, isActive: false, mode: 'Focus', interval: null };
+
+      window.onload = function() {
+        loadData();
+        renderUser();
+        renderLogs();
+        renderNotifications();
       };
 
-      function App() {
-        const [lang, setLang] = useState('hi');
-        const [isDarkMode, setIsDarkMode] = useState(true);
-        const [showDueOnly, setShowDueOnly] = useState(false);
-        const [user, setUser] = useState({
-          name: 'रोशन लाल साहू',
-          category: 'प्रतियोगी परीक्षा (Competitive Exams)',
-          availableHours: 6,
-          streak: 5, 
-          points: 350
-        });
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3500);
+      }
 
-        const [studyLogs, setStudyLogs] = useState(() => {
-          const savedLogs = localStorage.getItem('user_study_logs');
-          return savedLogs ? JSON.parse(savedLogs) : [
-            {
-              id: 1,
-              subject: 'भौतिक विज्ञान (Physics)',
-              topic: 'घर्षण और गति के नियम (Friction & Laws of Motion)',
-              date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
-              difficulty: 'कठिन (Hard)',
-              timeSpent: 2,
-              notes: 'F=ma, घर्षण बल = uN',
-              currentStage: 1, 
-              stages: [
-                { name: 'R1 (24h)', due: new Date(Date.now()).toISOString().split('T')[0], completed: true },
-                { name: 'R2 (3d)', due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-                { name: 'R3 (7d)', due: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-                { name: 'R4 (15d)', due: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false },
-                { name: 'Mastery (30d)', due: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], completed: false }
-              ]
-            }
-          ];
-        });
+      function loadData() {
+        const savedUser = localStorage.getItem('user_profile');
+        if (savedUser) { try { user = JSON.parse(savedUser); } catch(e){} }
 
-        useEffect(() => {
-          localStorage.setItem('user_study_logs', JSON.stringify(studyLogs));
-        }, [studyLogs]);
-
-        const [newLog, setNewLog] = useState({ subject: '', customSubject: '', topic: '', difficulty: 'Medium', timeSpent: 2 });
-        const [timer, setTimer] = useState({ minutes: 25, seconds: 0, isActive: false, mode: 'Focus' });
-        const [activeTab, setActiveTab] = useState('dashboard');
-        const [alertMsg, setAlertMsg] = useState(null);
-        const [notifications, setNotifications] = useState([]);
-        
-        const [inputApiKey, setInputApiKey] = useState(localStorage.getItem('user_gemini_key') || '');
-        const [selectedTopicForTest, setSelectedTopicForTest] = useState(null);
-        
-        const [activeNotesLogId, setActiveNotesLogId] = useState(null);
-        const [tempNotesText, setTempNotesText] = useState('');
-        const [activeFeynmanLogId, setActiveFeynmanLogId] = useState(null);
-        const [feynmanText, setFeynmanText] = useState('');
-        const [feynmanEvaluation, setFeynmanEvaluation] = useState('');
-        const [loadingFeynman, setLoadingFeynman] = useState(false);
-        
-        const [aiQuiz, setAiQuiz] = useState(null);
-        const [loadingQuiz, setLoadingQuiz] = useState(false);
-        const [userAnswers, setUserAnswers] = useState({});
-        const [quizSubmitted, setQuizSubmitted] = useState(false);
-
-        const showAlert = (msg) => {
-          setAlertMsg(msg);
-          setTimeout(() => setAlertMsg(null), 4000);
-        };
-
-        const playBuzzerSound = () => {
-          try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.4);
-          } catch (e) { console.log("Audio blocked"); }
-        };
-
-        const handleMarkNextStage = (logId) => {
-          setStudyLogs(prev => prev.map(log => {
-            if (log.id === logId) {
-              const updatedStages = [...log.stages];
-              const nextPendingIdx = updatedStages.findIndex(s => !s.completed);
-              if (nextPendingIdx !== -1) {
-                updatedStages[nextPendingIdx].completed = true;
-                showAlert(`Stage ${updatedStages[nextPendingIdx].name} ${lang === 'hi' ? 'पूर्ण मार्क हुआ!' : 'marked completed!'} +20 XP`);
-                setUser(u => ({ ...u, points: u.points + 20 }));
-                return { ...log, currentStage: nextPendingIdx + 1, stages: updatedStages };
-              } else {
-                showAlert(lang === 'hi' ? "🎉 यह टॉपिक आप पूरी तरह मास्टर कर चुके हैं!" : "🎉 Topic already fully mastered!");
-              }
-            }
-            return log;
-          }));
-        };
-
-        const handleResetRevisionCycle = (logId) => {
-          setStudyLogs(prev => prev.map(log => {
-            if (log.id === logId) {
-              const today = new Date();
-              const getDue = (days) => new Date(today.getTime() + days * 24*60*60*1000).toISOString().split('T')[0];
-              showAlert(lang === 'hi' ? "🔄 रिवीजन चक्र रीसेट! शेड्यूल R1 से दोबारा शुरू होगा।" : "🔄 Cycle reset! Tracking restarted from R1.");
-              return {
-                ...log,
-                currentStage: 0,
-                stages: [
-                  { name: 'R1 (24h)', due: getDue(1), completed: false },
-                  { name: 'R2 (3d)', due: getDue(3), completed: false },
-                  { name: 'R3 (7d)', due: getDue(7), completed: false },
-                  { name: 'R4 (15d)', due: getDue(15), completed: false },
-                  { name: 'Mastery (30d)', due: getDue(30), completed: false }
-                ]
-              };
-            }
-            return log;
-          }));
-        };
-
-        const handleFeynmanVerify = async (log) => {
-          const savedKey = localStorage.getItem('user_gemini_key');
-          if (!savedKey) {
-            showAlert("⚠️ Please set Gemini API Key first!");
-            return;
-          }
-          if (!feynmanText.trim()) return;
-
-          setLoadingFeynman(true);
-          setFeynmanEvaluation('');
-
-          const prompt = `Review this student's explanation in ${lang === 'hi' ? 'Hindi' : 'English'} for Subject: "${log.subject}" and Topic: "${log.topic}". Student Explanation: "${feynmanText}". Evaluate using Feynman technique rules: verify correctness, point out any conceptual gaps or mistakes clearly, and give a constructive tip to make it simpler. Keep the response under 100 words.`;
-
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${savedKey}`;
-            const response = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            const data = await response.json();
-            const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            setFeynmanEvaluation(resultText || "Analysis error.");
-            setUser(u => ({ ...u, points: u.points + 30 }));
-          } catch (err) {
-            setFeynmanEvaluation("❌ AI Connection Failed.");
-          } finally {
-            setLoadingFeynman(false);
-          }
-        };
-
-        const handleOpenNotes = (log) => {
-          setActiveNotesLogId(log.id);
-          setTempNotesText(log.notes || '');
-        };
-
-        const handleSaveNotes = () => {
-          setStudyLogs(prev => prev.map(l => l.id === activeNotesLogId ? { ...l, notes: tempNotesText } : l));
-          setActiveNotesLogId(null);
-          showAlert(lang === 'hi' ? '📝 क्विक नोट्स सेव हो गए!' : '📝 Quick notes updated!');
-        };
-
-        const handleExportData = () => {
-          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(studyLogs));
-          const downloadAnchor = document.createElement('a');
-          downloadAnchor.setAttribute("href", dataStr);
-          downloadAnchor.setAttribute("download", `sajag_backup.json`);
-          document.body.appendChild(downloadAnchor);
-          downloadAnchor.click();
-          downloadAnchor.remove();
-        };
-
-        const handleImportData = (e) => {
-          const fileReader = new FileReader();
-          if (e.target.files && e.target.files[0]) {
-            fileReader.readAsText(e.target.files[0], "UTF-8");
-            fileReader.onload = (event) => {
-              try {
-                const parsedData = JSON.parse(event.target.result);
-                if (Array.isArray(parsedData)) { setStudyLogs(parsedData); showAlert('📥 Success!'); }
-              } catch (err) { showAlert('⚠️ Error'); }
-            };
-          }
-        };
-
-        const handleGenerateQuiz = async (log) => {
-          const savedKey = localStorage.getItem('user_gemini_key');
-          if (!savedKey) { setActiveTab('profile'); return; }
-          setSelectedTopicForTest(log);
-          setAiQuiz(null); setUserAnswers({}); setQuizSubmitted(false); setLoadingQuiz(true); setActiveTab('test-arena');
-
-          const userPrompt = `Create a 3-question multiple choice test based on Subject: "${log.subject}" and Topic: "${log.topic}". Format the response strictly as a JSON object inside your reply containing a 'questions' array. Each question must have: 'question' (string), 'options' (array of exactly 4 strings), 'correctIndex' (integer from 0 to 3), and 'explanation' (string). Return raw JSON text only. Generate output in ${lang === 'hi' ? 'Hindi' : 'English'}.`;
-
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${savedKey}`;
-            const response = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents: [{ parts: [{ text: userPrompt }] }], generationConfig: { responseMimeType: "application/json" } })
-            });
-            const data = await response.json();
-            const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textResponse) { setAiQuiz(JSON.parse(textResponse).questions); }
-          } catch (error) {
-            showAlert("⚠️ Test generation failed.");
-            setActiveTab('dashboard');
-          } finally { setLoadingQuiz(false); }
-        };
-
-        const handleSubmitQuiz = () => {
-          setQuizSubmitted(true);
-          if (!aiQuiz) return;
-          let correctCount = 0;
-          aiQuiz.forEach((q, idx) => { if (userAnswers[idx] === q.correctIndex) correctCount++; });
-          const pointsWon = correctCount * 20;
-          setUser(prev => ({ ...prev, points: prev.points + pointsWon, streak: prev.streak + 1 }));
-          showAlert(`🎉 Score: ${correctCount}/3. +${pointsWon} XP!`);
-        };
-
-        const handleSaveKey = () => {
-          localStorage.setItem('user_gemini_key', inputApiKey);
-          showAlert(lang === 'hi' ? '✅ API Key सुरक्षित सेव हो गई!' : '✅ API Key saved securely!');
-        };
-
-        const handleAddLog = (e) => {
-          e.preventDefault();
-          const finalSubject = newLog.subject === 'Custom' ? newLog.customSubject : newLog.subject;
-          if (!finalSubject || !newLog.topic) return;
+        const savedLogs = localStorage.getItem('user_study_logs');
+        if (savedLogs) {
+          try { studyLogs = JSON.parse(savedLogs); } catch(e){}
+        } else {
           const today = new Date();
-          const getDue = (days) => new Date(today.getTime() + days * 24*60*60*1000).toISOString().split('T')[0];
-
-          const newEntry = {
-            id: Date.now(), subject: finalSubject, topic: newLog.topic, date: today.toISOString().split('T')[0], difficulty: newLog.difficulty, timeSpent: parseFloat(newLog.timeSpent) || 1, notes: '', currentStage: 0,
+          const getDue = (days) => new Date(today.getTime() + days * 86400000).toISOString().split('T')[0];
+          studyLogs = [{
+            id: 1,
+            subject: 'Physics',
+            topic: 'घर्षण और गति के नियम (Friction & Motion)',
+            date: today.toISOString().split('T')[0],
+            difficulty: 'कठिन',
+            timeSpent: 2,
+            notes: 'F=ma, घर्षण बल = uN',
             stages: [
-              { name: 'R1 (24h)', due: getDue(1), completed: false },
+              { name: 'R1 (24h)', due: today.toISOString().split('T')[0], completed: true },
               { name: 'R2 (3d)', due: getDue(3), completed: false },
               { name: 'R3 (7d)', due: getDue(7), completed: false },
               { name: 'R4 (15d)', due: getDue(15), completed: false },
               { name: 'Mastery (30d)', due: getDue(30), completed: false }
             ]
-          };
-          setStudyLogs([newEntry, ...studyLogs]);
-          setNewLog({ subject: '', customSubject: '', topic: '', difficulty: 'Medium', timeSpent: 2 });
-          setActiveTab('dashboard');
-        };
+          }];
+        }
 
-        useEffect(() => {
-          const todayStr = new Date().toISOString().split('T')[0];
-          const generatedAlerts = [];
-          studyLogs.forEach(log => {
-            const activeStage = log.stages.find(s => !s.completed);
-            if (activeStage && activeStage.due === todayStr) {
-              generatedAlerts.push({
-                title: lang === 'hi' ? `📚 स्मार्ट रिवीजन: ${log.subject}` : `📚 Smart Revision: ${log.subject}`,
-                text: lang === 'hi' ? `आज "${log.topic}" के रिवीजन का समय है।` : `It's time to revise "${log.topic}" today.`
-              });
-            }
-          });
-          if (generatedAlerts.length === 0) {
-            generatedAlerts.push({
-              title: lang === 'hi' ? "⚡ एकाग्रता गाइड" : "⚡ Focus Guide",
-              text: lang === 'hi' ? 'कस्टम फोकस टाइमर का उपयोग करें!' : 'Use the customizable Focus Timer to boost productivity!'
-            });
-          }
-          setNotifications(generatedAlerts);
-        }, [studyLogs, lang]);
-
-        useEffect(() => {
-          let interval = null;
-          if (timer.isActive) {
-            interval = setInterval(() => {
-              if (timer.seconds > 0) {
-                setTimer(prev => ({ ...prev, seconds: prev.seconds - 1 }));
-              } else if (timer.seconds === 0 && timer.minutes > 0) {
-                setTimer(prev => ({ ...prev, minutes: prev.minutes - 1, seconds: 59 }));
-              } else {
-                clearInterval(interval);
-                playBuzzerSound();
-                const nextMode = timer.mode === 'Focus' ? 'Break' : 'Focus';
-                setTimer({ minutes: nextMode === 'Focus' ? 25 : 5, seconds: 0, isActive: false, mode: nextMode });
-                showAlert(`🔔 ${nextMode === 'Focus' ? 'ब्रेक समाप्त, फोकस मोड शुरू!' : 'फोकस सत्र समाप्त, ब्रेक लें!'}`);
-              }
-            }, 1000);
-          } else { clearInterval(interval); }
-          return () => clearInterval(interval);
-        }, [timer.isActive, timer.seconds, timer.minutes]);
-
-        const todayTotalAllocated = studyLogs.reduce((acc, log) => acc + (parseFloat(log.timeSpent) || 0), 0);
-        const remainingTime = Math.max(0, user.availableHours - todayTotalAllocated);
-        const todayStr = new Date().toISOString().split('T')[0];
-
-        return (
-          <div className="min-h-screen flex flex-col justify-between items-center p-3 w-full max-w-md mx-auto">
-            
-            {/* Header - Fixed & Compact */}
-            <header className="w-full flex justify-between items-center py-2 px-1 border-b border-slate-800/40 mb-3">
-              <div className="text-left">
-                <h1 className="text-xl font-black text-indigo-500 flex items-center gap-1">🧠 {t[lang].title}</h1>
-                <p className="text-[9px] text-slate-400">{t[lang].subtitle}</p>
-              </div>
-              <div className="flex gap-1.5">
-                <button onClick={() => setIsDarkMode(!isDarkMode)} className={`px-2 py-1 border rounded-xl text-[10px] font-bold transition ${isDarkMode ? 'bg-slate-800 border-slate-700 text-yellow-400' : 'bg-white border-slate-300 text-slate-700'}`}>
-                  {isDarkMode ? '☀️ Light' : '🌙 Dark'}
-                </button>
-                <button onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')} className="bg-indigo-600 text-white font-bold px-2 py-1 rounded-xl text-[10px] transition">
-                  🌐 {lang === 'hi' ? 'EN' : 'HI'}
-                </button>
-              </div>
-            </header>
-
-            {/* Main Full Screen Viewport Box - Adjusted for Real Mobile Display */}
-            <div className={`w-full flex flex-col flex-1 rounded-[24px] border border-slate-800/80 shadow-2xl relative overflow-hidden mb-16 min-h-[70vh] ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-slate-800'}`}>
-              
-              {alertMsg && (
-                <div className="absolute top-3 left-3 right-3 bg-indigo-600 text-white p-2.5 rounded-xl shadow-xl z-50 text-[11px] border border-indigo-400智慧 animate-fadeIn text-center font-semibold">
-                  {alertMsg}
-                </div>
-              )}
-
-              {/* Status Header Info Bar */}
-              <div className={`text-[10px] px-4 py-2.5 flex justify-between items-center border-b ${isDarkMode ? 'bg-slate-950/80 text-slate-400 border-slate-800/40' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                <div className="font-bold text-indigo-500">🏆 {t[lang].levelText} {calculatedLevel}</div>
-                <div className="flex items-center gap-1.5 font-semibold">
-                  <span className="bg-indigo-600/10 text-[9px] px-1.5 py-0.5 rounded text-indigo-500">🔥 {user.streak} {t[lang].streak}</span>
-                  <span>⭐ {user.points} XP</span>
-                </div>
-              </div>
-
-              {/* Dynamic Content Container */}
-              <main className="flex-1 overflow-y-auto p-3.5 space-y-4">
-                {activeTab === 'dashboard' && (
-                  <div className="space-y-4 animate-fadeIn">
-                    
-                    {/* Time Budget Component */}
-                    <div className={`p-4 rounded-xl border space-y-2.5 ${isDarkMode ? 'bg-gradient-to-br from-slate-950 to-indigo-950/40 border-indigo-900/30' : 'bg-gradient-to-br from-slate-50 to-indigo-50 border-indigo-100'}`}>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h2 className="text-[10px] text-indigo-500 font-bold uppercase tracking-wide">{t[lang].budgetTitle}</h2>
-                          <h3 className="text-base font-black mt-0.5">{todayTotalAllocated} / {user.availableHours} {t[lang].hoursBooked}</h3>
-                        </div>
-                        <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 text-[9px] py-0.5 px-1.5 rounded font-bold">
-                          {remainingTime > 0 ? `${remainingTime}h ${t[lang].available}` : t[lang].completedFull}
-                        </span>
-                      </div>
-                      <div className={`w-full h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
-                        <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (todayTotalAllocated / user.availableHours) * 100)}%` }}></div>
-                      </div>
-                    </div>
-
-                    {/* Analytics Bar Chart */}
-                    <div className={`p-3 rounded-xl border space-y-3 ${isDarkMode ? 'bg-slate-950/50 border-slate-800/60' : 'bg-slate-50 border-slate-200'}`}>
-                      <h4 className="text-[11px] font-bold text-indigo-400">{t[lang].analyticsTitle}</h4>
-                      <div className="flex justify-around items-end h-20 pt-1">
-                        {[
-                          { day: "M", h: 4, label: "4h" }, { day: "T", h: 5.5, label: "5.5h" }, 
-                          { day: "W", h: todayTotalAllocated || 2, label: `${todayTotalAllocated || 2}h`, active: true },
-                          { day: "T", h: 3, label: "3h" }, { day: "F", h: 5, label: "5h" }, 
-                          { day: "S", h: 1, label: "1h" }, { day: "S", h: 0, label: "0h" }
-                        ].map((bar, bIdx) => (
-                          <div key={bIdx} className="flex flex-col items-center flex-1 space-y-1">
-                            <span className="text-[8px] text-slate-500 font-medium">{bar.label}</span>
-                            <div className={`w-3.5 rounded-t transition-all duration-500 ${bar.active ? 'bg-indigo-500 shadow-md shadow-indigo-500/20' : 'bg-slate-800'}`} style={{ height: `${(bar.h / 6) * 50}px` }}></div>
-                            <span className="text-[9px] text-slate-500 font-bold">{bar.day}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Filter Elements */}
-                    <div className="flex items-center gap-2 text-xs font-bold px-1 text-slate-400">
-                      <input type="checkbox" id="dueFilter" checked={showDueOnly} onChange={() => setShowDueOnly(!showDueOnly)} className="rounded border-slate-700 bg-transparent w-4 h-4 accent-indigo-600 cursor-pointer" />
-                      <label htmlFor="dueFilter" className="cursor-pointer select-none">{t[lang].dueOnly}</label>
-                    </div>
-
-                    {/* Memory Tracker Space */}
-                    <div className="space-y-3">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t[lang].trackerTitle}</h3>
-                      {studyLogs
-                        .filter(log => !showDueOnly || log.stages.some(s => s.due === todayStr && !s.completed))
-                        .map(log => (
-                        <div key={log.id} className={`p-3 rounded-xl border space-y-3 ${isDarkMode ? 'bg-slate-950/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="flex-1">
-                              <span className="text-[8px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">{log.subject}</span>
-                              <h4 className="text-xs font-bold mt-1.5 leading-snug">{log.topic}</h4>
-                            </div>
-                            <div className="flex gap-1 shrink-0">
-                              <button type="button" onClick={() => handleOpenNotes(log)} className="bg-slate-800 text-slate-300 text-[9px] px-2 py-1 rounded-lg border border-slate-700 font-semibold">📝 Notes</button>
-                              <button type="button" onClick={() => { setActiveFeynmanLogId(activeFeynmanLogId === log.id ? null : log.id); setFeynmanText(''); setFeynmanEvaluation(''); }} className="bg-purple-950/40 text-purple-400 border border-purple-800/30 text-[9px] px-2 py-1 rounded-lg font-bold">{t[lang].feynmanBtn}</button>
-                              <button type="button" onClick={() => handleGenerateQuiz(log)} className="bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] px-2 py-1 rounded-lg font-bold transition">{t[lang].aiTestBtn}</button>
-                            </div>
-                          </div>
-
-                          {/* Feynman Active Recall Block */}
-                          {activeFeynmanLogId === log.id && (
-                            <div className="p-3 rounded-xl border border-purple-900/30 text-xs space-y-2 bg-purple-950/10 animate-fadeIn">
-                              <textarea value={feynmanText} onChange={(e) => setFeynmanText(e.target.value)} placeholder={t[lang].feynmanPlaceholder} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-[11px] text-slate-200 focus:outline-none h-16 resize-none" />
-                              <button type="button" onClick={() => handleFeynmanVerify(log)} disabled={loadingFeynman} className="bg-purple-600 text-white text-[10px] px-3 py-1 rounded-lg font-bold">{loadingFeynman ? "Analyzing..." : t[lang].verifyFeynman}</button>
-                              {feynmanEvaluation && <div className="p-2.5 rounded bg-slate-950 border border-purple-900/20 text-[10px] text-purple-300 mt-1 leading-relaxed">{feynmanEvaluation}</div>}
-                            </div>
-                          )}
-
-                          {activeNotesLogId === log.id && (
-                            <div className="p-3 rounded-xl border border-slate-800/60 text-xs space-y-2 animate-fadeIn bg-slate-900/40">
-                              <textarea value={tempNotesText} onChange={(e) => setTempNotesText(e.target.value)} placeholder={t[lang].notesPlaceholder} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-[11px] text-slate-200 focus:outline-none h-14 resize-none" />
-                              <button type="button" onClick={handleSaveNotes} className="bg-emerald-600 text-white font-bold text-[10px] px-3 py-1 rounded-lg">{t[lang].saveNotesBtn}</button>
-                            </div>
-                          )}
-
-                          {log.notes && activeNotesLogId !== log.id && (
-                            <div className="text-[10px] text-slate-400 italic bg-slate-900/30 p-2 rounded-lg border border-slate-800/40">📌 {log.notes}</div>
-                          )}
-
-                          {/* 5 Spaced Repetition Block Pillars */}
-                          <div className="grid grid-cols-5 gap-1 mt-1">
-                            {log.stages.map((stage, idx) => (
-                              <div key={idx} className={`text-[8px] py-1 rounded border text-center font-bold tracking-tight transition ${stage.completed ? 'bg-emerald-600/10 border-emerald-500/50 text-emerald-500' : 'bg-slate-800/40 border-slate-800 text-slate-500'}`}>
-                                {stage.name}
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Action Controllers */}
-                          <div className="flex gap-1.5 pt-1.5 border-t border-slate-800/30">
-                            <button type="button" onClick={() => handleMarkNextStage(log.id)} className="flex-1 bg-emerald-600/10 border border-emerald-500/20 hover:bg-emerald-600/20 text-emerald-500 text-[9px] py-1.5 rounded-lg font-bold transition">
-                              ✅ {lang === 'hi' ? 'अगला स्टेज पूर्ण' : 'Next Stage Done'}
-                            </button>
-                            <button type="button" onClick={() => handleResetRevisionCycle(log.id)} className="flex-1 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-500 text-[9px] py-1.5 rounded-lg font-bold transition">
-                              {t[lang].resetCycle}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'log' && (
-                  <div className="space-y-4 animate-fadeIn">
-                    <form onSubmit={handleAddLog} className="space-y-3.5 text-xs">
-                      <div>
-                        <label className="block font-semibold mb-1 text-slate-300">{t[lang].labelSubject}</label>
-                        <select value={newLog.subject} onChange={(e) => setNewLog({ ...newLog, subject: e.target.value })} className="w-full border rounded-xl p-2.5 bg-slate-950 border-slate-800 text-slate-200">
-                          <option value="">{t[lang].selectOpt}</option>
-                          <option value="Physics">Physics</option>
-                          <option value="Maths">Maths</option>
-                          <option value="History">History</option>
-                          <option value="Custom">Custom</option>
-                        </select>
-                      </div>
-                      {newLog.subject === 'Custom' && (
-                        <input type="text" placeholder="Subject name" value={newLog.customSubject} onChange={(e) => setNewLog({ ...newLog, customSubject: e.target.value })} className="w-full border rounded-xl p-2.5 bg-slate-950 border-slate-800 text-slate-200" />
-                      )}
-                      <div>
-                        <label className="block font-semibold mb-1 text-slate-300">{t[lang].labelTopic}</label>
-                        <input type="text" placeholder="Topic name" value={newLog.topic} onChange={(e) => setNewLog({ ...newLog, topic: e.target.value })} className="w-full border rounded-xl p-2.5 bg-slate-950 border-slate-800 text-slate-200" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block font-semibold mb-1 text-slate-300">{t[lang].labelTime}</label>
-                          <input type="number" step="0.5" min="0.5" value={newLog.timeSpent} onChange={(e) => setNewLog({ ...newLog, timeSpent: e.target.value })} className="w-full border rounded-xl p-2.5 bg-slate-950 border-slate-800 text-slate-200" />
-                        </div>
-                        <div className="pt-5">
-                          <button type="submit" className="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white text-xs hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/10">{t[lang].btnSave}</button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                )}
-
-                {activeTab === 'test-arena' && (
-                  <div className="space-y-4 animate-fadeIn">
-                    {loadingQuiz ? (
-                      <div className="text-center py-12"><div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div><p className="text-xs text-slate-400">AI Generating...</p></div>
-                    ) : aiQuiz ? (
-                      <div className="space-y-4 text-xs">
-                        {aiQuiz.map((q, qIdx) => (
-                          <div key={qIdx} className="p-3.5 rounded-xl border border-slate-800 space-y-3 bg-slate-950/40">
-                            <h4 className="font-bold leading-relaxed">{qIdx + 1}. {q.question}</h4>
-                            <div className="space-y-1.5">
-                              {q.options.map((opt, oIdx) => (
-                                <button key={oIdx} type="button" onClick={() => setUserAnswers({ ...userAnswers, [qIdx]: oIdx })} className="w-full text-left p-2 rounded-lg border text-[11px] border-slate-800 bg-slate-950 hover:bg-slate-900 transition">{opt}</button>
-                              ))}
-                            </div>
-                            {quizSubmitted && <div className="text-[10px] text-slate-400 bg-slate-950 p-2.5 rounded border border-slate-800/60 leading-normal">{q.explanation}</div>}
-                          </div>
-                        ))}
-                        <button onClick={handleSubmitQuiz} className="w-full bg-emerald-600 font-bold py-2 rounded-xl text-white text-xs hover:bg-emerald-700 transition">Submit Test</button>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-
-                {activeTab === 'timer' && (
-                  <div className="space-y-5 flex flex-col items-center justify-center min-h-[250px] animate-fadeIn">
-                    <div className="w-full flex items-center justify-between text-xs px-3">
-                      <span className="text-slate-400 font-medium">{t[lang].customTimerLabel}</span>
-                      <input type="number" value={timer.minutes} onChange={(e) => setTimer(prev => ({ ...prev, minutes: parseInt(e.target.value) || 25 }))} className="w-14 p-1 border rounded-lg text-center bg-slate-950 border-slate-800 text-slate-200" />
-                    </div>
-                    <div className="text-4xl font-black font-mono tracking-wider text-indigo-400 bg-slate-950/40 px-6 py-3 rounded-2xl border border-slate-800/40">{String(timer.minutes).padStart(2, '0')}:{String(timer.seconds).padStart(2, '0')}</div>
-                    <button type="button" onClick={() => setTimer(prev => ({ ...prev, isActive: !prev.isActive }))} className="px-8 py-2 rounded-xl bg-indigo-600 font-bold text-white text-xs hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/10">{timer.isActive ? t[lang].btnPause : t[lang].btnStart}</button>
-                  </div>
-                )}
-
-                {activeTab === 'notifications' && (
-                  <div className="space-y-2.5 text-xs animate-fadeIn">
-                    {notifications.map((n, idx) => (
-                      <div key={idx} className="p-3 bg-indigo-950/10 border border-indigo-900/20 rounded-xl text-indigo-400">
-                        <h4 className="font-bold text-[11px] mb-0.5">{n.title}</h4>
-                        <p className="text-[10px] opacity-90">{n.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {activeTab === 'info' && (
-                  <div className="space-y-3.5 text-left text-xs animate-fadeIn leading-relaxed">
-                    <div className="p-4 rounded-xl bg-indigo-950/10 border border-indigo-900/20 space-y-1.5">
-                      <h4 className="font-bold uppercase tracking-wide text-indigo-400 mb-1">{t[lang].howToUseTitle}</h4>
-                      <p>{t[lang].step1}</p><p>{t[lang].step2}</p><p>{t[lang].step3}</p><p>{t[lang].step4}</p>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'profile' && (
-                  <div className="space-y-3.5 text-left text-xs animate-fadeIn">
-                    <div className="text-center py-4 rounded-xl border border-slate-800 bg-slate-950/30">
-                      <div className="w-12 h-16 rounded-full flex items-center justify-center mx-auto mb-1 text-2xl">👤</div>
-                      <h3 className="text-xs font-black">{user.name}</h3>
-                      <p className="text-[9px] text-slate-400 mt-0.5">{user.category}</p>
-                    </div>
-                    
-                    <div className="rounded-xl p-3.5 border border-slate-800 bg-slate-950/30 space-y-2">
-                      <h4 className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">{t[lang].medalsTitle}</h4>
-                      <div className="space-y-2">
-                        {achievementsList.map((ach, idx) => (
-                          <div key={idx} className={`p-2 rounded-xl border flex items-center justify-between text-[10px] ${ach.unlocked ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400' : 'border-slate-800/80 opacity-40'}`}>
-                            <div>
-                              <div className="font-bold">{ach.name}</div>
-                              <div className="text-[8.5px] text-slate-400 mt-0.5">{ach.desc}</div>
-                            </div>
-                            <span>{ach.unlocked ? "✅" : "🔒"}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl p-3.5 border border-slate-800 bg-slate-950/30 space-y-2">
-                      <h4 className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">{t[lang].backupTitle}</h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button type="button" onClick={handleExportData} className="bg-indigo-600 text-white p-2 rounded-xl font-bold text-[10px] hover:bg-indigo-700 transition">{t[lang].btnExport}</button>
-                        <label className="bg-slate-800 text-slate-200 p-2 rounded-xl font-bold text-[10px] text-center cursor-pointer border border-slate-700 block hover:bg-slate-700 transition">
-                          {t[lang].btnImport}
-                          <input type="file" accept=".json" onChange={handleImportData} className="hidden" />
-                        </label>
-                      </div>
-                    </div>
-                    
-                    <div className="rounded-xl p-3.5 border border-slate-800 bg-slate-950/30 space-y-2">
-                      <h4 className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">{t[lang].aiSettings}</h4>
-                      <input type="password" placeholder="AI Key..." value={inputApiKey} onChange={(e) => setInputApiKey(e.target.value)} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-xl text-slate-200 focus:outline-none text-[11px]" />
-                      <button type="button" onClick={handleSaveKey} className="w-full bg-indigo-600 font-bold py-2 rounded-xl text-white text-[10px] hover:bg-indigo-700 transition">{t[lang].btnSaveKey}</button>
-                    </div>
-                  </div>
-                )}
-              </main>
-
-              {/* Sticky Mobile Dock Navigation Bar */}
-              <nav className={`absolute bottom-0 left-0 right-0 h-14 border-t flex justify-around items-center px-1 z-20 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200'}`}>
-                <button type="button" onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'dashboard' ? 'text-indigo-500 font-bold' : 'text-slate-500'}`}><span className="text-base">📖</span><span className="text-[8px] mt-0.5">{t[lang].navTracker}</span></button>
-                <button type="button" onClick={() => setActiveTab('log')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'log' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-base">➕</span><span className="text-[8px] mt-0.5">{t[lang].navAdd}</span></button>
-                <button type="button" onClick={() => setActiveTab('timer')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'timer' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-base">⏱</span><span className="text-[8px] mt-0.5">{t[lang].navFocus}</span></button>
-                <button type="button" onClick={() => setActiveTab('notifications')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'notifications' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-base">🔔</span><span className="text-[8px] mt-0.5">{t[lang].navSuggest}</span></button>
-                <button type="button" onClick={() => setActiveTab('info')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'info' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-base">ℹ️</span><span className="text-[8px] mt-0.5">{t[lang].navInfo}</span></button>
-                <button type="button" onClick={() => setActiveTab('profile')} className={`flex flex-col items-center justify-center flex-1 py-1 ${activeTab === 'profile' ? 'text-indigo-400 font-bold' : 'text-slate-500'}`}><span className="text-base">👤</span><span className="text-[8px] mt-0.5">{t[lang].navProfile}</span></button>
-              </nav>
-            </div>
-            
-            <footer className="w-full text-center py-1 text-[9px] text-slate-500 border-t border-slate-900/40">sajag chhatra v2.5 Ultimate • app.pmevidya.com</footer>
-          </div>
-        );
+        const savedKey = localStorage.getItem('user_gemini_key') || '';
+        document.getElementById('apiKeyInput').value = savedKey;
       }
 
-      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+      function saveData() {
+        localStorage.setItem('user_profile', JSON.stringify(user));
+        localStorage.setItem('user_study_logs', JSON.stringify(studyLogs));
+      }
+
+      function renderUser() {
+        const level = Math.floor(user.points / 100) + 1;
+        document.getElementById('levelBadgeDesktop').innerText = '🏆 स्तर ' + level;
+        document.getElementById('levelBadgeMobile').innerText = '🏆 स्तर ' + level;
+        document.getElementById('streakBadgeDesktop').innerText = '🔥 ' + user.streak + 'd';
+        document.getElementById('streakBadgeMobile').innerText = '🔥 ' + user.streak + 'd';
+        document.getElementById('xpBadgeDesktop').innerText = '⭐ ' + user.points + ' Total XP';
+        document.getElementById('xpBadgeMobile').innerText = '⭐ ' + user.points + ' XP';
+        document.getElementById('profileName').innerText = user.name;
+      }
+
+      function switchTab(tab) {
+        activeTab = tab;
+        ['dashboard', 'log', 'test-arena', 'timer', 'analytics', 'notifications', 'profile'].forEach(v => {
+          const el = document.getElementById('view-' + v);
+          if (el) el.classList.add('hidden');
+        });
+        const activeView = document.getElementById('view-' + tab);
+        if (activeView) activeView.classList.remove('hidden');
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('hover:bg-slate-800/50', 'text-slate-400');
+        });
+        const currentNav = document.getElementById('nav-' + tab);
+        if (currentNav) {
+          currentNav.classList.add('bg-indigo-600', 'text-white');
+          currentNav.classList.remove('hover:bg-slate-800/50', 'text-slate-400');
+        }
+      }
+
+      function renderLogs() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const dueOnly = document.getElementById('dueTodayCheck').checked;
+
+        const container = document.getElementById('logsContainer');
+        container.innerHTML = '';
+
+        let totalTodayHours = 0;
+
+        studyLogs.forEach(log => {
+          if (log.date === todayStr) totalTodayHours += (parseFloat(log.timeSpent) || 0);
+
+          if (dueOnly && !log.stages.some(s => s.due === todayStr && !s.completed)) return;
+          if (search && !log.topic.toLowerCase().includes(search) && !log.subject.toLowerCase().includes(search)) return;
+
+          const card = document.createElement('div');
+          card.className = `p-4 rounded-2xl border space-y-3 flex flex-col justify-between transition ${isDarkMode ? 'bg-slate-900/70 border-slate-800 text-slate-100' : 'bg-white border-slate-200 shadow-sm text-slate-900'}`;
+
+          let stagesHTML = log.stages.map(s => `
+            <div class="text-[10px] py-1.5 px-1 rounded-xl border text-center font-bold ${s.completed ? (isDarkMode ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-400' : 'bg-emerald-50 border-emerald-300 text-emerald-700') : (isDarkMode ? 'bg-slate-800/40 border-slate-800 text-slate-500' : 'bg-slate-100 border-slate-200 text-slate-600')}">
+              <div>${s.name}</div>
+              <div class="text-[8px] opacity-75 mt-0.5">${s.due.slice(5)}</div>
+            </div>
+          `).join('');
+
+          card.innerHTML = `
+            <div class="space-y-2">
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border ${isDarkMode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-200 text-indigo-700'}">${log.subject}</span>
+                  <h4 class="text-sm sm:text-base font-bold mt-1.5 leading-snug">${log.topic}</h4>
+                  <span class="text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}">समय: ${log.timeSpent}h • कठिनाई: ${log.difficulty}</span>
+                </div>
+                <div class="flex gap-1 shrink-0">
+                  <button onclick="handleAiQuiz(${log.id})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-2.5 py-1 rounded-xl font-bold transition">🤖 AI टेस्ट</button>
+                </div>
+              </div>
+              ${log.notes ? `<div class="text-xs italic p-2.5 rounded-xl border ${isDarkMode ? 'text-slate-400 bg-slate-950/40 border-slate-800/50' : 'text-slate-600 bg-slate-50 border-slate-200'}">📌 ${log.notes}</div>` : ''}
+            </div>
+            <div class="space-y-2 pt-2 border-t ${isDarkMode ? 'border-slate-800/50' : 'border-slate-200'}">
+              <div class="grid grid-cols-5 gap-1.5">${stagesHTML}</div>
+              <div class="flex gap-2 pt-1">
+                <button onclick="markNextStage(${log.id})" class="flex-1 text-xs py-2 rounded-xl font-bold transition border ${isDarkMode ? 'bg-emerald-600/10 border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-300 text-emerald-800'}">✅ अगला स्टेज पूर्ण</button>
+                <button onclick="resetCycle(${log.id})" class="text-xs px-3 py-2 rounded-xl font-bold transition border ${isDarkMode ? 'bg-rose-600/10 border-rose-500/30 text-rose-400' : 'bg-rose-50 border-rose-300 text-rose-800'}">🔄 रीसेट</button>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        document.getElementById('budgetLogged').innerText = totalTodayHours + ' / 6 घंटे बुक हैं';
+        const rem = Math.max(0, 6 - totalTodayHours);
+        document.getElementById('budgetTag').innerText = rem + 'h शेष समय';
+        document.getElementById('budgetBar').style.width = Math.min(100, (totalTodayHours / 6) * 100) + '%';
+        const wedVal = document.getElementById('wedVal');
+        if (wedVal) wedVal.innerText = (totalTodayHours || 2) + 'h';
+      }
+
+      function markNextStage(id) {
+        studyLogs = studyLogs.map(log => {
+          if (log.id === id) {
+            const nextIdx = log.stages.findIndex(s => !s.completed);
+            if (nextIdx !== -1) {
+              log.stages[nextIdx].completed = true;
+              user.points += 20;
+              showToast('🎉 ' + log.stages[nextIdx].name + ' पूर्ण! (+20 XP)');
+            } else {
+              showToast('🎉 टॉपिक पहले से मास्टर हो चुका है!');
+            }
+          }
+          return log;
+        });
+        saveData();
+        renderUser();
+        renderLogs();
+      }
+
+      function resetCycle(id) {
+        const today = new Date();
+        const getDue = (days) => new Date(today.getTime() + days * 86400000).toISOString().split('T')[0];
+        studyLogs = studyLogs.map(log => {
+          if (log.id === id) {
+            log.stages = [
+              { name: 'R1 (24h)', due: getDue(1), completed: false },
+              { name: 'R2 (3d)', due: getDue(3), completed: false },
+              { name: 'R3 (7d)', due: getDue(7), completed: false },
+              { name: 'R4 (15d)', due: getDue(15), completed: false },
+              { name: 'Mastery (30d)', due: getDue(30), completed: false }
+            ];
+          }
+          return log;
+        });
+        saveData();
+        renderLogs();
+        showToast('🔄 रिवीजन चक्र रीसेट किया गया!');
+      }
+
+      function toggleCustomSub() {
+        const val = document.getElementById('subSelect').value;
+        const customDiv = document.getElementById('customSubDiv');
+        if (val === 'Custom') customDiv.classList.remove('hidden');
+        else customDiv.classList.add('hidden');
+      }
+
+      function handleFormSubmit(e) {
+        e.preventDefault();
+        const subSel = document.getElementById('subSelect').value;
+        const customSub = document.getElementById('customSubInput').value;
+        const topic = document.getElementById('topicInput').value;
+        const timeSpent = parseFloat(document.getElementById('timeInput').value) || 1;
+        const diff = document.getElementById('diffSelect').value;
+
+        const finalSub = subSel === 'Custom' ? customSub : subSel;
+        if (!finalSub || !topic) return;
+
+        const today = new Date();
+        const getDue = (days) => new Date(today.getTime() + days * 86400000).toISOString().split('T')[0];
+
+        studyLogs.unshift({
+          id: Date.now(),
+          subject: finalSub,
+          topic: topic,
+          date: today.toISOString().split('T')[0],
+          difficulty: diff,
+          timeSpent: timeSpent,
+          notes: '',
+          stages: [
+            { name: 'R1 (24h)', due: getDue(1), completed: false },
+            { name: 'R2 (3d)', due: getDue(3), completed: false },
+            { name: 'R3 (7d)', due: getDue(7), completed: false },
+            { name: 'R4 (15d)', due: getDue(15), completed: false },
+            { name: 'Mastery (30d)', due: getDue(30), completed: false }
+          ]
+        });
+
+        saveData();
+        renderLogs();
+        document.getElementById('topicInput').value = '';
+        showToast('✅ नया अध्ययन दर्ज हुआ!');
+        switchTab('dashboard');
+      }
+
+      function toggleTimer() {
+        if (timer.isActive) {
+          clearInterval(timer.interval);
+          timer.isActive = false;
+          document.getElementById('pomoStartBtn').innerText = '▶ शुरू करें';
+        } else {
+          timer.isActive = true;
+          document.getElementById('pomoStartBtn').innerText = '⏸ रोकें';
+          timer.interval = setInterval(() => {
+            if (timer.seconds > 0) {
+              timer.seconds--;
+            } else if (timer.minutes > 0) {
+              timer.minutes--;
+              timer.seconds = 59;
+            } else {
+              clearInterval(timer.interval);
+              timer.isActive = false;
+              showToast('🔔 फोकस समय पूर्ण!');
+            }
+            updateTimerDisplay();
+          }, 1000);
+        }
+      }
+
+      function resetTimer() {
+        clearInterval(timer.interval);
+        timer.isActive = false;
+        const mins = parseInt(document.getElementById('customTimerMinutes').value) || 25;
+        timer.minutes = mins;
+        timer.seconds = 0;
+        document.getElementById('pomoStartBtn').innerText = '▶ शुरू करें';
+        updateTimerDisplay();
+      }
+
+      function updateCustomTimer(val) {
+        if (!timer.isActive) {
+          timer.minutes = parseInt(val) || 25;
+          timer.seconds = 0;
+          updateTimerDisplay();
+        }
+      }
+
+      function updateTimerDisplay() {
+        const text = String(timer.minutes).padStart(2, '0') + ':' + String(timer.seconds).padStart(2, '0');
+        document.getElementById('pomoTimeDisplay').innerText = text;
+        document.getElementById('miniTimerDisplay').innerText = text;
+      }
+
+      async function handleAiQuiz(logId) {
+        const log = studyLogs.find(l => l.id === logId);
+        if (!log) return;
+
+        switchTab('test-arena');
+        const container = document.getElementById('quizContainer');
+        container.innerHTML = '<div class="text-center py-12"><div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div><p class="text-xs text-slate-400">Gemini AI टेस्ट तैयार कर रहा है...</p></div>';
+
+        const userKey = localStorage.getItem('user_gemini_key') || systemApiKey;
+        const promptText = `Generate a 3-question multiple-choice quiz in Hindi for Subject: "${log.subject}", Topic: "${log.topic}".`;
+
+        const payload = {
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                questions: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      question: { type: "STRING" },
+                      options: { type: "ARRAY", items: { type: "STRING" } },
+                      correctIndex: { type: "INTEGER" },
+                      explanation: { type: "STRING" }
+                    },
+                    required: ["question", "options", "correctIndex", "explanation"]
+                  }
+                }
+              },
+              required: ["questions"]
+            }
+          }
+        };
+
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${userKey}`;
+          const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+          const data = await res.json();
+          const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          const questions = JSON.parse(jsonText).questions;
+
+          let html = `<div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-xl text-indigo-300 font-bold text-xs">टॉपिक: ${log.topic}</div>`;
+          questions.forEach((q, qIdx) => {
+            html += `
+              <div class="p-4 rounded-2xl border space-y-3 bg-slate-900/80 border-slate-800 text-xs">
+                <h4 class="font-bold text-sm">${qIdx + 1}. ${q.question}</h4>
+                <div class="space-y-2">
+                  ${q.options.map((opt, oIdx) => `
+                    <button onclick="selectOption(this)" class="w-full text-left p-3 rounded-xl border bg-slate-950 border-slate-800 hover:bg-slate-800 text-slate-300 transition">${opt}</button>
+                  `).join('')}
+                </div>
+                <p class="hidden text-xs p-2.5 rounded-xl border bg-slate-950 border-slate-800 text-emerald-400 mt-2">💡 व्याख्या: ${q.explanation}</p>
+              </div>
+            `;
+          });
+          html += `<button onclick="finishQuiz()" class="w-full bg-emerald-600 font-bold py-3 rounded-xl text-white text-xs hover:bg-emerald-700 transition">सबमिट टेस्ट</button>`;
+          container.innerHTML = html;
+        } catch(e) {
+          container.innerHTML = '<p class="text-xs text-center py-8 text-rose-400">⚠️ AI टेस्ट जनरेट नहीं हो सका। अपनी API Key चेक करें।</p>';
+        }
+      }
+
+      function selectOption(btn) {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('button').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
+        btn.classList.add('bg-indigo-600', 'text-white');
+      }
+
+      function finishQuiz() {
+        user.points += 50;
+        user.streak += 1;
+        saveData();
+        renderUser();
+        showToast('🎯 टेस्ट पूर्ण! +50 XP प्राप्त हुए!');
+        switchTab('dashboard');
+      }
+
+      function renderNotifications() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const list = document.getElementById('notifList');
+        const due = studyLogs.filter(l => l.stages.some(s => s.due === todayStr && !s.completed));
+        if (due.length > 0) {
+          list.innerHTML = due.map(l => `
+            <div class="p-4 border rounded-2xl bg-indigo-950/20 border-indigo-900/40 text-indigo-300 space-y-1">
+              <h4 class="font-bold text-sm">⏰ आज देय रिवीजन: ${l.subject}</h4>
+              <p class="text-xs opacity-90">टॉपिक "${l.topic}" का रिवीजन आज होना आवश्यक है।</p>
+            </div>
+          `).join('');
+        } else {
+          list.innerHTML = '<p class="text-center py-12 text-slate-400">आज कोई लंबित रिवीजन नहीं है। बहुत बढ़िया!</p>';
+        }
+      }
+
+      function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(studyLogs, null, 2));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `sajag_backup_${new Date().toISOString().split('T')[0]}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+      }
+
+      function importData(e) {
+        const reader = new FileReader();
+        if (e.target.files && e.target.files[0]) {
+          reader.readAsText(e.target.files[0], "UTF-8");
+          reader.onload = (evt) => {
+            try {
+              const parsed = JSON.parse(evt.target.result);
+              if (Array.isArray(parsed)) {
+                studyLogs = parsed;
+                saveData();
+                renderLogs();
+                showToast('📥 डेटा सफलतापूर्वक रीस्टोर हुआ!');
+              }
+            } catch (err) {
+              showToast('⚠️ अमान्य JSON फ़ाइल!');
+            }
+          };
+        }
+      }
+
+      function saveApiKey() {
+        const key = document.getElementById('apiKeyInput').value;
+        localStorage.setItem('user_gemini_key', key);
+        showToast('✅ API Key सुरक्षित सेव हो गई!');
+      }
+
+      function toggleTheme() {
+        isDarkMode = !isDarkMode;
+        const body = document.getElementById('appBody');
+        const btnDesktop = document.getElementById('themeBtnDesktop');
+        const btnMobile = document.getElementById('themeBtnMobile');
+
+        if (isDarkMode) {
+          body.classList.remove('bg-slate-100', 'text-slate-900');
+          body.classList.add('bg-slate-950', 'text-slate-100');
+          btnDesktop.innerText = '☀️ Light';
+          btnMobile.innerText = '☀️';
+        } else {
+          body.classList.remove('bg-slate-950', 'text-slate-100');
+          body.classList.add('bg-slate-100', 'text-slate-900');
+          btnDesktop.innerText = '🌙 Dark';
+          btnMobile.innerText = '🌙';
+        }
+        renderLogs();
+      }
     </script>
 </body>
 </html>
+
+```
